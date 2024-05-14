@@ -1,4 +1,4 @@
-import { getAllTags, Notice, Plugin, TFile } from 'obsidian';
+import { Notice, Plugin, TFile } from 'obsidian';
 import { DEFAULT_SETTINGS, PluginSettings } from './types/plugin-settings.intf';
 import { SettingsTab } from './settingTab';
 import { log } from './utils/log';
@@ -12,6 +12,7 @@ import {
 import { isExcalidrawFile } from './utils/is-excalidraw-file.fn';
 import { publishTypefullyDraft } from './utils/publish-typefully-draft.fn';
 import { cleanMarkdownForTypeFully } from './utils/clean-markdown-for-typefully.fn';
+import { getFileTags } from './utils/get-file-tags.fn';
 
 export class MyPlugin extends Plugin {
   /**
@@ -82,42 +83,13 @@ export class MyPlugin extends Plugin {
             .onClick(async () => {
               const selection = editor.getSelection();
               const file = view.file;
-              const fileTags = this.getFileTags(file);
+              const fileTags = getFileTags(file, this.app);
 
               await this.publish(selection, fileTags);
             });
         });
       })
     );
-  }
-
-  /**
-   * Return all the tags of the given file, or an empty array if there's none
-   * @param file
-   */
-  getFileTags(file: TFile | null): string[] {
-    const retVal: Set<string> = new Set<string>();
-
-    if (!file) {
-      return Array.from(retVal);
-    }
-
-    const fileCache = this.app.metadataCache.getFileCache(file);
-    if (!fileCache) {
-      return Array.from(retVal);
-    }
-
-    const tags = getAllTags(fileCache);
-
-    if (!tags) {
-      return Array.from(retVal);
-    }
-
-    for (const tag of tags) {
-      retVal.add(tag);
-    }
-
-    return Array.from(retVal);
   }
 
   // FIXME make tags optional here
@@ -158,7 +130,7 @@ export class MyPlugin extends Plugin {
     }
 
     const fileContent = await this.app.vault.read(fileToPublish);
-    const fileTags = this.getFileTags(fileToPublish);
+    const fileTags = getFileTags(fileToPublish, this.app);
     return this.publish(fileContent, fileTags);
   }
 
