@@ -66,6 +66,7 @@ export class MyPlugin extends Plugin {
     let fileContent = await this.app.vault.read(fileToPublish);
     fileContent = removeFrontMatter(fileContent);
     fileContent = fileContent.trim();
+    // Remove obsidian links
     fileContent = fileContent.replace('[[', '');
     fileContent = fileContent.replace(']]', '');
     fileContent = removeMarkdownLinks(fileContent);
@@ -75,11 +76,12 @@ export class MyPlugin extends Plugin {
     publishTypefullyDraft(
       {
         content: fileContent,
-        // TODO add support for direct scheduling
-        //"schedule-date": "next-free-slot",
-        auto_plug_enabled: true,
-        auto_retweet_enabled: true,
-        threadify: true,
+        'schedule-date': this.settings.autoSchedule
+          ? 'next-free-slot'
+          : undefined,
+        auto_retweet_enabled: this.settings.autoRetweet,
+        auto_plug_enabled: this.settings.autoPlug,
+        threadify: this.settings.threadify,
       },
       this.settings.apiKey
     );
@@ -110,6 +112,34 @@ export class MyPlugin extends Plugin {
         log('The loaded settings miss the [apiKey] property', 'debug');
         needToSaveSettings = true;
       }
+
+      if (loadedSettings.autoRetweet) {
+        draft.autoRetweet = loadedSettings.autoRetweet;
+      } else {
+        log('The loaded settings miss the [autoRetweet] property', 'debug');
+        needToSaveSettings = true;
+      }
+
+      if (loadedSettings.autoPlug) {
+        draft.autoPlug = loadedSettings.autoPlug;
+      } else {
+        log('The loaded settings miss the [autoPlug] property', 'debug');
+        needToSaveSettings = true;
+      }
+
+      if (loadedSettings.threadify) {
+        draft.threadify = loadedSettings.threadify;
+      } else {
+        log('The loaded settings miss the [threadify] property', 'debug');
+        needToSaveSettings = true;
+      }
+
+      if (loadedSettings.autoSchedule) {
+        draft.autoSchedule = loadedSettings.autoSchedule;
+      } else {
+        log('The loaded settings miss the [autoSchedule] property', 'debug');
+        needToSaveSettings = true;
+      }
     });
 
     log(`Settings loaded`, 'debug', loadedSettings);
@@ -127,10 +157,6 @@ export class MyPlugin extends Plugin {
     await this.saveData(this.settings);
     log('Settings saved', 'debug', this.settings);
   }
-
-  // getFileContent(file: TFile): Promise<string> {
-
-  // }
 
   async canBePublishedToTypefully(file: TFile): Promise<boolean> {
     if (!file.path) {

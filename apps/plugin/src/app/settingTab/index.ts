@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, Setting, ToggleComponent } from 'obsidian';
 import { MyPlugin } from '../plugin';
 import { log } from '../utils/log';
 import { Draft, produce } from 'immer';
@@ -19,6 +19,10 @@ export class SettingsTab extends PluginSettingTab {
 
     this.renderSupportHeader(containerEl);
     this.renderApiKey(containerEl);
+    this.renderAutoRetweet(containerEl);
+    this.renderAutoPlug(containerEl);
+    this.renderThreadify(containerEl);
+    this.renderAutoSchedule(containerEl);
   }
 
   renderApiKey(containerEl: HTMLElement) {
@@ -37,6 +41,82 @@ export class SettingsTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         });
     });
+  }
+
+  renderAutoRetweet(containerEl: HTMLElement) {
+    new Setting(containerEl)
+      .setName('Enable Auto retweet')
+      .setDesc(
+        'If enabled, the post will have an AutoRT enabled, according to the one set on Typefully for the account.'
+      )
+      .addToggle((toggle: ToggleComponent) => {
+        toggle.onChange(async (newValue: boolean) => {
+          this.plugin.settings = produce(
+            this.plugin.settings,
+            (draft: Draft<PluginSettings>) => {
+              draft.autoRetweet = newValue;
+            }
+          );
+          await this.plugin.saveSettings();
+        });
+      });
+  }
+
+  renderAutoPlug(containerEl: HTMLElement) {
+    new Setting(containerEl)
+      .setName('Enable Auto plug')
+      .setDesc(
+        'If enabled, the post will have an AutoPlug enabled, according to the one set on Typefully for the account.'
+      )
+      .addToggle((toggle: ToggleComponent) => {
+        toggle.onChange(async (newValue: boolean) => {
+          this.plugin.settings = produce(
+            this.plugin.settings,
+            (draft: Draft<PluginSettings>) => {
+              draft.autoPlug = newValue;
+            }
+          );
+          await this.plugin.saveSettings();
+        });
+      });
+  }
+
+  renderThreadify(containerEl: HTMLElement) {
+    new Setting(containerEl)
+      .setName('Enable Threadify')
+      .setDesc(
+        'If enabled, content will be automatically split into multiple tweets.'
+      )
+      .addToggle((toggle: ToggleComponent) => {
+        toggle.onChange(async (newValue: boolean) => {
+          this.plugin.settings = produce(
+            this.plugin.settings,
+            (draft: Draft<PluginSettings>) => {
+              draft.threadify = newValue;
+            }
+          );
+          await this.plugin.saveSettings();
+        });
+      });
+  }
+
+  renderAutoSchedule(containerEl: HTMLElement) {
+    new Setting(containerEl)
+      .setName('Enable Auto scheduling')
+      .setDesc(
+        'If enabled, the post will be automatically scheduled in the next free slot.'
+      )
+      .addToggle((toggle: ToggleComponent) => {
+        toggle.onChange(async (newValue: boolean) => {
+          this.plugin.settings = produce(
+            this.plugin.settings,
+            (draft: Draft<PluginSettings>) => {
+              draft.autoSchedule = newValue;
+            }
+          );
+          await this.plugin.saveSettings();
+        });
+      });
   }
 
   renderSupportHeader(containerEl: HTMLElement) {
