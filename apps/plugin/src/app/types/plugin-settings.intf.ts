@@ -1,10 +1,7 @@
 export interface PluginSettings {
-  /**
-   * Enable
-   */
-  enabled: boolean;
+  apiKey: string;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
-  enabled: false,
+  apiKey: '',
 };

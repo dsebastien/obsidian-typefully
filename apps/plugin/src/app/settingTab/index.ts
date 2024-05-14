@@ -1,5 +1,8 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import { MyPlugin } from '../plugin';
+import { log } from '../utils/log';
+import { Draft, produce } from 'immer';
+import { PluginSettings } from '../types/plugin-settings.intf';
 
 export class SettingsTab extends PluginSettingTab {
   plugin: MyPlugin;
@@ -15,6 +18,25 @@ export class SettingsTab extends PluginSettingTab {
     containerEl.empty();
 
     this.renderSupportHeader(containerEl);
+    this.renderApiKey(containerEl);
+  }
+
+  renderApiKey(containerEl: HTMLElement) {
+    new Setting(containerEl).setName('Typefully API Key').addText((text) => {
+      text
+        .setPlaceholder('')
+        .setValue(this.plugin.settings.apiKey)
+        .onChange(async (newValue) => {
+          log(`Typefully API Key set to: `, 'debug', newValue);
+          this.plugin.settings = produce(
+            this.plugin.settings,
+            (draft: Draft<PluginSettings>) => {
+              draft.apiKey = newValue;
+            }
+          );
+          await this.plugin.saveSettings();
+        });
+    });
   }
 
   renderSupportHeader(containerEl: HTMLElement) {
@@ -41,7 +63,7 @@ export class SettingsTab extends PluginSettingTab {
     });
     const imgEl = linkEl.createEl('img');
     imgEl.src =
-      'https://github.com/dsebastien/obsidian-plugin-template/blob/master/apps/plugin/src/assets/buy-me-a-coffee.png?raw=true';
+      'https://github.com/dsebastien/obsidian-plugin-template/raw/main/apps/plugin/src/assets/buy-me-a-coffee.png';
     imgEl.alt = 'Buy me a coffee';
     imgEl.width = width;
   }

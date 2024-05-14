@@ -1,1 +1,22 @@
-export const FOO = 'BAR';
+/**
+ * How many milliseconds to wait before hiding notices
+ */
+export const NOTICE_TIMEOUT = 5000;
+
+/**
+ * Typefully API URL
+ * Reference: https://support.typefully.com/en/articles/8718287-typefully-api
+ */
+export const TYPEFULLY_API_URL = 'https://api.typefully.com/v1';
+
+export const TYPEFULLY_API_DRAFTS = '/drafts/';
+
+export const MSG_API_KEY_CONFIGURATION_REQUIRED =
+  'Please configure the Typefully plugin to provide a valid API key';
+
+export const MARKDOWN_FILE_EXTENSION = 'md';
+export const DEFAULT_CANVAS_FILE_NAME = 'Canvas.md';
+
+export const FRONT_MATTER_REGEX = /---[\S\s]*?---\n/;
+
+export const MARKDOWN_LINK_REGEX = /\[(.*?)\]\(.*?\)/g;
