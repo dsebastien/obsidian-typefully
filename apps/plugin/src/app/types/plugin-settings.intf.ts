@@ -4,6 +4,7 @@ export interface PluginSettings {
   autoPlug: boolean;
   threadify: boolean;
   autoSchedule: boolean;
+  appendTags: boolean;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -12,4 +13,5 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   autoPlug: false,
   threadify: false,
   autoSchedule: false,
+  appendTags: false,
 };

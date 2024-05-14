@@ -81,15 +81,54 @@ export class MyPlugin extends Plugin {
             .setTitle('Publish the current selection to Typefully')
             .onClick(async () => {
               const selection = editor.getSelection();
-              await this.publish(selection);
+              const file = view.file;
+              const fileTags = this.getFileTags(file);
+
+              await this.publish(selection, fileTags);
             });
         });
       })
     );
   }
 
-  async publish(content: string) {
-    const cleanedContent = cleanMarkdownForTypeFully(content);
+  getFileTags(file: TFile | null): string[] {
+    let retVal: string[] = [];
+
+    if (!file) {
+      return retVal;
+    }
+
+    const fileCache = this.app.metadataCache.getFileCache(file);
+    if (!fileCache) {
+      return retVal;
+    }
+
+    if (!fileCache.frontmatter) {
+      return retVal;
+    }
+
+    if (!fileCache.frontmatter.tags) {
+      return retVal;
+    }
+
+    retVal = fileCache.frontmatter.tags;
+
+    return retVal;
+  }
+
+  // FIXME make tags optional
+  async publish(content: string, tags: string[]) {
+    let cleanedContent = cleanMarkdownForTypeFully(content);
+
+    if (this.settings.appendTags) {
+      log('Tags to append: ', 'debug', tags);
+      let tagsString = '\n\n';
+      tags.forEach((tag) => {
+        tagsString += `#${tag} `;
+      });
+
+      cleanedContent += tagsString;
+    }
 
     log('Text to publish', 'debug', cleanedContent);
     return publishTypefullyDraft(
@@ -115,7 +154,8 @@ export class MyPlugin extends Plugin {
     }
 
     const fileContent = await this.app.vault.read(fileToPublish);
-    return this.publish(fileContent);
+    const fileTags = this.getFileTags(fileToPublish);
+    return this.publish(fileContent, fileTags);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -169,6 +209,13 @@ export class MyPlugin extends Plugin {
         draft.autoSchedule = loadedSettings.autoSchedule;
       } else {
         log('The loaded settings miss the [autoSchedule] property', 'debug');
+        needToSaveSettings = true;
+      }
+
+      if (loadedSettings.appendTags) {
+        draft.appendTags = loadedSettings.appendTags;
+      } else {
+        log('The loaded settings miss the [appendTags] property', 'debug');
         needToSaveSettings = true;
       }
     });

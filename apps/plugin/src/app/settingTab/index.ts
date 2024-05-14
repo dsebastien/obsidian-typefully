@@ -23,6 +23,7 @@ export class SettingsTab extends PluginSettingTab {
     this.renderAutoPlug(containerEl);
     this.renderThreadify(containerEl);
     this.renderAutoSchedule(containerEl);
+    this.renderAppendTags(containerEl);
   }
 
   renderApiKey(containerEl: HTMLElement) {
@@ -116,6 +117,26 @@ export class SettingsTab extends PluginSettingTab {
             this.plugin.settings,
             (draft: Draft<PluginSettings>) => {
               draft.autoSchedule = newValue;
+            }
+          );
+          await this.plugin.saveSettings();
+        });
+      });
+  }
+
+  renderAppendTags(containerEl: HTMLElement) {
+    new Setting(containerEl)
+      .setName('Append tags to posts')
+      .setDesc(
+        'If enabled, the tags of the source note will be appended at the end of the post.'
+      )
+      .addToggle((toggle: ToggleComponent) => {
+        toggle.setValue(this.plugin.settings.appendTags);
+        toggle.onChange(async (newValue: boolean) => {
+          this.plugin.settings = produce(
+            this.plugin.settings,
+            (draft: Draft<PluginSettings>) => {
+              draft.appendTags = newValue;
             }
           );
           await this.plugin.saveSettings();
