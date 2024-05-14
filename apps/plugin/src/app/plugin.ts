@@ -10,9 +10,8 @@ import {
   NOTICE_TIMEOUT,
 } from './constants';
 import { isExcalidrawFile } from './utils/is-excalidraw-file.fn';
-import { removeFrontMatter } from './utils/remove-front-matter.fn';
 import { publishTypefullyDraft } from './utils/publish-typefully-draft.fn';
-import { removeMarkdownLinks } from './utils/remove-markdown-links.fn';
+import { cleanMarkdownForTypeFully } from './utils/clean-markdown-for-typefully.fn';
 
 export class MyPlugin extends Plugin {
   /**
@@ -50,20 +49,19 @@ export class MyPlugin extends Plugin {
           return;
         }
 
-        await this.tryToPublishFile(currentFile);
+        await this.publishFile(currentFile);
       },
     });
 
     // Add context menu entries
     this.registerEvent(
-      this.app.workspace.on('editor-menu', (menu, _editor, view) => {
+      this.app.workspace.on('editor-menu', (menu, editor, view) => {
         menu.addSeparator();
         menu.addItem((item) => {
           item.setIcon('arrows-up-from-line');
           item
             .setTitle('Publish the current note to Typefully')
             .onClick(async () => {
-              //const selection = editor.getSelection();
               const currentFile = view.file;
 
               if (!currentFile) {
@@ -74,35 +72,29 @@ export class MyPlugin extends Plugin {
                 return;
               }
 
-              await this.tryToPublishFile(currentFile);
+              await this.publishFile(currentFile);
+            });
+        });
+        menu.addItem((item) => {
+          item.setIcon('arrows-up-from-line');
+          item
+            .setTitle('Publish the current selection to Typefully')
+            .onClick(async () => {
+              const selection = editor.getSelection();
+              await this.publish(selection);
             });
         });
       })
     );
   }
 
-  async tryToPublishFile(fileToPublish: TFile) {
-    if (!this.canBePublishedToTypefully(fileToPublish)) {
-      const msg = 'The file cannot be published to Typefully';
-      log(msg, 'debug', fileToPublish);
-      new Notice(msg, NOTICE_TIMEOUT);
-      return;
-    }
+  async publish(content: string) {
+    const cleanedContent = cleanMarkdownForTypeFully(content);
 
-    let fileContent = await this.app.vault.read(fileToPublish);
-    fileContent = removeFrontMatter(fileContent);
-    fileContent = fileContent.trim();
-    // Remove obsidian links
-    fileContent = fileContent.replace('[[', ''); // Link open
-    fileContent = fileContent.replace(']]', ''); // Link close
-    fileContent = fileContent.replace('> ', ''); // Quotes
-    fileContent = removeMarkdownLinks(fileContent);
-
-    log('Text to publish', 'debug', fileContent);
-
-    publishTypefullyDraft(
+    log('Text to publish', 'debug', cleanedContent);
+    return publishTypefullyDraft(
       {
-        content: fileContent,
+        content: cleanedContent,
         'schedule-date': this.settings.autoSchedule
           ? 'next-free-slot'
           : undefined,
@@ -112,6 +104,18 @@ export class MyPlugin extends Plugin {
       },
       this.settings.apiKey
     );
+  }
+
+  async publishFile(fileToPublish: TFile) {
+    if (!this.canBePublishedToTypefully(fileToPublish)) {
+      const msg = 'The file cannot be published to Typefully';
+      log(msg, 'debug', fileToPublish);
+      new Notice(msg, NOTICE_TIMEOUT);
+      return;
+    }
+
+    const fileContent = await this.app.vault.read(fileToPublish);
+    return this.publish(fileContent);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
