@@ -1,4 +1,4 @@
-import { Notice, Plugin, TFile } from 'obsidian';
+import { getAllTags, Notice, Plugin, TFile } from 'obsidian';
 import { DEFAULT_SETTINGS, PluginSettings } from './types/plugin-settings.intf';
 import { SettingsTab } from './settingTab';
 import { log } from './utils/log';
@@ -91,32 +91,36 @@ export class MyPlugin extends Plugin {
     );
   }
 
+  /**
+   * Return all the tags of the given file, or an empty array if there's none
+   * @param file
+   */
   getFileTags(file: TFile | null): string[] {
-    let retVal: string[] = [];
+    const retVal: Set<string> = new Set<string>();
 
     if (!file) {
-      return retVal;
+      return Array.from(retVal);
     }
 
     const fileCache = this.app.metadataCache.getFileCache(file);
     if (!fileCache) {
-      return retVal;
+      return Array.from(retVal);
     }
 
-    if (!fileCache.frontmatter) {
-      return retVal;
+    const tags = getAllTags(fileCache);
+
+    if (!tags) {
+      return Array.from(retVal);
     }
 
-    if (!fileCache.frontmatter.tags) {
-      return retVal;
+    for (const tag of tags) {
+      retVal.add(tag);
     }
 
-    retVal = fileCache.frontmatter.tags;
-
-    return retVal;
+    return Array.from(retVal);
   }
 
-  // FIXME make tags optional
+  // FIXME make tags optional here
   async publish(content: string, tags: string[]) {
     let cleanedContent = cleanMarkdownForTypeFully(content);
 
@@ -124,7 +128,7 @@ export class MyPlugin extends Plugin {
       log('Tags to append: ', 'debug', tags);
       let tagsString = '\n\n';
       tags.forEach((tag) => {
-        tagsString += `#${tag} `;
+        tagsString += ` ${tag}`;
       });
 
       cleanedContent += tagsString;
