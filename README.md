@@ -1,6 +1,6 @@
-# PLUGIN_NAME
+# Obsidian Typefully integration
 
-TODO
+Obsidian plugin that integrates [Typefully](https://typefully.com/)
 
 ## Features
 

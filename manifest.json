@@ -1,7 +1,7 @@
 {
-  "id": "PLUGIN_NAME",
-  "name": "TODO",
-  "description": "TODO",
+  "id": "obsidian-typefully",
+  "name": "Typefully",
+  "description": "Typefully integration. Publish social media posts with ease",
   "version": "1.0.0",
   "minAppVersion": "0.15.0",
   "isDesktopOnly": false,

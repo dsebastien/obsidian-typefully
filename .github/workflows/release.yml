@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 env:
-  PLUGIN_NAME: PLUGIN_NAME
+  PLUGIN_NAME: obsidian-typefully
 
 jobs:
   build:
