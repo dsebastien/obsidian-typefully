@@ -53,6 +53,32 @@ export class MyPlugin extends Plugin {
         await this.tryToPublishFile(currentFile);
       },
     });
+
+    // Add context menu entries
+    this.registerEvent(
+      this.app.workspace.on('editor-menu', (menu, _editor, view) => {
+        menu.addSeparator();
+        menu.addItem((item) => {
+          item.setIcon('arrows-up-from-line');
+          item
+            .setTitle('Publish the current note to Typefully')
+            .onClick(async () => {
+              //const selection = editor.getSelection();
+              const currentFile = view.file;
+
+              if (!currentFile) {
+                new Notice(
+                  'Please open a note before calling this command',
+                  NOTICE_TIMEOUT
+                );
+                return;
+              }
+
+              await this.tryToPublishFile(currentFile);
+            });
+        });
+      })
+    );
   }
 
   async tryToPublishFile(fileToPublish: TFile) {
