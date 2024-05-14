@@ -50,6 +50,7 @@ export class SettingsTab extends PluginSettingTab {
         'If enabled, the post will have an AutoRT enabled, according to the one set on Typefully for the account.'
       )
       .addToggle((toggle: ToggleComponent) => {
+        toggle.setValue(this.plugin.settings.autoRetweet);
         toggle.onChange(async (newValue: boolean) => {
           this.plugin.settings = produce(
             this.plugin.settings,
@@ -69,6 +70,7 @@ export class SettingsTab extends PluginSettingTab {
         'If enabled, the post will have an AutoPlug enabled, according to the one set on Typefully for the account.'
       )
       .addToggle((toggle: ToggleComponent) => {
+        toggle.setValue(this.plugin.settings.autoPlug);
         toggle.onChange(async (newValue: boolean) => {
           this.plugin.settings = produce(
             this.plugin.settings,
@@ -88,6 +90,7 @@ export class SettingsTab extends PluginSettingTab {
         'If enabled, content will be automatically split into multiple tweets.'
       )
       .addToggle((toggle: ToggleComponent) => {
+        toggle.setValue(this.plugin.settings.threadify);
         toggle.onChange(async (newValue: boolean) => {
           this.plugin.settings = produce(
             this.plugin.settings,
@@ -107,6 +110,7 @@ export class SettingsTab extends PluginSettingTab {
         'If enabled, the post will be automatically scheduled in the next free slot.'
       )
       .addToggle((toggle: ToggleComponent) => {
+        toggle.setValue(this.plugin.settings.autoSchedule);
         toggle.onChange(async (newValue: boolean) => {
           this.plugin.settings = produce(
             this.plugin.settings,
