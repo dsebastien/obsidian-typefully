@@ -67,8 +67,9 @@ export class MyPlugin extends Plugin {
     fileContent = removeFrontMatter(fileContent);
     fileContent = fileContent.trim();
     // Remove obsidian links
-    fileContent = fileContent.replace('[[', '');
-    fileContent = fileContent.replace(']]', '');
+    fileContent = fileContent.replace('[[', ''); // Link open
+    fileContent = fileContent.replace(']]', ''); // Link close
+    fileContent = fileContent.replace('> ', ''); // Quotes
     fileContent = removeMarkdownLinks(fileContent);
 
     log('Text to publish', 'debug', fileContent);
