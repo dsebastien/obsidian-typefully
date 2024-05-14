@@ -1,11 +1,6 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import { MyPlugin } from '../plugin';
 
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import * as pluginManifest from '../../../../../manifest.json';
-import { Draft, produce } from 'immer';
-import { PluginSettings } from '../types';
-
 export class SettingsTab extends PluginSettingTab {
   plugin: MyPlugin;
 

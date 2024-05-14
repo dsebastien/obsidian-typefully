@@ -1,5 +1,5 @@
 import { Plugin } from 'obsidian';
-import { DEFAULT_SETTINGS, PluginSettings } from './types';
+import { DEFAULT_SETTINGS, PluginSettings } from './types/plugin-settings.intf';
 import { SettingsTab } from './settingTab';
 import { log } from './utils/log';
 import { Draft, produce } from 'immer';
