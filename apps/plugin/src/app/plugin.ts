@@ -107,7 +107,7 @@ export class MyPlugin extends Plugin {
     }
 
     log('Text to publish', 'debug', cleanedContent);
-    return publishTypefullyDraft(
+    const result = await publishTypefullyDraft(
       {
         content: cleanedContent,
         'schedule-date': this.settings.autoSchedule
@@ -119,6 +119,17 @@ export class MyPlugin extends Plugin {
       },
       this.settings.apiKey
     );
+
+    if (result.successful) {
+      const msg = 'Typefully draft published successfully';
+      log(msg, 'debug', result);
+      new Notice(msg, NOTICE_TIMEOUT);
+    } else {
+      log('Failed to publish Typefully draft', 'debug', result);
+      if (result.errorDetails) {
+        new Notice(result.errorDetails.detail, NOTICE_TIMEOUT);
+      }
+    }
   }
 
   async publishFile(fileToPublish: TFile) {

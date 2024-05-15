@@ -14,6 +14,10 @@ export const TYPEFULLY_API_DRAFTS = '/drafts/';
 export const MSG_API_KEY_CONFIGURATION_REQUIRED =
   'Please configure the Typefully plugin to provide a valid API key';
 
+export const MSG_TYPEFULLY_FAILED_TO_PUBLISH = 'Failed to publish to Typefully';
+export const MSG_TYPEFULLY_FAILED_TO_PUBLISH_POSSIBLE_API_KEY_ISSUE =
+  'Failed to publish to Typefully. Is your API key valid?';
+
 export const MARKDOWN_FILE_EXTENSION = 'md';
 export const DEFAULT_CANVAS_FILE_NAME = 'Canvas.md';
 

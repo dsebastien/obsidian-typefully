@@ -3,6 +3,7 @@ import { App, getAllTags, TFile } from 'obsidian';
 /**
  * Return all the tags of the given file, or an empty array if there's none
  * @param file
+ * @param app the Obsidian app
  */
 export const getFileTags = (file: TFile | null, app: App): string[] => {
   const retVal: Set<string> = new Set<string>();
