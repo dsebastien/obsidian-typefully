@@ -11,9 +11,10 @@ export const cleanMarkdownForTypeFully = (text: string): string => {
   retVal = removeFrontMatter(retVal);
   retVal = retVal.trim();
   // Remove obsidian links
-  retVal = retVal.replace('[[', ''); // Link open
-  retVal = retVal.replace(']]', ''); // Link close
-  retVal = retVal.replace('> ', ''); // Quotes
+  retVal = retVal.replaceAll('[[', ''); // Link open
+  retVal = retVal.replaceAll(']]', ''); // Link close
+  // Remove Markdown quotes
+  retVal = retVal.replaceAll('> ', ''); // Quotes
   retVal = removeMarkdownLinks(retVal);
 
   return retVal;
