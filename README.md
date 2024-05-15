@@ -7,6 +7,19 @@ Obsidian plugin that integrates [Typefully](https://typefully.com/)
 - Publish the current note
 - Publish the current selection
 
+## Limitations
+
+The Typefully API doesn't support images, Markdown, or HTML at this point (as far as I know). For this reason, I try to only send raw text over to the Typefully API.
+
+For now, the plugin strips out:
+
+- Obsidian links: `[[Some Link]]` becomes `Some Link`
+- Markdown links: `[Google](https://www.google.com)` becomes `Google`
+- Markdown quotes: `> Hey Jude` becomes `Hey Jude`
+- YAML front matter (note properties)
+
+That list will probably need to get longer (e.g., to handle embeds, callouts, etc). Don't hesitate to file issues.
+
 ## Configuration
 
 - Typefully API Key: the API key to use. You can create one here: Settings > API & Integrations > API Keys
