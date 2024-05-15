@@ -92,17 +92,14 @@ export class MyPlugin extends Plugin {
     );
   }
 
-  // FIXME make tags optional here
+  // FIXME make tags optional for this function call
   async publish(content: string, tags: string[]) {
     let cleanedContent = cleanMarkdownForTypeFully(content);
 
-    if (this.settings.appendTags) {
+    if (this.settings.appendTags && tags.length > 0) {
       log('Tags to append: ', 'debug', tags);
       let tagsString = '\n\n';
-      tags.forEach((tag) => {
-        tagsString += ` ${tag}`;
-      });
-
+      tagsString += tags.join(' ');
       cleanedContent += tagsString;
     }
 
