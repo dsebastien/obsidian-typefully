@@ -1,6 +1,8 @@
 # Obsidian Typefully integration
 
-Obsidian plugin that integrates [Typefully](https://typefully.com/)
+Obsidian plugin that integrates [Typefully](./images/demo.gif)
+
+![Demo of the Typefully plugin for obsidian](./images/demo.gif)
 
 ## Features
 
