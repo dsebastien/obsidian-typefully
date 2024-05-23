@@ -17,13 +17,13 @@ export class SettingsTab extends PluginSettingTab {
 
     containerEl.empty();
 
-    this.renderSupportHeader(containerEl);
     this.renderApiKey(containerEl);
     this.renderAutoRetweet(containerEl);
     this.renderAutoPlug(containerEl);
     this.renderThreadify(containerEl);
     this.renderAutoSchedule(containerEl);
     this.renderAppendTags(containerEl);
+    this.renderSupportHeader(containerEl);
   }
 
   renderApiKey(containerEl: HTMLElement) {
@@ -156,7 +156,7 @@ export class SettingsTab extends PluginSettingTab {
 
     this.renderBuyMeACoffeeBadge(containerEl);
     const spacing = containerEl.createDiv();
-    spacing.style.marginBottom = '0.75em';
+    spacing.classList.add('support-header-margin');
   }
 
   renderBuyMeACoffeeBadge(
