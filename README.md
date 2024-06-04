@@ -29,3 +29,6 @@ That list will probably need to get longer (e.g., to handle embeds, callouts, et
 - Enable Auto plug: If enabled, the post will have an AutoPlug enabled, according to the one set on Typefully for the account
 - Enable Threadify: If enabled, content will be automatically split into multiple tweets
 - Enable Auto scheduling: If enabled, the post will be automatically scheduled in the next free slot
+
+## News & support
+To stay up to date about this plugin, Obsidian in general, Personal Knowledge Management and note-taking, subscribe to [my newsletter](https://dsebastien.net/#/portal/signup). Note that the best way to support my work is to become a paid subscriber ❤️.
