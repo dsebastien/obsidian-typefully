@@ -31,4 +31,5 @@ That list will probably need to get longer (e.g., to handle embeds, callouts, et
 - Enable Auto scheduling: If enabled, the post will be automatically scheduled in the next free slot
 
 ## News & support
+
 To stay up to date about this plugin, Obsidian in general, Personal Knowledge Management and note-taking, subscribe to [my newsletter](https://dsebastien.net/#/portal/signup). Note that the best way to support my work is to become a paid subscriber ❤️.
