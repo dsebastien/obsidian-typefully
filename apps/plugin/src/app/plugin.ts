@@ -14,7 +14,7 @@ import { publishTypefullyDraft } from './utils/publish-typefully-draft.fn';
 import { cleanMarkdownForTypeFully } from './utils/clean-markdown-for-typefully.fn';
 import { getFileTags } from './utils/get-file-tags.fn';
 
-export class MyPlugin extends Plugin {
+export class TypefullyPlugin extends Plugin {
   /**
    * The plugin settings are immutable
    */

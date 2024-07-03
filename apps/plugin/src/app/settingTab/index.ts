@@ -1,13 +1,13 @@
 import { App, PluginSettingTab, Setting, ToggleComponent } from 'obsidian';
-import { MyPlugin } from '../plugin';
+import { TypefullyPlugin } from '../plugin';
 import { log } from '../utils/log';
 import { Draft, produce } from 'immer';
 import { PluginSettings } from '../types/plugin-settings.intf';
 
 export class SettingsTab extends PluginSettingTab {
-  plugin: MyPlugin;
+  plugin: TypefullyPlugin;
 
-  constructor(app: App, plugin: MyPlugin) {
+  constructor(app: App, plugin: TypefullyPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
