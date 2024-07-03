@@ -1,7 +1,7 @@
 {
   "name": "obsidian-typefully",
   "description": "Typefully integration. Publish social media posts with ease",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "license": "MIT",
   "author": {
     "name": "Sébastien Dubois",
