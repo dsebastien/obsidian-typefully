@@ -23,6 +23,7 @@ export class SettingsTab extends PluginSettingTab {
     this.renderThreadify(containerEl);
     this.renderAutoSchedule(containerEl);
     this.renderAppendTags(containerEl);
+    this.renderFollowButton(containerEl);
     this.renderSupportHeader(containerEl);
   }
 
@@ -140,6 +141,18 @@ export class SettingsTab extends PluginSettingTab {
             }
           );
           await this.plugin.saveSettings();
+        });
+      });
+  }
+
+  renderFollowButton(containerEl: HTMLElement) {
+    new Setting(containerEl)
+      .setName('Follow me on X')
+      .setDesc('@dSebastien')
+      .addButton((button) => {
+        button.setCta();
+        button.setButtonText('Follow me on X').onClick(() => {
+          window.open('https://x.com/dSebastien');
         });
       });
   }
