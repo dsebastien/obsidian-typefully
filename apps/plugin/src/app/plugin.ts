@@ -37,7 +37,7 @@ export class TypefullyPlugin extends Plugin {
     // Add commands
     this.addCommand({
       id: 'publish-note-to-typefully',
-      name: 'Publish the current note to Typefully',
+      name: 'Publish the current note',
       editorCallback: async (_editor, view) => {
         log('Publishing the current note to Typefully', 'debug');
         const currentFile = view.file;
