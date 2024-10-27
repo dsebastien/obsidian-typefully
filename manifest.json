@@ -2,7 +2,7 @@
   "id": "typefully",
   "name": "Typefully",
   "description": "Typefully integration. Publish social media posts with ease",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "minAppVersion": "0.15.0",
   "isDesktopOnly": false,
   "author": "Sébastien Dubois",
