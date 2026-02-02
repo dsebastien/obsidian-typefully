@@ -1,0 +1,6 @@
+/* Typefully Plugin Styles */
+@import 'tailwindcss';
+
+.support-header-margin {
+    margin-top: 1rem;
+}
