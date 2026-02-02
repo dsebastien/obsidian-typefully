@@ -4,12 +4,13 @@
 export const NOTICE_TIMEOUT = 5000;
 
 /**
- * Typefully API URL
- * Reference: https://support.typefully.com/en/articles/8718287-typefully-api
+ * Typefully API URL (v2)
+ * Reference: https://typefully.com/docs/api
  */
-export const TYPEFULLY_API_URL = 'https://api.typefully.com/v1';
+export const TYPEFULLY_API_URL = 'https://api.typefully.com/v2';
 
-export const TYPEFULLY_API_DRAFTS = '/drafts/';
+export const TYPEFULLY_API_SOCIAL_SETS = '/social-sets';
+export const TYPEFULLY_API_DRAFTS = '/drafts';
 
 export const MSG_API_KEY_CONFIGURATION_REQUIRED =
   'Please configure the Typefully plugin to provide a valid API key';

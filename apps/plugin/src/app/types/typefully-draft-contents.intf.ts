@@ -1,25 +1,51 @@
 /**
- * Reference: https://support.typefully.com/en/articles/8718287-typefully-api
+ * Reference: https://typefully.com/docs/api
+ * Typefully API v2 Draft Contents
  */
 export interface TypefullyDraftContents {
-  /**
-   * You can split into multiple tweets by adding 4 consecutive newlines between tweets in the content.
-   */
-  content: string;
-  /**
-   * Content will be automatically split into multiple tweets
-   */
-  threadify: boolean;
-  /**
-   * Can either be an ISO formatted date (e.g.:2022-06-13T11:13:31.662Z) or next-free-slot
-   */
-  'schedule-date'?: string | 'next-free-slot';
-  /**
-   * If true, the post will have an AutoRT enabled, according to the one set on Typefully for the account.
-   */
-  auto_retweet_enabled: boolean;
-  /**
-   * If true, the post will have an AutoPlug enabled, according to the one set on Typefully for the account.
-   */
-  auto_plug_enabled: boolean;
+  platforms: TypefullyPlatforms;
+  draft_title?: string;
+  tags?: string[];
+  share?: boolean;
+  publish_at?: string | 'now' | 'next-free-slot';
+}
+
+export interface TypefullyPlatforms {
+  x?: TypefullyPlatformConfig;
+  linkedin?: TypefullyPlatformConfig;
+  threads?: TypefullyPlatformConfig;
+  bluesky?: TypefullyPlatformConfig;
+  mastodon?: TypefullyPlatformConfig;
+}
+
+export interface TypefullyPlatformConfig {
+  enabled: boolean;
+  posts: TypefullyPost[];
+  settings?: TypefullyXSettings;
+}
+
+export interface TypefullyPost {
+  text: string;
+  media_ids?: string[];
+}
+
+export interface TypefullyXSettings {
+  reply_to_url?: string;
+  community_id?: string;
+  share_with_followers?: boolean;
+}
+
+/**
+ * Social Set (account) response
+ */
+export interface TypefullySocialSet {
+  id: number;
+  username: string;
+  name: string;
+  profile_image_url: string;
+}
+
+export interface TypefullySocialSetsResponse {
+  results: TypefullySocialSet[];
+  count: number;
 }

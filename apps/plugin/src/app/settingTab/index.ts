@@ -18,6 +18,7 @@ export class SettingsTab extends PluginSettingTab {
     containerEl.empty();
 
     this.renderApiKey(containerEl);
+    this.renderSocialSetId(containerEl);
     this.renderAutoRetweet(containerEl);
     this.renderAutoPlug(containerEl);
     this.renderThreadify(containerEl);
@@ -43,6 +44,29 @@ export class SettingsTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         });
     });
+  }
+
+  renderSocialSetId(containerEl: HTMLElement) {
+    new Setting(containerEl)
+      .setName('Social Set ID')
+      .setDesc(
+        'Optional: Your Typefully Social Set ID. Leave empty to auto-detect. Find it in Typefully Settings → API with Development mode enabled.'
+      )
+      .addText((text) => {
+        text
+          .setPlaceholder('Auto-detect')
+          .setValue(this.plugin.settings.socialSetId)
+          .onChange(async (newValue) => {
+            log(`Social Set ID set to: `, 'debug', newValue);
+            this.plugin.settings = produce(
+              this.plugin.settings,
+              (draft: Draft<PluginSettings>) => {
+                draft.socialSetId = newValue;
+              }
+            );
+            await this.plugin.saveSettings();
+          });
+      });
   }
 
   renderAutoRetweet(containerEl: HTMLElement) {

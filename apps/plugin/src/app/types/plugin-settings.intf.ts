@@ -1,5 +1,6 @@
 export interface PluginSettings {
   apiKey: string;
+  socialSetId: string;
   autoRetweet: boolean;
   autoPlug: boolean;
   threadify: boolean;
@@ -9,6 +10,7 @@ export interface PluginSettings {
 
 export const DEFAULT_SETTINGS: PluginSettings = {
   apiKey: '',
+  socialSetId: '',
   autoRetweet: false,
   autoPlug: false,
   threadify: false,
