@@ -103,18 +103,30 @@ export class TypefullyPlugin extends Plugin {
       cleanedContent += tagsString;
     }
 
+    // Build posts array - split by 4 newlines if threadify is enabled
+    let posts: { text: string }[];
+    if (this.settings.threadify) {
+      posts = cleanedContent
+        .split('\n\n\n\n')
+        .filter(text => text.trim())
+        .map(text => ({ text: text.trim() }));
+    } else {
+      posts = [{ text: cleanedContent }];
+    }
+
     log('Text to publish', 'debug', cleanedContent);
     const result = await publishTypefullyDraft(
       {
-        content: cleanedContent,
-        'schedule-date': this.settings.autoSchedule
-          ? 'next-free-slot'
-          : undefined,
-        auto_retweet_enabled: this.settings.autoRetweet,
-        auto_plug_enabled: this.settings.autoPlug,
-        threadify: this.settings.threadify,
+        platforms: {
+          x: {
+            enabled: true,
+            posts,
+          },
+        },
+        publish_at: this.settings.autoSchedule ? 'next-free-slot' : undefined,
       },
-      this.settings.apiKey
+      this.settings.apiKey,
+      this.settings.socialSetId
     );
 
     if (result.successful) {
@@ -165,6 +177,13 @@ export class TypefullyPlugin extends Plugin {
         draft.apiKey = loadedSettings.apiKey;
       } else {
         log('The loaded settings miss the [apiKey] property', 'debug');
+        needToSaveSettings = true;
+      }
+
+      if (loadedSettings.socialSetId) {
+        draft.socialSetId = loadedSettings.socialSetId;
+      } else {
+        log('The loaded settings miss the [socialSetId] property', 'debug');
         needToSaveSettings = true;
       }
 
