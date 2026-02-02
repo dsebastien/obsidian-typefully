@@ -1,6 +1,6 @@
 import { Notice, Plugin } from 'obsidian'
 import type { TFile } from 'obsidian'
-import { DEFAULT_SETTINGS } from './types/plugin-settings.intf'
+import { DEFAULT_PLATFORM_SETTINGS, DEFAULT_SETTINGS } from './types/plugin-settings.intf'
 import type { PluginSettings } from './types/plugin-settings.intf'
 import { TypefullySettingTab } from './settings/settings-tab'
 import { log } from '../utils/log'
@@ -16,6 +16,7 @@ import { isExcalidrawFile } from './utils/is-excalidraw-file.fn'
 import { publishTypefullyDraft } from './utils/publish-typefully-draft.fn'
 import { cleanMarkdownForTypeFully } from './utils/clean-markdown-for-typefully.fn'
 import { getFileTags } from './utils/get-file-tags.fn'
+import type { TypefullyPlatforms } from './types/typefully-draft-contents.intf'
 
 export class TypefullyPlugin extends Plugin {
     /**
@@ -91,6 +92,20 @@ export class TypefullyPlugin extends Plugin {
     }
 
     async publish(content: string, tags: string[]) {
+        // Check if at least one platform is enabled
+        const { platforms } = this.settings
+        const hasEnabledPlatform =
+            platforms.x ||
+            platforms.linkedin ||
+            platforms.threads ||
+            platforms.bluesky ||
+            platforms.mastodon
+
+        if (!hasEnabledPlatform) {
+            new Notice('Please enable at least one target platform in settings', NOTICE_TIMEOUT)
+            return
+        }
+
         let cleanedContent = cleanMarkdownForTypeFully(content)
 
         if (this.settings.appendTags && tags.length > 0) {
@@ -112,14 +127,33 @@ export class TypefullyPlugin extends Plugin {
         }
 
         log('Text to publish', 'debug', cleanedContent)
+
+        // Build platforms object based on settings
+        const platformConfig = { enabled: true, posts }
+        const targetPlatforms: TypefullyPlatforms = {}
+
+        if (platforms.x) {
+            targetPlatforms.x = platformConfig
+        }
+        if (platforms.linkedin) {
+            targetPlatforms.linkedin = platformConfig
+        }
+        if (platforms.threads) {
+            targetPlatforms.threads = platformConfig
+        }
+        if (platforms.bluesky) {
+            targetPlatforms.bluesky = platformConfig
+        }
+        if (platforms.mastodon) {
+            targetPlatforms.mastodon = platformConfig
+        }
+
+        const enabledPlatformNames = Object.keys(targetPlatforms).join(', ')
+        log(`Publishing to platforms: ${enabledPlatformNames}`, 'debug')
+
         const result = await publishTypefullyDraft(
             {
-                platforms: {
-                    x: {
-                        enabled: true,
-                        posts
-                    }
-                },
+                platforms: targetPlatforms,
                 publish_at: this.settings.autoSchedule ? 'next-free-slot' : undefined
             },
             this.settings.apiKey,
@@ -127,7 +161,7 @@ export class TypefullyPlugin extends Plugin {
         )
 
         if (result.successful) {
-            const msg = 'Typefully draft published successfully'
+            const msg = `Typefully draft created for: ${enabledPlatformNames}`
             log(msg, 'debug', result)
             new Notice(msg, NOTICE_TIMEOUT)
         } else {
@@ -158,68 +192,90 @@ export class TypefullyPlugin extends Plugin {
      */
     async loadSettings() {
         log('Loading settings', 'debug')
-        let loadedSettings = (await this.loadData()) as PluginSettings
+        const loadedSettings = (await this.loadData()) as PluginSettings | null
 
         if (!loadedSettings) {
             log('Using default settings', 'debug')
-            loadedSettings = produce(DEFAULT_SETTINGS, () => DEFAULT_SETTINGS)
+            this.settings = produce(DEFAULT_SETTINGS, () => DEFAULT_SETTINGS)
             return
         }
 
         let needToSaveSettings = false
 
         this.settings = produce(this.settings, (draft: Draft<PluginSettings>) => {
-            if (loadedSettings.apiKey) {
-                draft.apiKey = loadedSettings.apiKey
-            } else {
-                log('The loaded settings miss the [apiKey] property', 'debug')
-                needToSaveSettings = true
-            }
+            // String settings - use nullish coalescing for empty strings
+            draft.apiKey = loadedSettings.apiKey ?? ''
+            draft.socialSetId = loadedSettings.socialSetId ?? ''
 
-            if (loadedSettings.socialSetId) {
-                draft.socialSetId = loadedSettings.socialSetId
-            } else {
-                log('The loaded settings miss the [socialSetId] property', 'debug')
-                needToSaveSettings = true
-            }
-
-            if (loadedSettings.autoRetweet) {
+            // Boolean settings - check if defined
+            if (typeof loadedSettings.autoRetweet === 'boolean') {
                 draft.autoRetweet = loadedSettings.autoRetweet
             } else {
-                log('The loaded settings miss the [autoRetweet] property', 'debug')
                 needToSaveSettings = true
             }
 
-            if (loadedSettings.autoPlug) {
+            if (typeof loadedSettings.autoPlug === 'boolean') {
                 draft.autoPlug = loadedSettings.autoPlug
             } else {
-                log('The loaded settings miss the [autoPlug] property', 'debug')
                 needToSaveSettings = true
             }
 
-            if (loadedSettings.threadify) {
+            if (typeof loadedSettings.threadify === 'boolean') {
                 draft.threadify = loadedSettings.threadify
             } else {
-                log('The loaded settings miss the [threadify] property', 'debug')
                 needToSaveSettings = true
             }
 
-            if (loadedSettings.autoSchedule) {
+            if (typeof loadedSettings.autoSchedule === 'boolean') {
                 draft.autoSchedule = loadedSettings.autoSchedule
             } else {
-                log('The loaded settings miss the [autoSchedule] property', 'debug')
                 needToSaveSettings = true
             }
 
-            if (loadedSettings.appendTags) {
+            if (typeof loadedSettings.appendTags === 'boolean') {
                 draft.appendTags = loadedSettings.appendTags
             } else {
-                log('The loaded settings miss the [appendTags] property', 'debug')
+                needToSaveSettings = true
+            }
+
+            // New settings - enableAllPlatforms
+            if (typeof loadedSettings.enableAllPlatforms === 'boolean') {
+                draft.enableAllPlatforms = loadedSettings.enableAllPlatforms
+            } else {
+                needToSaveSettings = true
+            }
+
+            // Platform settings - merge with defaults
+            if (loadedSettings.platforms && typeof loadedSettings.platforms === 'object') {
+                draft.platforms = {
+                    x:
+                        typeof loadedSettings.platforms.x === 'boolean'
+                            ? loadedSettings.platforms.x
+                            : DEFAULT_PLATFORM_SETTINGS.x,
+                    linkedin:
+                        typeof loadedSettings.platforms.linkedin === 'boolean'
+                            ? loadedSettings.platforms.linkedin
+                            : DEFAULT_PLATFORM_SETTINGS.linkedin,
+                    threads:
+                        typeof loadedSettings.platforms.threads === 'boolean'
+                            ? loadedSettings.platforms.threads
+                            : DEFAULT_PLATFORM_SETTINGS.threads,
+                    bluesky:
+                        typeof loadedSettings.platforms.bluesky === 'boolean'
+                            ? loadedSettings.platforms.bluesky
+                            : DEFAULT_PLATFORM_SETTINGS.bluesky,
+                    mastodon:
+                        typeof loadedSettings.platforms.mastodon === 'boolean'
+                            ? loadedSettings.platforms.mastodon
+                            : DEFAULT_PLATFORM_SETTINGS.mastodon
+                }
+            } else {
+                draft.platforms = { ...DEFAULT_PLATFORM_SETTINGS }
                 needToSaveSettings = true
             }
         })
 
-        log(`Settings loaded`, 'debug', loadedSettings)
+        log(`Settings loaded`, 'debug', this.settings)
 
         if (needToSaveSettings) {
             void this.saveSettings()

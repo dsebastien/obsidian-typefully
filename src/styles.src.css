@@ -4,3 +4,28 @@
 .support-header-margin {
     margin-top: 1rem;
 }
+
+/* Settings tab styles */
+.typefully-api-key-input {
+    width: 300px;
+}
+
+.typefully-social-set-input {
+    width: 200px;
+}
+
+.typefully-social-sets-list {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.typefully-social-sets-desc {
+    margin-bottom: 8px;
+    color: var(--text-muted);
+}
+
+.typefully-social-set-button {
+    display: block;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
