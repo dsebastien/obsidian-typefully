@@ -1,72 +1,28 @@
 # Release Notes
 
-## 1.2.10 (Latest)
+## 2.0.0 (2026-02-03)
 
-### New Features
+### ⚠ BREAKING CHANGES
 
-- **Social Set Selection**: Added ability to select and configure which Typefully social set to publish to
-- **Platform Selection**: Added individual toggles for target platforms (X, LinkedIn, Threads, Bluesky, Mastodon)
-- **Enable All Platforms**: Added convenience toggle to enable all platforms at once
-- **Typefully API v2**: Migrated to Typefully API v2 for improved multi-platform support
-- **Bun-based Build**: Updated to use new Bun-based build system
+- Migrated from Typefully API v1 to v2
 
-### Improvements
+Changes:
 
-- Platform-specific draft creation
-- Better error handling with detailed error messages
-- Improved settings UI organization
+- Updated API endpoint from /v1/drafts to /v2/social-sets/{id}/drafts
+- Changed auth header from X-API-KEY to Authorization: Bearer
+- Updated draft content format to use platforms object with posts array
+- Added socialSetId setting (optional - auto-detects if not set)
+- Added fetchSocialSets function for auto-detection
+- Updated response handling for v2 format
+- Threadify now splits content into multiple post objects
 
-## 1.2.9
-
-### Changes
-
-- Changed the command name for clarity
-
-## 1.2.8
-
-### Changes
-
-- Changed the plugin class name
-
-## 1.2.7
-
-### Documentation
-
-- Updated README
-
-## 1.2.6
-
-### Changes
-
-- Updated the plugin ID
-
-## 1.2.5
-
-### Bug Fixes
-
-- Various stability improvements
-
-## 1.2.0 - 1.2.4
+The v2 API provides better multi-platform support and is the recommended
+version per Typefully's December 2025 announcement.
 
 ### Features
 
-- Threadify support (split content at 4 newlines)
-- Auto-scheduling to next free slot
-- Tag appending from frontmatter
-- Auto-retweet option
-- Auto-plug option
-
-## 1.1.0
-
-### Features
-
-- Context menu integration
-- Publish selection support
-
-## 1.0.0
-
-### Initial Release
-
-- Publish current note to Typefully
-- Basic API key configuration
-- Markdown cleaning (links, quotes, frontmatter)
+- **all:** added docs
+- **all:** added selection for the social set and settings to enable/disable target platforms
+- **all:** updated workflows
+- **all:** used the new Bun-based template
+- migrate to Typefully API v2
