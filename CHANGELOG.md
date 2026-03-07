@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0](https://github.com/dsebastien/obsidian-typefully/compare/2.0.0...3.0.0) (2026-03-07)
+
+### Features
+
+- **all:** major improvements and typefully pane ([d72a274](https://github.com/dsebastien/obsidian-typefully/commit/d72a27471275c58a2f44d3c02a40a3726bd677f8))
+- **all:** updated ([6843fe2](https://github.com/dsebastien/obsidian-typefully/commit/6843fe20f1bb4193d551077e85ef2d51ba7fcc52))
+
 ## [2.0.0](https://github.com/dsebastien/obsidian-typefully/compare/1.2.10...2.0.0) (2026-02-03)
 
 ### ⚠ BREAKING CHANGES
