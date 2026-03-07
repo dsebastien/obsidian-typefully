@@ -1,18 +1,12 @@
-import { requestUrl } from 'obsidian'
 import {
     MSG_API_KEY_CONFIGURATION_REQUIRED,
     MSG_TYPEFULLY_FAILED_TO_PUBLISH,
-    MSG_TYPEFULLY_FAILED_TO_PUBLISH_POSSIBLE_API_KEY_ISSUE,
-    TYPEFULLY_API_DRAFTS,
-    TYPEFULLY_API_SOCIAL_SETS,
-    TYPEFULLY_API_URL
+    MSG_TYPEFULLY_FAILED_TO_PUBLISH_POSSIBLE_API_KEY_ISSUE
 } from '../constants'
-import type {
-    TypefullyDraftContents,
-    TypefullySocialSetsResponse
-} from '../types/typefully-draft-contents.intf'
+import type { TypefullyDraftContents } from '../types/typefully-draft-contents.intf'
+import type { TypefullySocialSetsResponse } from '../types/typefully-draft-contents.intf'
+import { TypefullyApiClient, TypefullyApiRequestError } from '../api/typefully-api-client'
 import { log } from '../../utils/log'
-import { hasName } from './has-name.fn'
 import { hasStatus } from './has-status.fn'
 
 /**
@@ -23,17 +17,8 @@ export const fetchSocialSets = async (
     apiKey: string
 ): Promise<TypefullySocialSetsResponse | null> => {
     try {
-        const response = await requestUrl({
-            url: `${TYPEFULLY_API_URL}${TYPEFULLY_API_SOCIAL_SETS}`,
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${apiKey}`
-            }
-        })
-
-        if (response.status === 200) {
-            return response.json as TypefullySocialSetsResponse
-        }
+        const client = new TypefullyApiClient(apiKey)
+        return await client.listSocialSets()
     } catch (error) {
         log('Failed to fetch social sets', 'error', error)
     }
@@ -63,18 +48,32 @@ export const publishTypefullyDraft = async (
         }
     }
 
+    const client = new TypefullyApiClient(apiKey)
+
     // If no socialSetId provided, fetch and use first available
     let effectiveSocialSetId = socialSetId
     if (!effectiveSocialSetId) {
         log('No social set ID configured, fetching available social sets', 'debug')
-        const socialSets = await fetchSocialSets(apiKey)
-        if (socialSets && socialSets.results.length > 0) {
-            effectiveSocialSetId = socialSets.results[0]!.id.toString()
-            log(
-                `Using social set: ${socialSets.results[0]!.username} (${effectiveSocialSetId})`,
-                'debug'
-            )
-        } else {
+        try {
+            const socialSets = await client.listSocialSets()
+            if (socialSets && socialSets.results.length > 0) {
+                effectiveSocialSetId = socialSets.results[0]!.id.toString()
+                log(
+                    `Using social set: ${socialSets.results[0]!.username} (${effectiveSocialSetId})`,
+                    'debug'
+                )
+            } else {
+                return {
+                    successful: false,
+                    details: null,
+                    errorDetails: {
+                        statusCode: 400,
+                        detail: 'No social sets found. Please check your Typefully account.',
+                        rawError: null
+                    }
+                }
+            }
+        } catch {
             return {
                 successful: false,
                 details: null,
@@ -89,56 +88,17 @@ export const publishTypefullyDraft = async (
 
     log('Publishing a Typefully draft (API v2)', 'debug')
     try {
-        const url = `${TYPEFULLY_API_URL}${TYPEFULLY_API_SOCIAL_SETS}/${effectiveSocialSetId}${TYPEFULLY_API_DRAFTS}`
-        log(`POST ${url}`, 'debug')
-
-        const response = await requestUrl({
-            url,
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${apiKey}`
+        const draft = await client.createDraft(effectiveSocialSetId, content)
+        return {
+            successful: true,
+            details: {
+                id: draft.id,
+                postStatus: draft.status as 'draft' | 'scheduled' | 'published',
+                numberOfTweets: draft.platforms?.x?.posts?.length || 1,
+                scheduledDate: draft.publish_at,
+                privateUrl: draft.private_url
             },
-            contentType: 'application/json; charset=UTF-8',
-            body: JSON.stringify(content)
-        })
-
-        log('Typefully response', 'debug', response)
-
-        if (response.status === 200 || response.status === 201) {
-            return {
-                successful: true,
-                details: {
-                    id: response.json.id,
-                    postStatus: response.json.status,
-                    numberOfTweets: response.json.platforms?.x?.posts?.length || 1,
-                    scheduledDate: response.json.scheduled_date,
-                    privateUrl: response.json.private_url
-                },
-                errorDetails: null
-            }
-        } else if (response.status === 500) {
-            return {
-                successful: false,
-                details: null,
-                errorDetails: {
-                    statusCode: 500,
-                    detail: "Typefully's API seems unavailable. Please try again later",
-                    rawError: null
-                }
-            }
-        } else {
-            return {
-                successful: false,
-                details: null,
-                errorDetails: {
-                    statusCode: response.status,
-                    detail:
-                        response.json?.error?.message ||
-                        response.json?.detail ||
-                        MSG_TYPEFULLY_FAILED_TO_PUBLISH,
-                    rawError: null
-                }
-            }
+            errorDetails: null
         }
     } catch (error: unknown) {
         if (hasStatus(error) && error.status === 403) {
@@ -153,26 +113,38 @@ export const publishTypefullyDraft = async (
             }
         }
 
-        if (hasName(error)) {
+        if (error instanceof TypefullyApiRequestError && error.statusCode === 500) {
             return {
                 successful: false,
                 details: null,
                 errorDetails: {
-                    statusCode: 0,
-                    detail: MSG_TYPEFULLY_FAILED_TO_PUBLISH,
-                    rawError: error
+                    statusCode: 500,
+                    detail: "Typefully's API seems unavailable. Please try again later",
+                    rawError: null
                 }
             }
         }
-    }
 
-    return {
-        successful: false,
-        details: null,
-        errorDetails: {
-            statusCode: 0,
-            detail: MSG_TYPEFULLY_FAILED_TO_PUBLISH,
-            rawError: null
+        if (error instanceof TypefullyApiRequestError) {
+            return {
+                successful: false,
+                details: null,
+                errorDetails: {
+                    statusCode: error.statusCode,
+                    detail: error.detail,
+                    rawError: error.rawError
+                }
+            }
+        }
+
+        return {
+            successful: false,
+            details: null,
+            errorDetails: {
+                statusCode: 0,
+                detail: MSG_TYPEFULLY_FAILED_TO_PUBLISH,
+                rawError: error
+            }
         }
     }
 }
@@ -180,13 +152,13 @@ export const publishTypefullyDraft = async (
 /**
  * Response of publishing a Typefully draft
  */
-interface TypeFullyPublishDraftResult {
+export interface TypeFullyPublishDraftResult {
     successful: boolean
     details: TypeFullyPublishDraftResultDetails | null
     errorDetails: TypefullyPublishDraftErrorDetails | null
 }
 
-interface TypeFullyPublishDraftResultDetails {
+export interface TypeFullyPublishDraftResultDetails {
     postStatus: 'draft' | 'scheduled' | 'published'
     id: number
     numberOfTweets: number
@@ -194,7 +166,7 @@ interface TypeFullyPublishDraftResultDetails {
     privateUrl?: string
 }
 
-interface TypefullyPublishDraftErrorDetails {
+export interface TypefullyPublishDraftErrorDetails {
     statusCode: number
     detail: string
     rawError: unknown

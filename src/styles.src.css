@@ -7,11 +7,13 @@
 
 /* Settings tab styles */
 .typefully-api-key-input {
-    width: 300px;
+    width: 100%;
+    max-width: 300px;
 }
 
 .typefully-social-set-input {
-    width: 200px;
+    width: 100%;
+    max-width: 200px;
 }
 
 .typefully-social-sets-list {
@@ -28,4 +30,725 @@
     display: block;
     margin-bottom: 4px;
     cursor: pointer;
+}
+
+/* Buttons */
+.typefully-view button,
+.modal button {
+    cursor: pointer;
+}
+
+/* Utility */
+.typefully-hidden {
+    display: none;
+}
+
+/* Form styles */
+.typefully-datetime-container {
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.typefully-modal-input-wide {
+    width: 100% !important;
+    min-width: 0;
+}
+
+/* Tags */
+.typefully-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 0;
+}
+
+.typefully-tag-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 16px;
+    border: 1px solid var(--text-muted);
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.85em;
+    color: var(--text-normal);
+    transition:
+        background-color 0.15s,
+        border-color 0.15s;
+}
+
+.typefully-tag-pill:hover {
+    background: var(--background-modifier-hover);
+}
+
+.typefully-tag-pill-active {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-color: var(--interactive-accent);
+}
+
+/* Draft list styles */
+.typefully-draft-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.typefully-draft-filters .setting-item {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    padding: 0;
+}
+
+.typefully-draft-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    cursor: pointer;
+}
+
+.typefully-draft-item:hover {
+    background: var(--background-modifier-hover);
+}
+
+.typefully-draft-item-static {
+    cursor: default;
+}
+
+.typefully-draft-preview {
+    min-width: 0;
+}
+
+.typefully-draft-preview-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+}
+
+.typefully-draft-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    font-size: 0.8em;
+    color: var(--text-muted);
+}
+
+.typefully-draft-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* Status badges */
+.typefully-status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75em;
+    font-weight: 500;
+}
+
+.typefully-status-badge-spaced {
+    margin-right: 8px;
+}
+
+.typefully-status-draft {
+    background: var(--background-modifier-border);
+    color: var(--text-normal);
+}
+
+.typefully-status-scheduled {
+    background: #2563eb20;
+    color: #2563eb;
+}
+
+.typefully-status-published {
+    background: #16a34a20;
+    color: #16a34a;
+}
+
+.typefully-status-error {
+    background: #dc262620;
+    color: #dc2626;
+}
+
+/* Queue styles */
+.typefully-queue-day {
+    margin-bottom: 16px;
+}
+
+.typefully-queue-day-header {
+    font-weight: 600;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.typefully-queue-slot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 8px;
+    align-items: center;
+}
+
+.typefully-queue-slot-time {
+    font-weight: 500;
+    min-width: 50px;
+    color: var(--text-muted);
+}
+
+.typefully-queue-slot-available {
+    color: var(--text-faint);
+    font-style: italic;
+}
+
+.typefully-queue-slot-clickable {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 8px;
+}
+
+.typefully-queue-slot-clickable:hover {
+    color: var(--interactive-accent);
+    background: var(--background-modifier-hover);
+    font-style: normal;
+}
+
+.typefully-queue-slot-draft {
+    cursor: pointer;
+    color: var(--text-normal);
+    min-width: 0;
+    word-break: break-word;
+}
+
+.typefully-queue-slot-draft:hover {
+    color: var(--interactive-accent);
+}
+
+/* Settings user profile */
+.typefully-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: var(--background-secondary);
+    border-radius: 8px;
+}
+
+.typefully-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.typefully-user-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.typefully-user-name {
+    font-weight: 600;
+}
+
+.typefully-user-email {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.typefully-api-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85em;
+    margin-left: 8px;
+}
+
+.typefully-api-status-ok {
+    color: #16a34a;
+}
+
+.typefully-api-status-error {
+    color: #dc2626;
+}
+
+/* Settings tags section */
+.typefully-settings-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0 12px 0;
+}
+
+.typefully-settings-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    background: var(--background-modifier-border);
+}
+
+/* Load more button */
+.typefully-load-more {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    border: none;
+    background: transparent;
+}
+
+.typefully-load-more:hover {
+    color: var(--interactive-accent);
+    background: var(--background-modifier-hover);
+}
+
+/* ─── View layout ─────────────────────────────────────────────────────────── */
+
+.typefully-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.typefully-view-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    flex-shrink: 0;
+}
+
+.typefully-view-back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.typefully-view-refresh-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.typefully-view-tabs {
+    display: flex;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.typefully-view-tab {
+    padding: 4px 10px;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.typefully-view-tab:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.typefully-view-tab.typefully-tab-active {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.typefully-view-tab.typefully-tab-active:hover {
+    background: var(--interactive-accent-hover);
+    color: var(--text-on-accent);
+}
+
+.typefully-view-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.typefully-view-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--background-modifier-border);
+    justify-content: flex-end;
+}
+
+/* ─── Queue schedule page ─────────────────────────────────────────────────── */
+
+.typefully-schedule-timezone {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.typefully-schedule-days {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.typefully-schedule-day {
+    padding: 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+}
+
+.typefully-schedule-day .setting-item {
+    border: none;
+    padding: 0;
+}
+
+.typefully-schedule-times {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.typefully-schedule-time-slot {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.typefully-schedule-time-input {
+    padding: 2px 6px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 0.85em;
+    max-width: 100px;
+}
+
+.typefully-schedule-remove-btn {
+    padding: 2px 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+.typefully-schedule-remove-btn:hover {
+    color: #dc2626;
+}
+
+.typefully-schedule-add-btn {
+    padding: 2px 10px;
+    border: 1px dashed var(--background-modifier-border);
+    background: transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+    color: var(--text-muted);
+}
+
+.typefully-schedule-add-btn:hover {
+    border-color: var(--interactive-accent);
+    color: var(--interactive-accent);
+}
+
+/* ─── One-column field layout ─────────────────────────────────────────────── */
+
+.typefully-field-group {
+    margin-bottom: 12px;
+}
+
+.typefully-field-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 4px;
+    font-size: 0.9em;
+    color: var(--text-normal);
+}
+
+.typefully-field-textarea {
+    width: 100%;
+    min-height: 80px;
+    resize: vertical;
+    padding: 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1.5;
+}
+
+.typefully-field-textarea-large {
+    min-height: 200px;
+}
+
+/* ─── Platform toggles ───────────────────────────────────────────────────── */
+
+.typefully-platform-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.typefully-platform-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    cursor: pointer;
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+}
+
+.typefully-platform-toggle:hover {
+    background: var(--background-modifier-hover);
+}
+
+.typefully-platform-toggle input[type='checkbox'] {
+    margin: 0;
+}
+
+/* ─── Thread editor ──────────────────────────────────────────────────────── */
+
+.typefully-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.typefully-thread-post {
+    position: relative;
+    padding-left: 16px;
+    border-left: 2px solid var(--background-modifier-border);
+    margin-bottom: 8px;
+}
+
+.typefully-thread-post-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.typefully-thread-post-label {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.typefully-char-count {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    margin-left: auto;
+}
+
+.typefully-char-count-over {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.typefully-thread-remove-btn {
+    padding: 1px 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+.typefully-thread-remove-btn:hover {
+    color: #dc2626;
+}
+
+.typefully-thread-add-btn {
+    display: block;
+    width: 100%;
+    padding: 6px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    border: 1px dashed var(--background-modifier-border);
+    background: transparent;
+    border-radius: 4px;
+    font-size: 0.85em;
+}
+
+.typefully-thread-add-btn:hover {
+    border-color: var(--interactive-accent);
+    color: var(--interactive-accent);
+}
+
+.typefully-field-readonly {
+    opacity: 0.7;
+    cursor: default;
+    resize: none;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ─── Schedule buttons ────────────────────────────────────────────────────── */
+
+.typefully-schedule-buttons {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.typefully-schedule-btn-active {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: -2px;
+}
+
+.typefully-schedule-datetime {
+    margin-top: 4px;
+}
+
+.typefully-schedule-datetime-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    font-size: inherit;
+}
+
+/* ─── Calendar picker ─────────────────────────────────────────────────────── */
+
+.typefully-cal {
+    margin-top: 8px;
+}
+
+.typefully-cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.typefully-cal-title {
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.typefully-cal-nav {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    font-size: 1.3em;
+    line-height: 1;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.typefully-cal-nav:hover {
+    background: var(--background-modifier-hover);
+}
+
+.typefully-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    text-align: center;
+}
+
+.typefully-cal-dow {
+    font-size: 0.75em;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 4px 0;
+}
+
+.typefully-cal-day {
+    padding: 4px 0;
+    border-radius: 4px;
+    font-size: 0.85em;
+    cursor: pointer;
+    line-height: 1.6;
+}
+
+.typefully-cal-day:hover {
+    background: var(--background-modifier-hover);
+}
+
+.typefully-cal-day-outside {
+    color: var(--text-faint);
+}
+
+.typefully-cal-day-selected {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.typefully-cal-day-selected:hover {
+    background: var(--interactive-accent-hover);
+}
+
+.typefully-cal-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--background-modifier-border);
+}
+
+.typefully-cal-time-label {
+    font-size: 0.85em;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.typefully-cal-time-input {
+    padding: 4px 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 0.9em;
+}
+
+/* ─── Empty state ─────────────────────────────────────────────────────────── */
+
+.typefully-empty-state {
+    color: var(--text-faint);
+    text-align: center;
+    padding: 24px;
+    font-style: italic;
 }

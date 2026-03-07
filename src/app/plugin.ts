@@ -16,7 +16,15 @@ import { isExcalidrawFile } from './utils/is-excalidraw-file.fn'
 import { publishTypefullyDraft } from './utils/publish-typefully-draft.fn'
 import { cleanMarkdownForTypeFully } from './utils/clean-markdown-for-typefully.fn'
 import { getFileTags } from './utils/get-file-tags.fn'
-import type { TypefullyPlatforms } from './types/typefully-draft-contents.intf'
+import type { TypefullyPlatforms, TypefullyPost } from './types/typefully-draft-contents.intf'
+import { TypefullyApiClient } from './api/typefully-api-client'
+import type { TypefullyUser } from './types/typefully-api.intf'
+import { extractImagesFromMarkdown } from './utils/extract-images-from-markdown.fn'
+import type { ExtractedImage } from './utils/extract-images-from-markdown.fn'
+import { uploadVaultMedia } from './utils/upload-vault-media.fn'
+import { TypefullyView } from './views/typefully-view'
+import { VIEW_TYPE_TYPEFULLY } from './views/typefully-view-state'
+import type { ViewPage } from './views/typefully-view-state'
 
 export class TypefullyPlugin extends Plugin {
     /**
@@ -25,11 +33,25 @@ export class TypefullyPlugin extends Plugin {
     settings: PluginSettings = produce(DEFAULT_SETTINGS, () => DEFAULT_SETTINGS)
 
     /**
+     * Cached API client instance. Recreated when the API key changes.
+     */
+    private apiClient: TypefullyApiClient | null = null
+    private apiClientKey = ''
+
+    /**
+     * Cached user info from getMe()
+     */
+    cachedUser: TypefullyUser | null = null
+
+    /**
      * Executed as soon as the plugin loads
      */
     override async onload() {
         log('Initializing', 'debug')
         await this.loadSettings()
+
+        // Register the Typefully view
+        this.registerView(VIEW_TYPE_TYPEFULLY, (leaf) => new TypefullyView(leaf, this))
 
         // Add a settings screen for the plugin
         this.addSettingTab(new TypefullySettingTab(this.app, this))
@@ -37,6 +59,11 @@ export class TypefullyPlugin extends Plugin {
         if ('' === this.settings.apiKey) {
             new Notice(MSG_API_KEY_CONFIGURATION_REQUIRED, NOTICE_TIMEOUT)
         }
+
+        // Add ribbon icon
+        this.addRibbonIcon('arrows-up-from-line', 'Open Typefully', () => {
+            void this.activateView()
+        })
 
         // Add commands
         this.addCommand({
@@ -52,6 +79,65 @@ export class TypefullyPlugin extends Plugin {
                 }
 
                 await this.publishFile(currentFile)
+            }
+        })
+
+        this.addCommand({
+            id: 'publish-selection',
+            name: 'Publish the current selection',
+            editorCallback: async (editor, view) => {
+                const selection = editor.getSelection()
+                if (!selection) {
+                    new Notice('Please select some text first', NOTICE_TIMEOUT)
+                    return
+                }
+                const file = view.file
+                const fileTags = getFileTags(file, this.app)
+                await this.publishContent(selection, fileTags)
+            }
+        })
+
+        this.addCommand({
+            id: 'open-view',
+            name: 'Open panel',
+            callback: () => {
+                void this.activateView()
+            }
+        })
+
+        this.addCommand({
+            id: 'list-drafts',
+            name: 'List drafts',
+            callback: () => {
+                void this.activateView({ type: 'drafts-list' })
+            }
+        })
+
+        this.addCommand({
+            id: 'view-queue',
+            name: 'View queue',
+            callback: () => {
+                void this.activateView({ type: 'queue' })
+            }
+        })
+
+        this.addCommand({
+            id: 'view-queue-schedule',
+            name: 'View queue schedule',
+            callback: () => {
+                void this.activateView({ type: 'queue-schedule' })
+            }
+        })
+
+        this.addCommand({
+            id: 'refresh-drafts',
+            name: 'Refresh drafts',
+            callback: () => {
+                const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TYPEFULLY)
+                if (leaves.length > 0) {
+                    const view = leaves[0]!.view as TypefullyView
+                    view.setPage({ type: 'drafts-list' })
+                }
             }
         })
 
@@ -83,7 +169,7 @@ export class TypefullyPlugin extends Plugin {
                             const file = view.file
                             const fileTags = getFileTags(file, this.app)
 
-                            await this.publish(selection, fileTags)
+                            await this.publishContent(selection, fileTags)
                         }
                     )
                 })
@@ -106,6 +192,9 @@ export class TypefullyPlugin extends Plugin {
             return
         }
 
+        // Extract images before cleaning (cleaning removes image syntax)
+        const extractedImages = extractImagesFromMarkdown(content)
+
         let cleanedContent = cleanMarkdownForTypeFully(content)
 
         if (this.settings.appendTags && tags.length > 0) {
@@ -116,7 +205,7 @@ export class TypefullyPlugin extends Plugin {
         }
 
         // Build posts array - split by 4 newlines if threadify is enabled
-        let posts: { text: string }[]
+        let posts: TypefullyPost[]
         if (this.settings.threadify) {
             posts = cleanedContent
                 .split('\n\n\n\n')
@@ -124,6 +213,11 @@ export class TypefullyPlugin extends Plugin {
                 .map((text) => ({ text: text.trim() }))
         } else {
             posts = [{ text: cleanedContent }]
+        }
+
+        // Upload images if any found and API client is available
+        if (extractedImages.length > 0) {
+            await this.attachMediaToPosts(extractedImages, posts, content)
         }
 
         log('Text to publish', 'debug', cleanedContent)
@@ -164,12 +258,78 @@ export class TypefullyPlugin extends Plugin {
             const msg = `Typefully draft created for: ${enabledPlatformNames}`
             log(msg, 'debug', result)
             new Notice(msg, NOTICE_TIMEOUT)
+            this.refreshView()
         } else {
             log('Failed to publish Typefully draft', 'debug', result)
             if (result.errorDetails) {
                 new Notice(result.errorDetails.detail, NOTICE_TIMEOUT)
             }
         }
+    }
+
+    /**
+     * Upload extracted images and attach media_ids to the appropriate posts.
+     * When threadify is enabled, images are mapped to the thread segment they belong to.
+     */
+    private async attachMediaToPosts(
+        images: ExtractedImage[],
+        posts: TypefullyPost[],
+        originalContent: string
+    ): Promise<void> {
+        const client = this.getApiClient()
+        if (!client) return
+
+        const socialSetId = this.settings.socialSetId
+        if (!socialSetId) {
+            log('No social set ID for media upload, skipping images', 'warn')
+            return
+        }
+
+        const totalImages = images.length
+        for (let i = 0; i < totalImages; i++) {
+            const image = images[i]!
+            new Notice(`Uploading image ${i + 1}/${totalImages}...`, 2000)
+
+            const uploaded = await uploadVaultMedia(this.app, client, socialSetId, image.path)
+            if (!uploaded) continue
+
+            // Find which post segment this image belongs to
+            const postIndex = this.findPostIndexForImage(image, originalContent, posts)
+            const target = posts[postIndex]
+            if (target) {
+                if (!target.media_ids) target.media_ids = []
+                target.media_ids.push(uploaded.mediaId)
+            }
+        }
+    }
+
+    /**
+     * Determine which post segment an image belongs to based on its position
+     * in the original content relative to the thread split points.
+     */
+    private findPostIndexForImage(
+        image: ExtractedImage,
+        originalContent: string,
+        posts: TypefullyPost[]
+    ): number {
+        if (posts.length <= 1) return 0
+
+        const imagePos = originalContent.indexOf(image.originalSyntax)
+        if (imagePos === -1) return 0
+
+        // Find segment boundaries (split on 4+ newlines)
+        const segments = originalContent.split('\n\n\n\n')
+        let offset = 0
+        for (let i = 0; i < segments.length; i++) {
+            const segEnd = offset + segments[i]!.length
+            if (imagePos >= offset && imagePos < segEnd) {
+                return Math.min(i, posts.length - 1)
+            }
+            // Account for the separator length
+            offset = segEnd + 4
+        }
+
+        return 0
     }
 
     async publishFile(fileToPublish: TFile) {
@@ -182,10 +342,63 @@ export class TypefullyPlugin extends Plugin {
 
         const fileContent = await this.app.vault.read(fileToPublish)
         const fileTags = getFileTags(fileToPublish, this.app)
-        return this.publish(fileContent, fileTags)
+        return this.publishContent(fileContent, fileTags)
+    }
+
+    async publishContent(content: string, tags: string[]) {
+        return this.publish(content, tags)
+    }
+
+    /**
+     * Get or create a cached API client instance.
+     * Recreates the client if the API key has changed.
+     */
+    getApiClient(): TypefullyApiClient | null {
+        if (!this.settings.apiKey) return null
+        if (!this.apiClient || this.apiClientKey !== this.settings.apiKey) {
+            this.apiClient = new TypefullyApiClient(this.settings.apiKey)
+            this.apiClientKey = this.settings.apiKey
+        }
+        return this.apiClient
+    }
+
+    /**
+     * Refresh the Typefully panel if it is open.
+     */
+    refreshView() {
+        const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TYPEFULLY)
+        for (const leaf of leaves) {
+            const view = leaf.view as TypefullyView
+            view.refresh()
+        }
     }
 
     override onunload() {}
+
+    async activateView(initialPage?: ViewPage) {
+        const { workspace } = this.app
+
+        let leaf = workspace.getLeavesOfType(VIEW_TYPE_TYPEFULLY)[0]
+
+        if (!leaf) {
+            const rightLeaf = workspace.getRightLeaf(false)
+            if (rightLeaf) {
+                await rightLeaf.setViewState({
+                    type: VIEW_TYPE_TYPEFULLY,
+                    active: true
+                })
+                leaf = rightLeaf
+            }
+        }
+
+        if (leaf) {
+            await workspace.revealLeaf(leaf)
+            if (initialPage) {
+                const view = leaf.view as TypefullyView
+                view.setPage(initialPage)
+            }
+        }
+    }
 
     /**
      * Load the plugin settings

@@ -23,6 +23,54 @@ The key takeaway: consistency beats intensity.
 What's your top productivity tip?
 ```
 
+### Scheduling at Specific Times
+
+1. Enable "Show publish options modal" in settings
+2. Publish a note - the modal will appear
+3. Select "Specific date & time" from the Schedule dropdown
+4. Pick your desired date and time
+5. Click "Create Draft"
+
+The draft will be scheduled at the exact time you specified.
+
+### Attaching Images
+
+Include images in your note using standard Obsidian syntax:
+
+```markdown
+Check out this chart!
+
+![[quarterly-results.png]]
+
+The results speak for themselves.
+```
+
+When you publish, the plugin will:
+
+1. Detect the image reference
+2. Read the file from your vault
+3. Upload it to Typefully via presigned URLs
+4. Attach it to the correct post in the thread
+5. Strip the image syntax from the published text
+
+Supported formats: PNG, JPEG, GIF, WebP, SVG, MP4, PDF (LinkedIn only).
+
+### Managing Drafts
+
+1. Click the Typefully ribbon icon or use "Open Typefully panel" from the command palette
+2. The Drafts tab shows all your drafts
+3. Filter by status (draft, scheduled, published, error)
+4. Click a draft to view its full details
+5. Use Edit to modify text, schedule, or notes
+6. Use Delete to remove drafts you no longer need
+
+### Using Tags
+
+1. Create tags in Settings > Tags section
+2. Enable "Show publish options modal"
+3. When publishing, select tags in the modal
+4. Tags help organize your content in Typefully
+
 ### Scheduling Content in Advance
 
 1. Enable "Auto scheduling"
@@ -48,6 +96,20 @@ What's your top productivity tip?
 3. Publish once, reach all audiences
 4. Customize per-platform in Typefully if needed
 
+### Viewing Your Queue
+
+1. Open the Typefully panel and click the Queue tab
+2. See upcoming slots for the next 7 days
+3. Click on a draft preview to view its details
+4. Identify available slots for new content
+
+### Editing Your Queue Schedule
+
+1. Open the Typefully panel and click the Schedule tab
+2. Toggle days on or off
+3. Add or remove time slots for each day
+4. Click "Save schedule" to apply changes
+
 ## Troubleshooting
 
 ### "Please configure your Typefully API key"
@@ -58,7 +120,7 @@ What's your top productivity tip?
 
 1. Get your API key from Typefully Settings > API & Integrations
 2. Enter it in Obsidian Settings > Typefully > API key
-3. Restart Obsidian if the error persists
+3. The plugin validates the key immediately - look for the green "Connected" status
 
 ### "Please enable at least one target platform in settings"
 
@@ -88,6 +150,12 @@ What's your top productivity tip?
 **Problem:** No note is currently open.
 
 **Solution:** Open a note in the editor before using the publish command.
+
+### "Please configure a Social Set ID in settings first"
+
+**Problem:** You're using the List Drafts or View Queue command without a configured Social Set.
+
+**Solution:** Go to settings, click "Load available sets", and select one.
 
 ### Draft Created But Not Visible in Typefully
 
@@ -120,6 +188,25 @@ What's your top productivity tip?
 2. Revoke the old key and create a new one
 3. Copy carefully (no extra spaces)
 4. Paste into plugin settings
+5. Check that the green "Connected" status appears
+
+### Images Not Uploading
+
+**Problem:** Images from your note are not attached to the published draft.
+
+**Possible causes:**
+
+- Image file not found in vault
+- Unsupported image format
+- No Social Set ID configured (required for media upload)
+- Image processing timed out
+
+**Solution:**
+
+1. Ensure the image file exists in your vault
+2. Check that the format is supported (PNG, JPEG, GIF, WebP, SVG, MP4, PDF)
+3. Configure a Social Set ID in settings
+4. Check the console for error messages (Ctrl/Cmd + Shift + I)
 
 ### Content Looks Different Than Expected
 
@@ -127,6 +214,7 @@ What's your top productivity tip?
 
 **Expected behavior:** The plugin removes:
 
+- Image embeds `![[image.png]]` and `![alt](path)`
 - Obsidian wiki links `[[link]]`
 - Markdown links `[text](url)`
 - Blockquotes `> text`

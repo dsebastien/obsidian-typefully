@@ -23,16 +23,20 @@ export class TypefullySettingTab extends PluginSettingTab {
         containerEl.empty()
         this.platformToggles.clear()
 
+        this.renderUserProfile(containerEl)
         this.renderApiKey(containerEl)
         this.renderSocialSetSection(containerEl)
         this.renderPlatformsSection(containerEl)
         this.renderPublishingOptions(containerEl)
+        this.renderTagsSection(containerEl)
         this.renderFollowButton(containerEl)
         this.renderSupportHeader(containerEl)
     }
 
     renderApiKey(containerEl: HTMLElement) {
-        new Setting(containerEl)
+        new Setting(containerEl).setName('Account').setHeading()
+
+        const apiKeySetting = new Setting(containerEl)
             .setName('Typefully API key')
             .setDesc('Your Typefully API key. Get it from Typefully Settings → API & Integrations.')
             .addText((text) => {
@@ -47,10 +51,54 @@ export class TypefullySettingTab extends PluginSettingTab {
                             }
                         )
                         await this.plugin.saveSettings()
+
+                        // Validate API key
+                        if (newValue) {
+                            void this.validateApiKey(apiKeySetting.settingEl)
+                        } else {
+                            this.clearApiKeyStatus(apiKeySetting.settingEl)
+                            this.plugin.cachedUser = null
+                        }
                     })
                 text.inputEl.type = 'password'
                 text.inputEl.addClass('typefully-api-key-input')
             })
+
+        // Show initial validation if key exists
+        if (this.plugin.settings.apiKey) {
+            void this.validateApiKey(apiKeySetting.settingEl)
+        }
+    }
+
+    private clearApiKeyStatus(settingEl: HTMLElement) {
+        const existing = settingEl.querySelector('.typefully-api-status')
+        if (existing) existing.remove()
+    }
+
+    private async validateApiKey(settingEl: HTMLElement) {
+        this.clearApiKeyStatus(settingEl)
+        const statusEl = settingEl.createSpan({ cls: 'typefully-api-status' })
+        statusEl.setText('Validating...')
+
+        const client = this.plugin.getApiClient()
+        if (!client) {
+            statusEl.setText('No API key')
+            statusEl.addClass('typefully-api-status-error')
+            return
+        }
+
+        try {
+            const user = await client.getMe()
+            this.plugin.cachedUser = user
+            statusEl.empty()
+            statusEl.addClass('typefully-api-status-ok')
+            statusEl.setText(`Connected as ${user.name}`)
+        } catch {
+            this.plugin.cachedUser = null
+            statusEl.empty()
+            statusEl.addClass('typefully-api-status-error')
+            statusEl.setText('Invalid API key')
+        }
     }
 
     renderSocialSetSection(containerEl: HTMLElement) {
@@ -320,6 +368,102 @@ export class TypefullySettingTab extends PluginSettingTab {
                         }
                     )
                     await this.plugin.saveSettings()
+                })
+            })
+    }
+
+    renderUserProfile(containerEl: HTMLElement) {
+        if (!this.plugin.cachedUser) return
+
+        const user = this.plugin.cachedUser
+        const profileEl = containerEl.createDiv({ cls: 'typefully-user-profile' })
+
+        if (user.profile_image_url) {
+            const img = profileEl.createEl('img', { cls: 'typefully-user-avatar' })
+            img.src = user.profile_image_url
+            img.alt = user.name
+        }
+
+        const info = profileEl.createDiv({ cls: 'typefully-user-info' })
+        info.createDiv({ cls: 'typefully-user-name', text: user.name })
+        info.createDiv({ cls: 'typefully-user-email', text: user.email })
+    }
+
+    renderTagsSection(containerEl: HTMLElement) {
+        new Setting(containerEl).setName('Tags').setHeading()
+
+        if (!this.plugin.settings.apiKey || !this.plugin.settings.socialSetId) {
+            containerEl.createEl('p', {
+                text: 'Configure your API key and Social Set ID to manage tags.',
+                cls: 'setting-item-description'
+            })
+            return
+        }
+
+        const tagsContainer = containerEl.createDiv({ cls: 'typefully-settings-tags' })
+        const loadingEl = containerEl.createEl('p', { text: 'Loading tags...' })
+
+        const client = this.plugin.getApiClient()
+        if (!client) return
+
+        void (async () => {
+            try {
+                const tags = await client.listTags(this.plugin.settings.socialSetId)
+                loadingEl.remove()
+
+                if (tags.length === 0) {
+                    tagsContainer.createEl('span', {
+                        text: 'No tags yet.',
+                        cls: 'setting-item-description'
+                    })
+                } else {
+                    for (const tag of tags) {
+                        const tagEl = tagsContainer.createSpan({
+                            text: tag.name,
+                            cls: 'typefully-settings-tag'
+                        })
+                        if (tag.color) {
+                            tagEl.setCssStyles({
+                                borderLeft: `3px solid ${tag.color}`,
+                                paddingLeft: '8px'
+                            })
+                        }
+                    }
+                }
+            } catch (error) {
+                loadingEl.setText('Failed to load tags.')
+                log('Failed to load tags in settings', 'warn', error)
+            }
+        })()
+
+        // Create tag input
+        let newTagName = ''
+        new Setting(containerEl)
+            .setName('Create new tag')
+            .addText((text) => {
+                text.setPlaceholder('Tag name')
+                text.onChange((value) => {
+                    newTagName = value
+                })
+            })
+            .addButton((button) => {
+                button.setButtonText('Create').onClick(() => {
+                    if (!newTagName.trim()) {
+                        new Notice('Please enter a tag name', NOTICE_TIMEOUT)
+                        return
+                    }
+                    void (async () => {
+                        try {
+                            await client.createTag(this.plugin.settings.socialSetId, {
+                                name: newTagName.trim()
+                            })
+                            new Notice(`Tag "${newTagName}" created`, NOTICE_TIMEOUT)
+                            this.display() // Refresh
+                        } catch (error) {
+                            log('Failed to create tag', 'error', error)
+                            new Notice('Failed to create tag', NOTICE_TIMEOUT)
+                        }
+                    })()
                 })
             })
     }

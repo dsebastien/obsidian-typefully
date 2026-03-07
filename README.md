@@ -1,35 +1,36 @@
-# Obsidian Typefully integration
+# Obsidian Typefully
 
-Obsidian plugin that integrates [Typefully](./images/demo.gif)
-
-![Demo of the Typefully plugin for obsidian](./images/demo.gif)
+An Obsidian plugin that integrates with [Typefully](https://typefully.com) to publish your notes as social media posts. Supports X (Twitter), LinkedIn, Threads, Bluesky, and Mastodon with full Typefully API v2 coverage.
 
 ## Features
 
-- Publish the current note
-- Publish the current selection
+- Dedicated Typefully panel in the right sidebar with Drafts, Queue, and Schedule tabs
+- Publish notes or selected text to multiple platforms simultaneously
+- Attach vault images to posts (auto-upload via presigned URLs)
+- Browse, view, edit, and delete Typefully drafts from the panel
+- Edit queue schedule directly from the panel
+- Schedule posts: immediately, next free slot, or specific date/time
+- Thread creation via Threadify (split on 4+ consecutive newlines)
+- Manage Typefully tags from within Obsidian
+- View queue schedule and upcoming slots
+- Optional publish modal for per-draft scheduling, notes, and X settings
+- Automatic Markdown cleaning (strips frontmatter, wiki links, blockquotes, image syntax)
+- Append note tags as hashtags
 
-## Limitations
+## Installation
 
-The Typefully API doesn't support images, Markdown, or HTML at this point (as far as I know). For this reason, I try to only send raw text over to the Typefully API.
+1. Open **Settings > Community Plugins** in Obsidian
+2. Search for "Typefully" and install
+3. Enter your API key from [Typefully Settings > API & Integrations](https://typefully.com/settings)
 
-For now, the plugin strips out:
+## Documentation
 
-- Obsidian links: `[[Some Link]]` becomes `Some Link`
-- Markdown links: `[Google](https://www.google.com)` becomes `Google`
-- Markdown quotes: `> Hey Jude` becomes `Hey Jude`
-- YAML front matter (note properties)
+See the [full documentation](docs/README.md) for usage guides, configuration reference, and tips.
 
-That list will probably need to get longer (e.g., to handle embeds, callouts, etc). Don't hesitate to file issues.
+## License
 
-## Configuration
+[MIT](LICENSE)
 
-- Typefully API Key: the API key to use. You can create one here: Settings > API & Integrations > API Keys
-- Enable Auto retweet: If enabled, the post will have an AutoRT enabled, according to the one set on Typefully for the account
-- Enable Auto plug: If enabled, the post will have an AutoPlug enabled, according to the one set on Typefully for the account
-- Enable Threadify: If enabled, content will be automatically split into multiple tweets
-- Enable Auto scheduling: If enabled, the post will be automatically scheduled in the next free slot
+## Author
 
-## News & support
-
-To stay up to date about this plugin, Obsidian in general, Personal Knowledge Management and note-taking, subscribe to [my newsletter](https://dsebastien.net). Note that the best way to support my work is to become a paid subscriber ❤️.
+[Sebastien Dubois](https://dsebastien.net) | [GitHub](https://github.com/dsebastien/obsidian-typefully) | [Issues](https://github.com/dsebastien/obsidian-typefully/issues) | [Support](https://www.buymeacoffee.com/dsebastien)

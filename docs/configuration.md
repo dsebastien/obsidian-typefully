@@ -4,11 +4,15 @@ All plugin settings are available in Obsidian Settings > Community Plugins > Typ
 
 ## Settings
 
-### Authentication
+### Account
 
 | Setting           | Type     | Default | Description                                                                                                   |
 | ----------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------- |
 | Typefully API key | password | `""`    | Your Typefully API key. Get it from Typefully Settings > API & Integrations. Required for the plugin to work. |
+
+When you enter your API key, the plugin validates it immediately by calling `GET /me`. A green status message confirms the connection, or a red message indicates an invalid key.
+
+Your user profile (name, email, avatar) is displayed at the top of the settings when authenticated.
 
 ### Social Set
 
@@ -38,13 +42,29 @@ All plugin settings are available in Obsidian Settings > Community Plugins > Typ
 
 ### Publishing Options
 
-| Setting                | Type   | Default | Description                                                                 |
-| ---------------------- | ------ | ------- | --------------------------------------------------------------------------- |
-| Enable Auto scheduling | toggle | `false` | Automatically schedule posts to the next free slot in your Typefully queue. |
-| Enable Threadify       | toggle | `false` | Split content into multiple posts at 4 consecutive newlines.                |
-| Append tags to posts   | toggle | `false` | Append note tags as hashtags at the end of posts.                           |
-| Enable Auto retweet    | toggle | `false` | Enable AutoRT according to your Typefully account settings.                 |
-| Enable Auto plug       | toggle | `false` | Enable AutoPlug according to your Typefully account settings.               |
+| Setting                    | Type   | Default | Description                                                                 |
+| -------------------------- | ------ | ------- | --------------------------------------------------------------------------- |
+| Show publish options modal | toggle | `false` | Show a modal before publishing to configure schedule, title, notes, etc.    |
+| Enable Auto scheduling     | toggle | `false` | Automatically schedule posts to the next free slot in your Typefully queue. |
+| Enable Threadify           | toggle | `false` | Split content into multiple posts at 4 consecutive newlines.                |
+| Append tags to posts       | toggle | `false` | Append note tags as hashtags at the end of posts.                           |
+| Enable Auto retweet        | toggle | `false` | Enable AutoRT according to your Typefully account settings.                 |
+| Enable Auto plug           | toggle | `false` | Enable AutoPlug according to your Typefully account settings.               |
+
+### Tags
+
+When your API key and Social Set ID are configured, this section shows:
+
+- All existing Typefully tags with color indicators
+- A text input and "Create" button to add new tags
+
+Tags can also be selected per-draft in the publish options modal.
+
+### Queue Schedule
+
+When configured, this section shows your current Typefully queue schedule (read-only).
+
+To edit the schedule, open the Typefully panel (Schedule tab) where you can toggle days, add/remove time slots, and save changes.
 
 ## Advanced Configuration
 

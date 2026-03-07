@@ -103,7 +103,7 @@ describe('publishTypefullyDraft', () => {
                 id: 456,
                 status: 'scheduled',
                 platforms: { x: { posts: [{}] } },
-                scheduled_date: '2024-01-15T10:00:00Z'
+                publish_at: '2024-01-15T10:00:00Z'
             }
         })
 

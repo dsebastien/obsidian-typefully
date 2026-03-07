@@ -5,6 +5,7 @@
 export interface TypefullyDraftContents {
     platforms: TypefullyPlatforms
     draft_title?: string
+    notes?: string
     tags?: string[]
     share?: boolean
     publish_at?: 'now' | 'next-free-slot' | (string & {})
