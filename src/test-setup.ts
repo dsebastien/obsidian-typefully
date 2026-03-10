@@ -2,6 +2,11 @@
  * Test setup file that mocks the 'obsidian' module.
  * The obsidian package is types-only and has no runtime code,
  * so we need to provide mock implementations for tests.
+ *
+ * IMPORTANT: Do NOT re-mock 'obsidian' in individual spec files via mock.module().
+ * Re-mocking replaces the entire module, which removes exports that other
+ * test files depend on (e.g. removing getAllTags breaks get-file-tags tests).
+ * Instead, import the mock functions from 'obsidian' and cast them as Mock<...>.
  */
 import { mock } from 'bun:test'
 
@@ -26,6 +31,6 @@ void mock.module('obsidian', () => ({
     SearchComponent: class SearchComponent {},
     debounce: (fn: (...args: unknown[]) => unknown) => fn,
     setIcon: () => {},
-    requestUrl: async () => ({ status: 200, json: {} }),
-    getAllTags: () => []
+    requestUrl: mock(async () => ({ status: 200, json: {} })),
+    getAllTags: mock(() => [] as string[] | null)
 }))

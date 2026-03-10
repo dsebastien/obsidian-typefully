@@ -1,14 +1,11 @@
-import { describe, expect, test, mock } from 'bun:test'
+import { describe, expect, test, beforeEach } from 'bun:test'
+import type { Mock } from 'bun:test'
 import { getFileTags } from './get-file-tags.fn'
+import { getAllTags } from 'obsidian'
 import type { App, TFile, CachedMetadata } from 'obsidian'
 
-// Mock getAllTags from obsidian
-const mockGetAllTags = mock(() => [] as string[])
-
-// We need to mock the obsidian module for this test
-void mock.module('obsidian', () => ({
-    getAllTags: mockGetAllTags
-}))
+// getAllTags is already mocked via the preloaded test-setup.ts
+const mockGetAllTags = getAllTags as unknown as Mock<() => string[] | null>
 
 describe('getFileTags', () => {
     const createMockApp = (fileCache: CachedMetadata | null): App => {
@@ -21,6 +18,10 @@ describe('getFileTags', () => {
 
     // eslint-disable-next-line obsidianmd/no-tfile-tfolder-cast
     const createMockFile = (path: string): TFile => ({ path }) as TFile
+
+    beforeEach(() => {
+        mockGetAllTags.mockClear()
+    })
 
     test('returns empty array when file is null', () => {
         const mockApp = createMockApp(null)

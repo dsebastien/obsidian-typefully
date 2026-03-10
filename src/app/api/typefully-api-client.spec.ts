@@ -1,12 +1,12 @@
-import { describe, expect, test, mock, beforeEach } from 'bun:test'
+import { describe, expect, test, beforeEach } from 'bun:test'
+import type { Mock } from 'bun:test'
+import { requestUrl } from 'obsidian'
+import { TypefullyApiClient } from './typefully-api-client'
 
-const mockRequestUrl = mock(async () => ({ status: 200, json: {} }))
-
-void mock.module('obsidian', () => ({
-    requestUrl: mockRequestUrl
-}))
-
-const { TypefullyApiClient } = await import('./typefully-api-client')
+// requestUrl is already mocked via the preloaded test-setup.ts
+const mockRequestUrl = requestUrl as unknown as Mock<
+    () => Promise<{ status: number; json: unknown }>
+>
 
 describe('TypefullyApiClient', () => {
     let client: InstanceType<typeof TypefullyApiClient>

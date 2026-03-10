@@ -1,21 +1,18 @@
-import { describe, expect, test, mock, beforeEach } from 'bun:test'
+import { describe, expect, test, beforeEach } from 'bun:test'
+import type { Mock } from 'bun:test'
+import { requestUrl } from 'obsidian'
 import {
     MSG_API_KEY_CONFIGURATION_REQUIRED,
     MSG_TYPEFULLY_FAILED_TO_PUBLISH,
     MSG_TYPEFULLY_FAILED_TO_PUBLISH_POSSIBLE_API_KEY_ISSUE
 } from '../constants'
 import type { TypefullyDraftContents } from '../types/typefully-draft-contents.intf'
+import { publishTypefullyDraft, fetchSocialSets } from './publish-typefully-draft.fn'
 
-// Mock requestUrl from obsidian
-const mockRequestUrl = mock(async () => ({ status: 200, json: {} }))
-
-// Mock the obsidian module
-void mock.module('obsidian', () => ({
-    requestUrl: mockRequestUrl
-}))
-
-// Import after mocking
-const { publishTypefullyDraft, fetchSocialSets } = await import('./publish-typefully-draft.fn')
+// requestUrl is already mocked via the preloaded test-setup.ts
+const mockRequestUrl = requestUrl as unknown as Mock<
+    () => Promise<{ status: number; json: unknown }>
+>
 
 describe('publishTypefullyDraft', () => {
     const validContent: TypefullyDraftContents = {
