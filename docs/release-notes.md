@@ -1,5 +1,13 @@
 # Release Notes
 
+## 3.1.0 (2026-03-10)
+
+### Features
+
+- **all:** enabled publishing while in reading view
+- **all:** improved UI
+- **all:** only show future in queue
+
 ## 3.0.0 (2026-03-07)
 
 ### Features

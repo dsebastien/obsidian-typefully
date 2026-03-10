@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0](https://github.com/dsebastien/obsidian-typefully/compare/3.0.0...3.1.0) (2026-03-10)
+
+### Features
+
+- **all:** enabled publishing while in reading view ([7f4670e](https://github.com/dsebastien/obsidian-typefully/commit/7f4670ed1c4e6ab22a1e3b8456a65158e77ec3d4)), closes [#10](https://github.com/dsebastien/obsidian-typefully/issues/10)
+- **all:** improved UI ([8cb99f6](https://github.com/dsebastien/obsidian-typefully/commit/8cb99f60bd5887869604be05968feff34c674d05))
+- **all:** only show future in queue ([995b931](https://github.com/dsebastien/obsidian-typefully/commit/995b9311cc634a59925aa44b5b0f96302ae1c8a0))
+
 ## [3.0.0](https://github.com/dsebastien/obsidian-typefully/compare/2.0.0...3.0.0) (2026-03-07)
 
 ### Features
