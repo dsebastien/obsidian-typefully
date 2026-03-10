@@ -35,9 +35,17 @@ function buildPlatforms(settings: PluginSettings, posts: string[]): TypefullyPla
         enabled.push('x')
     }
 
-    const config = { enabled: true, posts: posts.map((text) => ({ text })) }
+    const defaultConfig = { enabled: true, posts: posts.map((text) => ({ text })) }
     for (const platform of enabled) {
-        platforms[platform] = config
+        // LinkedIn only supports single posts, so merge thread posts into one
+        if (platform === 'linkedin' && posts.length > 1) {
+            platforms[platform] = {
+                enabled: true,
+                posts: [{ text: posts.join('\n\n') }]
+            }
+        } else {
+            platforms[platform] = defaultConfig
+        }
     }
 
     return platforms

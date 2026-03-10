@@ -104,7 +104,7 @@ export async function renderDraftEditPage(
                             enabled: checkbox.checked
                         }
                         if (checkbox.checked) {
-                            detail.posts = posts.map((text) => ({ text }))
+                            detail.posts = postsForPlatform(name)
                         }
                         await client.updateDraft(socialSetId, d.id, {
                             platforms: {
@@ -130,6 +130,14 @@ export async function renderDraftEditPage(
     threadGroup.createEl('label', { text: 'Thread', cls: 'typefully-field-label' })
     const threadContainer = threadGroup.createDiv({ cls: 'typefully-thread' })
 
+    function postsForPlatform(name: string): { text: string }[] {
+        // LinkedIn only supports single posts, so merge thread posts into one
+        if (name === 'linkedin' && posts.length > 1) {
+            return [{ text: posts.join('\n\n') }]
+        }
+        return posts.map((text) => ({ text }))
+    }
+
     function buildPayload() {
         if (platformEntries.length === 0) return
         const platforms: Record<string, { enabled: boolean; posts?: { text: string }[] }> = {}
@@ -137,7 +145,7 @@ export async function renderDraftEditPage(
             if (platformEnabled[name]) {
                 platforms[name] = {
                     enabled: true,
-                    posts: posts.map((text) => ({ text }))
+                    posts: postsForPlatform(name)
                 }
             } else {
                 platforms[name] = { enabled: false }

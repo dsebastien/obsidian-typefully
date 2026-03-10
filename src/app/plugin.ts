@@ -230,7 +230,18 @@ export class TypefullyPlugin extends Plugin {
             targetPlatforms.x = platformConfig
         }
         if (platforms.linkedin) {
-            targetPlatforms.linkedin = platformConfig
+            // LinkedIn only supports single posts, so merge thread posts into one
+            if (posts.length > 1) {
+                const mergedText = posts.map((p) => p.text).join('\n\n')
+                const mergedMediaIds = posts.flatMap((p) => p.media_ids ?? [])
+                const mergedPost: TypefullyPost = { text: mergedText }
+                if (mergedMediaIds.length > 0) {
+                    mergedPost.media_ids = mergedMediaIds
+                }
+                targetPlatforms.linkedin = { enabled: true, posts: [mergedPost] }
+            } else {
+                targetPlatforms.linkedin = platformConfig
+            }
         }
         if (platforms.threads) {
             targetPlatforms.threads = platformConfig
