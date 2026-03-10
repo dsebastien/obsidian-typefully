@@ -32,6 +32,12 @@ export const FRONT_MATTER_REGEX = /---[\S\s]*?---\n/
 export const MARKDOWN_LINK_REGEX = /\[(.*?)\]\(.*?\)/g
 
 /**
+ * Delay before refreshing drafts after publish/schedule/delete.
+ * Gives the Typefully API time to propagate the state change.
+ */
+export const DRAFT_ACTION_REFRESH_DELAY_MS = 1500
+
+/**
  * Media upload polling configuration
  */
 export const MEDIA_POLL_INITIAL_DELAY_MS = 200

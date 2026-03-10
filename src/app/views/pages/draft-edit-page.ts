@@ -7,7 +7,7 @@ import type {
     TypefullyDraftPlatformDetail
 } from '../../types/typefully-api.intf'
 import { ConfirmModal } from '../../modals/confirm-modal'
-import { NOTICE_TIMEOUT } from '../../constants'
+import { NOTICE_TIMEOUT, DRAFT_ACTION_REFRESH_DELAY_MS } from '../../constants'
 import { log } from '../../../utils/log'
 import type { ViewPage } from '../typefully-view-state'
 import { parseISO, formatISO } from 'date-fns'
@@ -246,7 +246,10 @@ export async function renderDraftEditPage(
                     buildPayload()
                     await client.updateDraft(socialSetId, d.id, { ...payload, publish_at: 'now' })
                     new Notice('Draft published', NOTICE_TIMEOUT)
-                    setPage({ type: 'drafts-list' })
+                    setTimeout(
+                        () => setPage({ type: 'drafts-list' }),
+                        DRAFT_ACTION_REFRESH_DELAY_MS
+                    )
                 } catch (error) {
                     log('Failed to publish draft', 'error', error)
                     new Notice('Failed to publish draft', NOTICE_TIMEOUT)
@@ -265,7 +268,10 @@ export async function renderDraftEditPage(
                         publish_at: 'next-free-slot'
                     })
                     new Notice('Draft scheduled for next free slot', NOTICE_TIMEOUT)
-                    setPage({ type: 'drafts-list' })
+                    setTimeout(
+                        () => setPage({ type: 'drafts-list' }),
+                        DRAFT_ACTION_REFRESH_DELAY_MS
+                    )
                 } catch (error) {
                     log('Failed to schedule draft', 'error', error)
                     new Notice('Failed to schedule draft', NOTICE_TIMEOUT)

@@ -8,7 +8,7 @@ import type {
     TypefullyDraftListParams
 } from '../../types/typefully-api.intf'
 import { ConfirmModal } from '../../modals/confirm-modal'
-import { NOTICE_TIMEOUT } from '../../constants'
+import { NOTICE_TIMEOUT, DRAFT_ACTION_REFRESH_DELAY_MS } from '../../constants'
 import { log } from '../../../utils/log'
 import type { ViewPage } from '../typefully-view-state'
 import { format, parseISO } from 'date-fns'
@@ -90,7 +90,7 @@ function renderDraftItem(
                             new Notice('Draft published', NOTICE_TIMEOUT)
                             state.drafts = []
                             state.offset = 0
-                            loadDrafts()
+                            setTimeout(() => loadDrafts(), DRAFT_ACTION_REFRESH_DELAY_MS)
                         } catch (error) {
                             log('Failed to publish draft', 'error', error)
                             new Notice('Failed to publish draft', NOTICE_TIMEOUT)
@@ -111,7 +111,7 @@ function renderDraftItem(
                     new Notice('Draft scheduled for next free slot', NOTICE_TIMEOUT)
                     state.drafts = []
                     state.offset = 0
-                    loadDrafts()
+                    setTimeout(() => loadDrafts(), DRAFT_ACTION_REFRESH_DELAY_MS)
                 } catch (error) {
                     log('Failed to schedule draft', 'error', error)
                     new Notice('Failed to schedule draft', NOTICE_TIMEOUT)
@@ -132,7 +132,7 @@ function renderDraftItem(
                             new Notice('Draft deleted', NOTICE_TIMEOUT)
                             state.drafts = []
                             state.offset = 0
-                            loadDrafts()
+                            setTimeout(() => loadDrafts(), DRAFT_ACTION_REFRESH_DELAY_MS)
                         } catch (error) {
                             log('Failed to delete draft', 'error', error)
                             new Notice('Failed to delete draft', NOTICE_TIMEOUT)

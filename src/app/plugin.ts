@@ -8,6 +8,7 @@ import { produce } from 'immer'
 import type { Draft } from 'immer'
 import {
     DEFAULT_CANVAS_FILE_NAME,
+    DRAFT_ACTION_REFRESH_DELAY_MS,
     MARKDOWN_FILE_EXTENSION,
     MSG_API_KEY_CONFIGURATION_REQUIRED,
     NOTICE_TIMEOUT
@@ -269,7 +270,7 @@ export class TypefullyPlugin extends Plugin {
             const msg = `Typefully draft created for: ${enabledPlatformNames}`
             log(msg, 'debug', result)
             new Notice(msg, NOTICE_TIMEOUT)
-            this.refreshView()
+            setTimeout(() => this.refreshView(), DRAFT_ACTION_REFRESH_DELAY_MS)
         } else {
             log('Failed to publish Typefully draft', 'debug', result)
             if (result.errorDetails) {
