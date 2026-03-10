@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.2](https://github.com/dsebastien/obsidian-typefully/compare/3.1.1...3.1.2) (2026-03-10)
+
+### Bug Fixes
+
+- **all:** added a bit of delay for refresh after publishing/scheduling ([41f42e9](https://github.com/dsebastien/obsidian-typefully/commit/41f42e9c1b59eb1f46e6c3f5808f54c615f0eae4))
+
 ## [3.1.1](https://github.com/dsebastien/obsidian-typefully/compare/3.1.0...3.1.1) (2026-03-10)
 
 ### Bug Fixes

@@ -1,5 +1,11 @@
 # Release Notes
 
+## 3.1.2 (2026-03-10)
+
+### Bug Fixes
+
+- **all:** added a bit of delay for refresh after publishing/scheduling
+
 ## 3.1.1 (2026-03-10)
 
 ### Bug Fixes
