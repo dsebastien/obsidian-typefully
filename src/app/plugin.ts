@@ -69,9 +69,9 @@ export class TypefullyPlugin extends Plugin {
         this.addCommand({
             id: 'publish-note',
             name: 'Publish the current note',
-            editorCallback: async (_editor, view) => {
+            callback: async () => {
                 log('Publishing the current note to Typefully', 'debug')
-                const currentFile = view.file
+                const currentFile = this.app.workspace.getActiveFile()
 
                 if (!currentFile) {
                     new Notice('Please open a note before calling this command', NOTICE_TIMEOUT)

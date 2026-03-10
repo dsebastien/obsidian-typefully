@@ -10,15 +10,15 @@
 
 ## Commands
 
-| Command                       | Description                                                               |
-| ----------------------------- | ------------------------------------------------------------------------- |
-| Open Typefully panel          | Opens or reveals the Typefully panel in the right sidebar                 |
-| Publish the current note      | Creates a Typefully draft from the entire note content                    |
-| Publish the current selection | Creates a Typefully draft from selected text (command palette or context) |
-| List drafts                   | Opens the Typefully panel to the Drafts tab                               |
-| View queue                    | Opens the Typefully panel to the Queue tab                                |
-| View queue schedule           | Opens the Typefully panel to the Schedule tab                             |
-| Refresh drafts                | Re-fetches and re-renders the drafts list if the panel is open            |
+| Command                       | Description                                                                                     |
+| ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| Open Typefully panel          | Opens or reveals the Typefully panel in the right sidebar                                       |
+| Publish the current note      | Creates a Typefully draft from the entire note content (works in both reading and editing view) |
+| Publish the current selection | Creates a Typefully draft from selected text (editing/source view only)                         |
+| List drafts                   | Opens the Typefully panel to the Drafts tab                                                     |
+| View queue                    | Opens the Typefully panel to the Queue tab                                                      |
+| View queue schedule           | Opens the Typefully panel to the Schedule tab                                                   |
+| Refresh drafts                | Re-fetches and re-renders the drafts list if the panel is open                                  |
 
 ### Using Commands
 
@@ -29,7 +29,9 @@
 3. Search for "Typefully"
 4. Select the desired command
 
-**Context Menu:**
+The "Publish the current note" command works in both **reading view** and **editing/source view**. The "Publish the current selection" command requires editing/source view since it needs an active editor to read the selection.
+
+**Context Menu (editing/source view only):**
 
 1. Select text in your note (or right-click anywhere for the full note)
 2. Right-click to open the context menu
