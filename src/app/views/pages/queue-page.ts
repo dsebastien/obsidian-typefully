@@ -5,7 +5,7 @@ import type { TypefullyQueueDay } from '../../types/typefully-api.intf'
 import { NOTICE_TIMEOUT } from '../../constants'
 import { log } from '../../../utils/log'
 import type { ViewPage } from '../typefully-view-state'
-import { format, parseISO, addDays } from 'date-fns'
+import { format, parseISO, addDays, isPast } from 'date-fns'
 
 function renderDay(
     container: HTMLElement,
@@ -17,7 +17,9 @@ function renderDay(
     const dateStr = format(parseISO(day.date), 'EEEE, MMM d')
     dayEl.createDiv({ cls: 'typefully-queue-day-header', text: dateStr })
 
-    if (!day.items || day.items.length === 0) {
+    const futureItems = (day.items || []).filter((item) => !isPast(parseISO(item.at)))
+
+    if (futureItems.length === 0) {
         dayEl.createDiv({
             cls: 'typefully-queue-slot',
             text: 'No slots'
@@ -25,7 +27,7 @@ function renderDay(
         return
     }
 
-    for (const item of day.items) {
+    for (const item of futureItems) {
         const slotEl = dayEl.createDiv({ cls: 'typefully-queue-slot' })
 
         const time = format(parseISO(item.at), 'HH:mm')
