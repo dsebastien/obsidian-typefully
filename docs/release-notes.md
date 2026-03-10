@@ -1,5 +1,11 @@
 # Release Notes
 
+## 3.1.1 (2026-03-10)
+
+### Bug Fixes
+
+- **all:** fixed bug with linkedin. Posts are now merged into a single one for LI
+
 ## 3.1.0 (2026-03-10)
 
 ### Features

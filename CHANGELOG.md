@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.1](https://github.com/dsebastien/obsidian-typefully/compare/3.1.0...3.1.1) (2026-03-10)
+
+### Bug Fixes
+
+- **all:** fixed bug with linkedin. Posts are now merged into a single one for LI ([5af64f7](https://github.com/dsebastien/obsidian-typefully/commit/5af64f78ce7b476d8b23538f7ea7f98c0805c448))
+
 ## [3.1.0](https://github.com/dsebastien/obsidian-typefully/compare/3.0.0...3.1.0) (2026-03-10)
 
 ### Features
