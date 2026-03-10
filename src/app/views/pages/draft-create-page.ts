@@ -9,7 +9,7 @@ import type { PluginSettings, PlatformSettings } from '../../types/plugin-settin
 import { NOTICE_TIMEOUT } from '../../constants'
 import { log } from '../../../utils/log'
 import type { ViewPage } from '../typefully-view-state'
-import { parseISO, formatISO } from 'date-fns'
+import { formatISO } from 'date-fns'
 import { renderCalendarPicker } from '../calendar-picker'
 
 const CHAR_LIMIT = 280
@@ -113,51 +113,49 @@ export function renderDraftCreatePage(
 
     renderThread()
 
-    // Schedule
-    const scheduleGroup = container.createDiv({ cls: 'typefully-field-group' })
-    scheduleGroup.createEl('label', { text: 'Schedule', cls: 'typefully-field-label' })
-    const scheduleBtns = scheduleGroup.createDiv({ cls: 'typefully-schedule-buttons' })
+    // Schedule – when coming from the Queue (scheduledAt is set), hide scheduling
+    // options since the time slot is already chosen
+    if (!scheduledAt) {
+        const scheduleGroup = container.createDiv({ cls: 'typefully-field-group' })
+        scheduleGroup.createEl('label', { text: 'Schedule', cls: 'typefully-field-label' })
+        const scheduleBtns = scheduleGroup.createDiv({ cls: 'typefully-schedule-buttons' })
 
-    const nowBtn = scheduleBtns.createEl('button', { text: 'Publish now', cls: 'mod-cta' })
-    const slotBtn = scheduleBtns.createEl('button', { text: 'Next free slot' })
-    const atBtn = scheduleBtns.createEl('button', { text: 'Schedule at...' })
+        const nowBtn = scheduleBtns.createEl('button', { text: 'Publish now', cls: 'mod-cta' })
+        const slotBtn = scheduleBtns.createEl('button', { text: 'Next free slot' })
+        const atBtn = scheduleBtns.createEl('button', { text: 'Schedule at...' })
 
-    const datetimeRow = scheduleGroup.createDiv({
-        cls: 'typefully-schedule-datetime typefully-hidden'
-    })
-    const initialDate = scheduledAt ? parseISO(scheduledAt) : null
-    renderCalendarPicker(datetimeRow, initialDate, (date) => {
-        publishAt = formatISO(date)
-        setActiveSchedule(atBtn)
-    })
-    if (scheduledAt) {
-        atBtn.addClass('typefully-schedule-btn-active')
-        datetimeRow.removeClass('typefully-hidden')
+        const datetimeRow = scheduleGroup.createDiv({
+            cls: 'typefully-schedule-datetime typefully-hidden'
+        })
+        renderCalendarPicker(datetimeRow, null, (date) => {
+            publishAt = formatISO(date)
+            setActiveSchedule(atBtn)
+        })
+
+        function setActiveSchedule(active: HTMLElement) {
+            nowBtn.removeClass('typefully-schedule-btn-active')
+            slotBtn.removeClass('typefully-schedule-btn-active')
+            atBtn.removeClass('typefully-schedule-btn-active')
+            active.addClass('typefully-schedule-btn-active')
+        }
+
+        nowBtn.addEventListener('click', () => {
+            publishAt = 'now'
+            datetimeRow.addClass('typefully-hidden')
+            setActiveSchedule(nowBtn)
+        })
+
+        slotBtn.addEventListener('click', () => {
+            publishAt = 'next-free-slot'
+            datetimeRow.addClass('typefully-hidden')
+            setActiveSchedule(slotBtn)
+        })
+
+        atBtn.addEventListener('click', () => {
+            datetimeRow.removeClass('typefully-hidden')
+            setActiveSchedule(atBtn)
+        })
     }
-
-    function setActiveSchedule(active: HTMLElement) {
-        nowBtn.removeClass('typefully-schedule-btn-active')
-        slotBtn.removeClass('typefully-schedule-btn-active')
-        atBtn.removeClass('typefully-schedule-btn-active')
-        active.addClass('typefully-schedule-btn-active')
-    }
-
-    nowBtn.addEventListener('click', () => {
-        publishAt = 'now'
-        datetimeRow.addClass('typefully-hidden')
-        setActiveSchedule(nowBtn)
-    })
-
-    slotBtn.addEventListener('click', () => {
-        publishAt = 'next-free-slot'
-        datetimeRow.addClass('typefully-hidden')
-        setActiveSchedule(slotBtn)
-    })
-
-    atBtn.addEventListener('click', () => {
-        datetimeRow.removeClass('typefully-hidden')
-        setActiveSchedule(atBtn)
-    })
 
     // Actions
     const actionsEl = container.createDiv({ cls: 'typefully-view-actions' })
@@ -165,7 +163,9 @@ export function renderDraftCreatePage(
     const cancelBtn = actionsEl.createEl('button', { text: 'Cancel' })
     cancelBtn.addEventListener('click', () => goBack())
 
-    const createBtn = actionsEl.createEl('button', { text: 'Create Draft', cls: 'mod-cta' })
+    const createBtnText = scheduledAt ? 'Schedule' : 'Create Draft'
+    const loadingText = scheduledAt ? 'Scheduling...' : 'Creating...'
+    const createBtn = actionsEl.createEl('button', { text: createBtnText, cls: 'mod-cta' })
     createBtn.addEventListener('click', () => {
         if (!posts.some((p) => p.trim())) {
             new Notice('Post text cannot be empty', NOTICE_TIMEOUT)
@@ -175,7 +175,7 @@ export function renderDraftCreatePage(
         void (async () => {
             try {
                 createBtn.disabled = true
-                createBtn.setText('Creating...')
+                createBtn.setText(loadingText)
 
                 const content: TypefullyDraftContents = {
                     platforms: buildPlatforms(settings, posts)
@@ -192,7 +192,7 @@ export function renderDraftCreatePage(
                 log('Failed to create draft', 'error', error)
                 new Notice(msg, NOTICE_TIMEOUT)
                 createBtn.disabled = false
-                createBtn.setText('Create Draft')
+                createBtn.setText(createBtnText)
             }
         })()
     })
