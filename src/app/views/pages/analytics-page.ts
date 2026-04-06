@@ -3,16 +3,33 @@ import type { TypefullyApiClient } from '../../api/typefully-api-client'
 import type { TypefullyAnalyticsPost } from '../../types/typefully-api.intf'
 import { NOTICE_TIMEOUT } from '../../constants'
 import { log } from '../../../utils/log'
-import { format, subDays } from 'date-fns'
+import { addDays, differenceInDays, format, parseISO, subDays } from 'date-fns'
 
 const ANALYTICS_PAGE_SIZE = 100
 const TOP_POSTS_COUNT = 10
 const PLATFORM = 'x'
+const MAX_API_RANGE_DAYS = 365
+
+interface DateRangePreset {
+    label: string
+    days: number | null // null = all time
+}
+
+const DATE_RANGE_PRESETS: DateRangePreset[] = [
+    { label: 'Last 30 days', days: 30 },
+    { label: 'Last 90 days', days: 90 },
+    { label: 'Last 6 months', days: 180 },
+    { label: 'Last year', days: 365 },
+    { label: 'All time', days: null }
+]
+
+const DEFAULT_PRESET_INDEX = 0 // Last 30 days
 
 interface AnalyticsState {
     posts: TypefullyAnalyticsPost[]
     startDate: string
     endDate: string
+    activePresetIndex: number
     loading: boolean
     sortField: 'impressions' | 'created_at'
     sortDesc: boolean
@@ -27,6 +44,40 @@ const ENGAGEMENT_KEYS = [
     { key: 'profile_clicks', label: 'Profile clicks', color: 'var(--color-purple)' },
     { key: 'link_clicks', label: 'Link clicks', color: 'var(--color-cyan)' }
 ] as const
+
+function splitDateRange(
+    startDate: string,
+    endDate: string
+): { startDate: string; endDate: string }[] {
+    const start = parseISO(startDate)
+    const end = parseISO(endDate)
+    const totalDays = differenceInDays(end, start)
+
+    if (totalDays <= MAX_API_RANGE_DAYS) {
+        return [{ startDate, endDate }]
+    }
+
+    const chunks: { startDate: string; endDate: string }[] = []
+    let chunkStart = start
+    while (differenceInDays(end, chunkStart) > MAX_API_RANGE_DAYS) {
+        const chunkEnd = addDays(chunkStart, MAX_API_RANGE_DAYS)
+        chunks.push({
+            startDate: format(chunkStart, 'yyyy-MM-dd'),
+            endDate: format(chunkEnd, 'yyyy-MM-dd')
+        })
+        chunkStart = addDays(chunkEnd, 1)
+    }
+    chunks.push({ startDate: format(chunkStart, 'yyyy-MM-dd'), endDate: format(end, 'yyyy-MM-dd') })
+    return chunks
+}
+
+function datesFromPreset(preset: DateRangePreset): { startDate: string; endDate: string } {
+    const today = new Date()
+    const endDate = format(today, 'yyyy-MM-dd')
+    const startDate =
+        preset.days !== null ? format(subDays(today, preset.days), 'yyyy-MM-dd') : '2020-01-01'
+    return { startDate, endDate }
+}
 
 function computeTotals(posts: TypefullyAnalyticsPost[]) {
     let impressions = 0
@@ -245,43 +296,42 @@ export function renderAnalyticsPage(
     client: TypefullyApiClient,
     socialSetId: string
 ) {
-    const today = new Date()
-    const thirtyDaysAgo = subDays(today, 30)
+    const defaultPreset = DATE_RANGE_PRESETS[DEFAULT_PRESET_INDEX]!
+    const defaultDates = datesFromPreset(defaultPreset)
 
     const state: AnalyticsState = {
         posts: [],
-        startDate: format(thirtyDaysAgo, 'yyyy-MM-dd'),
-        endDate: format(today, 'yyyy-MM-dd'),
+        startDate: defaultDates.startDate,
+        endDate: defaultDates.endDate,
+        activePresetIndex: DEFAULT_PRESET_INDEX,
         loading: false,
         sortField: 'impressions',
         sortDesc: true
     }
 
-    // Date range picker
+    // Date range preset buttons
     const filters = container.createDiv({ cls: 'typefully-analytics-filters' })
+    const presetButtons: HTMLButtonElement[] = []
 
-    const startLabel = filters.createEl('label', { text: 'From ' })
-    const startInput = startLabel.createEl('input', { type: 'date' })
-    startInput.value = state.startDate
-    startInput.addEventListener('change', () => {
-        state.startDate = startInput.value
-    })
-
-    const endLabel = filters.createEl('label', { text: ' To ' })
-    const endInput = endLabel.createEl('input', { type: 'date' })
-    endInput.value = state.endDate
-    endInput.addEventListener('change', () => {
-        state.endDate = endInput.value
-    })
-
-    const loadBtn = filters.createEl('button', {
-        text: 'Load',
-        cls: 'mod-cta'
-    })
-    loadBtn.addEventListener('click', () => {
-        state.posts = []
-        void loadAllPosts()
-    })
+    for (let i = 0; i < DATE_RANGE_PRESETS.length; i++) {
+        const preset = DATE_RANGE_PRESETS[i]!
+        const btn = filters.createEl('button', {
+            text: preset.label,
+            cls: `typefully-analytics-range-btn${i === state.activePresetIndex ? ' typefully-analytics-range-active' : ''}`
+        })
+        btn.addEventListener('click', () => {
+            const dates = datesFromPreset(preset)
+            state.startDate = dates.startDate
+            state.endDate = dates.endDate
+            state.activePresetIndex = i
+            for (let j = 0; j < presetButtons.length; j++) {
+                presetButtons[j]!.toggleClass('typefully-analytics-range-active', j === i)
+            }
+            state.posts = []
+            void loadAllPosts()
+        })
+        presetButtons.push(btn)
+    }
 
     // Note about platform limitation
     filters.createEl('span', {
@@ -292,39 +342,51 @@ export function renderAnalyticsPage(
     // Results container
     const resultsEl = container.createDiv()
 
+    let currentLoadId = 0
+
     void loadAllPosts()
 
     async function loadAllPosts() {
-        if (state.loading) return
+        const loadId = ++currentLoadId
         state.loading = true
         state.posts = []
         renderResults()
 
         try {
-            let offset = 0
-            let hasMore = true
+            const chunks = splitDateRange(state.startDate, state.endDate)
 
-            while (hasMore) {
-                const response = await client.listAnalyticsPosts(socialSetId, PLATFORM, {
-                    start_date: state.startDate,
-                    end_date: state.endDate,
-                    limit: ANALYTICS_PAGE_SIZE,
-                    offset
-                })
+            for (const chunk of chunks) {
+                let offset = 0
+                let hasMore = true
 
-                state.posts.push(...response.results)
-                hasMore = response.next !== null
-                offset += ANALYTICS_PAGE_SIZE
+                while (hasMore) {
+                    const response = await client.listAnalyticsPosts(socialSetId, PLATFORM, {
+                        start_date: chunk.startDate,
+                        end_date: chunk.endDate,
+                        limit: ANALYTICS_PAGE_SIZE,
+                        offset
+                    })
 
-                // Render incrementally so the user sees progress
-                renderResults()
+                    // A newer load was started — discard these results
+                    if (loadId !== currentLoadId) return
+
+                    state.posts.push(...response.results)
+                    hasMore = response.next !== null
+                    offset += ANALYTICS_PAGE_SIZE
+
+                    // Render incrementally so the user sees progress
+                    renderResults()
+                }
             }
         } catch (error) {
+            if (loadId !== currentLoadId) return
             log('Failed to load analytics', 'error', error)
             new Notice('Failed to load analytics', NOTICE_TIMEOUT)
         } finally {
-            state.loading = false
-            renderResults()
+            if (loadId === currentLoadId) {
+                state.loading = false
+                renderResults()
+            }
         }
     }
 

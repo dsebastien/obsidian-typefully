@@ -4,22 +4,23 @@ This document lists the Typefully API v2 endpoints and their support status in t
 
 ## Supported Endpoints
 
-| Endpoint                             | Method | Description                   | Status            |
-| ------------------------------------ | ------ | ----------------------------- | ----------------- |
-| `/me`                                | GET    | Get current user info         | Supported         |
-| `/social-sets`                       | GET    | List social sets (accounts)   | Supported         |
-| `/social-sets/{id}/drafts`           | GET    | List drafts with filters      | Supported         |
-| `/social-sets/{id}/drafts`           | POST   | Create a new draft            | Supported         |
-| `/social-sets/{id}/drafts/{draftId}` | GET    | Get draft details             | Supported         |
-| `/social-sets/{id}/drafts/{draftId}` | PATCH  | Update a draft                | Supported         |
-| `/social-sets/{id}/drafts/{draftId}` | DELETE | Delete a draft                | Supported         |
-| `/social-sets/{id}/media/upload`     | POST   | Request presigned upload URL  | Supported         |
-| `/social-sets/{id}/media/{mediaId}`  | GET    | Check media processing status | Supported         |
-| `/social-sets/{id}/tags`             | GET    | List tags                     | Supported         |
-| `/social-sets/{id}/tags`             | POST   | Create a tag                  | Supported         |
-| `/social-sets/{id}/queue`            | GET    | Get queue (scheduled slots)   | Supported         |
-| `/social-sets/{id}/queue/schedule`   | GET    | Get queue schedule rules      | Supported         |
-| `/social-sets/{id}/queue/schedule`   | PUT    | Update queue schedule rules   | Supported (panel) |
+| Endpoint                                       | Method | Description                   | Status            |
+| ---------------------------------------------- | ------ | ----------------------------- | ----------------- |
+| `/me`                                          | GET    | Get current user info         | Supported         |
+| `/social-sets`                                 | GET    | List social sets (accounts)   | Supported         |
+| `/social-sets/{id}/drafts`                     | GET    | List drafts with filters      | Supported         |
+| `/social-sets/{id}/drafts`                     | POST   | Create a new draft            | Supported         |
+| `/social-sets/{id}/drafts/{draftId}`           | GET    | Get draft details             | Supported         |
+| `/social-sets/{id}/drafts/{draftId}`           | PATCH  | Update a draft                | Supported         |
+| `/social-sets/{id}/drafts/{draftId}`           | DELETE | Delete a draft                | Supported         |
+| `/social-sets/{id}/media/upload`               | POST   | Request presigned upload URL  | Supported         |
+| `/social-sets/{id}/media/{mediaId}`            | GET    | Check media processing status | Supported         |
+| `/social-sets/{id}/tags`                       | GET    | List tags                     | Supported         |
+| `/social-sets/{id}/tags`                       | POST   | Create a tag                  | Supported         |
+| `/social-sets/{id}/queue`                      | GET    | Get queue (scheduled slots)   | Supported         |
+| `/social-sets/{id}/queue/schedule`             | GET    | Get queue schedule rules      | Supported         |
+| `/social-sets/{id}/queue/schedule`             | PUT    | Update queue schedule rules   | Supported (panel) |
+| `/social-sets/{id}/analytics/{platform}/posts` | GET    | List post analytics           | Supported (panel) |
 
 ## Draft Features
 

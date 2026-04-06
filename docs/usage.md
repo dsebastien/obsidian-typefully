@@ -53,11 +53,12 @@ Enable/disable platforms individually or use "Enable all platforms" for convenie
 
 ### Typefully Panel
 
-The Typefully panel opens in the right sidebar and persists alongside your notes. It has three tabs:
+The Typefully panel opens in the right sidebar and persists alongside your notes. It has four tabs:
 
 - **Drafts**: Browse, filter, sort, view, edit, and delete your Typefully drafts
 - **Queue**: View upcoming scheduled slots for the next 7 days, click drafts to see details
 - **Schedule**: Edit your queue schedule (toggle days, add/remove time slots, save changes)
+- **Analytics**: View post performance metrics for X (Twitter)
 
 Open the panel via the ribbon icon, the "Open Typefully panel" command, or any of the draft/queue commands.
 
@@ -104,6 +105,18 @@ Open the Typefully panel (Queue tab) to see your upcoming schedule:
 - Shows scheduled slots for the next 7 days
 - Each slot shows either a draft preview or "Available"
 - Click a draft preview to view its full details
+
+### Analytics
+
+Open the Typefully panel (Analytics tab) to view performance metrics for your X (Twitter) posts:
+
+- **Date range presets**: Choose from Last 30 days, Last 90 days, Last 6 months, Last year, or All time
+- **Summary cards**: Total impressions, engagement, and post count
+- **Top posts chart**: Bar chart of your top 10 posts by impressions
+- **Engagement breakdown**: Stacked bar showing likes, comments, shares, quotes, saves, profile clicks, and link clicks
+- **Posts table**: Sortable list of all posts with detailed metrics (sort by impressions or date)
+
+Data loads automatically when you select a date range. The default view shows the last 30 days.
 
 ### Threadify (Thread Creation)
 
