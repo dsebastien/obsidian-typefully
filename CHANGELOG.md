@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.0](https://github.com/dsebastien/obsidian-typefully/compare/3.1.2...3.2.0) (2026-04-06)
+
+### Features
+
+- **all:** added support for analytics ([ec3a93b](https://github.com/dsebastien/obsidian-typefully/commit/ec3a93bb4b4082226ab54e75823fc34ca094c590))
+- **all:** improved analytics ui ([efebaf4](https://github.com/dsebastien/obsidian-typefully/commit/efebaf454df3fcc7a48d8623037ad83ad35b4981))
+- **all:** updated deps ([646dd93](https://github.com/dsebastien/obsidian-typefully/commit/646dd937cdcc3a232850fd22f9adf3f91d00bf8b))
+- **all:** updated workflows ([0cde850](https://github.com/dsebastien/obsidian-typefully/commit/0cde850284f75889ce472e206b5a7aede1e81a76))
+
+### Bug Fixes
+
+- **all:** fix flaky tests ([462a5ce](https://github.com/dsebastien/obsidian-typefully/commit/462a5cea256309559fb504ab28e2cf85347d83e2))
+
 ## [3.1.2](https://github.com/dsebastien/obsidian-typefully/compare/3.1.1...3.1.2) (2026-03-10)
 
 ### Bug Fixes

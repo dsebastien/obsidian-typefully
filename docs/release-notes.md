@@ -1,5 +1,18 @@
 # Release Notes
 
+## 3.2.0 (2026-04-06)
+
+### Features
+
+- **all:** added support for analytics
+- **all:** improved analytics ui
+- **all:** updated deps
+- **all:** updated workflows
+
+### Bug Fixes
+
+- **all:** fix flaky tests
+
 ## 3.1.2 (2026-03-10)
 
 ### Bug Fixes
