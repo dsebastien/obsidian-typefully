@@ -744,6 +744,258 @@
     font-size: 0.9em;
 }
 
+/* ─── Analytics ───────────────────────────────────────────────────────────── */
+
+.typefully-analytics-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.typefully-analytics-filters label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85em;
+    color: var(--text-muted);
+}
+
+.typefully-analytics-filters input[type='date'] {
+    padding: 4px 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 0.85em;
+}
+
+.typefully-analytics-platform-note {
+    font-size: 0.8em;
+    color: var(--text-faint);
+    font-style: italic;
+    margin-left: auto;
+}
+
+.typefully-analytics-loading {
+    color: var(--text-faint);
+    text-align: center;
+    padding: 16px;
+    font-style: italic;
+}
+
+/* Summary cards */
+.typefully-analytics-summary {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.typefully-analytics-card {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--background-secondary);
+    text-align: center;
+}
+
+.typefully-analytics-card-value {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--text-normal);
+    line-height: 1.2;
+}
+
+.typefully-analytics-card-label {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Charts */
+.typefully-analytics-chart {
+    margin-bottom: 20px;
+}
+
+.typefully-analytics-chart h3 {
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+/* Top posts bar chart */
+.typefully-analytics-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.typefully-analytics-bar-label {
+    flex: 0 0 180px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.82em;
+}
+
+.typefully-analytics-bar-label a {
+    color: var(--text-normal);
+    text-decoration: none;
+}
+
+.typefully-analytics-bar-label a:hover {
+    color: var(--interactive-accent);
+}
+
+.typefully-analytics-bar-container {
+    flex: 1;
+    min-width: 0;
+    height: 18px;
+    background: var(--background-modifier-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.typefully-analytics-bar {
+    height: 100%;
+    background: var(--interactive-accent);
+    border-radius: 4px;
+    min-width: 2px;
+    transition: width 0.3s ease;
+}
+
+.typefully-analytics-bar-value {
+    flex: 0 0 50px;
+    text-align: right;
+    font-size: 0.8em;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Engagement stacked bar */
+.typefully-analytics-stacked-bar {
+    display: flex;
+    height: 28px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.typefully-analytics-stacked-segment {
+    height: 100%;
+    min-width: 2px;
+    transition: width 0.3s ease;
+}
+
+/* Legend */
+.typefully-analytics-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.typefully-analytics-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8em;
+    color: var(--text-muted);
+}
+
+.typefully-analytics-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* Posts table */
+.typefully-analytics-table-section {
+    margin-top: 16px;
+}
+
+.typefully-analytics-table-section h3 {
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.typefully-analytics-sort-controls {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.typefully-analytics-sort-btn {
+    padding: 3px 10px;
+    border: 1px solid var(--background-modifier-border);
+    background: transparent;
+    border-radius: 4px;
+    font-size: 0.8em;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.typefully-analytics-sort-btn:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.typefully-analytics-sort-active {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-color: var(--interactive-accent);
+}
+
+.typefully-analytics-sort-active:hover {
+    background: var(--interactive-accent-hover);
+    color: var(--text-on-accent);
+}
+
+.typefully-analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82em;
+}
+
+.typefully-analytics-table th {
+    text-align: left;
+    padding: 6px 8px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--background-modifier-border);
+    white-space: nowrap;
+}
+
+.typefully-analytics-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    font-variant-numeric: tabular-nums;
+}
+
+.typefully-analytics-table tbody tr:hover {
+    background: var(--background-modifier-hover);
+}
+
+.typefully-analytics-cell-text {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.typefully-analytics-cell-text a {
+    color: var(--text-normal);
+    text-decoration: none;
+}
+
+.typefully-analytics-cell-text a:hover {
+    color: var(--interactive-accent);
+}
+
 /* ─── Empty state ─────────────────────────────────────────────────────────── */
 
 .typefully-empty-state {

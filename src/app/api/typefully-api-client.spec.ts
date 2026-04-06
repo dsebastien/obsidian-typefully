@@ -266,6 +266,81 @@ describe('TypefullyApiClient', () => {
         })
     })
 
+    describe('listAnalyticsPosts', () => {
+        test('calls GET /social-sets/{id}/analytics/{platform}/posts with required params', async () => {
+            mockRequestUrl.mockResolvedValueOnce({
+                status: 200,
+                json: {
+                    results: [
+                        {
+                            platform: 'x',
+                            post_id: '123456',
+                            created_at: '2026-03-01T12:00:00Z',
+                            preview_text: 'Hello world',
+                            url: 'https://x.com/user/status/123456',
+                            draft_id: 42,
+                            metrics: {
+                                impressions: 1400,
+                                engagement: {
+                                    total: 83,
+                                    likes: 48,
+                                    comments: 3,
+                                    shares: 12,
+                                    quotes: 4,
+                                    saves: 2,
+                                    profile_clicks: 9,
+                                    link_clicks: 5
+                                }
+                            }
+                        }
+                    ],
+                    count: 1,
+                    limit: 100,
+                    offset: 0,
+                    next: null,
+                    previous: null
+                }
+            })
+
+            const result = await client.listAnalyticsPosts('123', 'x', {
+                start_date: '2026-03-01',
+                end_date: '2026-03-31'
+            })
+
+            expect(result.results).toHaveLength(1)
+            expect(result.results[0]?.metrics.impressions).toBe(1400)
+            expect(result.results[0]?.metrics.engagement.likes).toBe(48)
+            expect(mockRequestUrl).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    url: 'https://api.typefully.com/v2/social-sets/123/analytics/x/posts?start_date=2026-03-01&end_date=2026-03-31',
+                    method: 'GET'
+                })
+            )
+        })
+
+        test('includes optional params when provided', async () => {
+            mockRequestUrl.mockResolvedValueOnce({
+                status: 200,
+                json: { results: [], count: 0, limit: 50, offset: 10, next: null, previous: null }
+            })
+
+            await client.listAnalyticsPosts('123', 'x', {
+                start_date: '2026-03-01',
+                end_date: '2026-03-31',
+                include_replies: true,
+                limit: 50,
+                offset: 10
+            })
+
+            expect(mockRequestUrl).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    url: 'https://api.typefully.com/v2/social-sets/123/analytics/x/posts?start_date=2026-03-01&end_date=2026-03-31&include_replies=true&limit=50&offset=10',
+                    method: 'GET'
+                })
+            )
+        })
+    })
+
     describe('error handling', () => {
         test('throws TypefullyApiError on non-2xx response', async () => {
             mockRequestUrl.mockResolvedValueOnce({

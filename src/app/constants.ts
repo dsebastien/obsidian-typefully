@@ -17,6 +17,7 @@ export const TYPEFULLY_API_TAGS = '/tags'
 export const TYPEFULLY_API_QUEUE = '/queue'
 export const TYPEFULLY_API_QUEUE_SCHEDULE = '/queue/schedule'
 export const TYPEFULLY_API_ME = '/me'
+export const TYPEFULLY_API_ANALYTICS = '/analytics'
 
 export const MSG_API_KEY_CONFIGURATION_REQUIRED =
     'Please configure the Typefully plugin to provide a valid API key'

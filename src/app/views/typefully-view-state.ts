@@ -9,3 +9,4 @@ export type ViewPage =
     | { type: 'queue' }
     | { type: 'queue-schedule' }
     | { type: 'posted-list' }
+    | { type: 'analytics' }

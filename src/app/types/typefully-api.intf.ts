@@ -164,6 +164,42 @@ export interface TypefullyQueueScheduleRule {
     days: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[]
 }
 
+// ─── Analytics ──────────────────────────────────────────────────────────────
+
+export interface TypefullyAnalyticsEngagement {
+    total: number
+    likes: number
+    comments: number
+    shares: number
+    quotes: number
+    saves: number
+    profile_clicks: number
+    link_clicks: number
+}
+
+export interface TypefullyAnalyticsPostMetrics {
+    impressions: number
+    engagement: TypefullyAnalyticsEngagement
+}
+
+export interface TypefullyAnalyticsPost {
+    platform: string
+    post_id: string
+    created_at: string
+    preview_text: string
+    url: string
+    draft_id: number
+    metrics: TypefullyAnalyticsPostMetrics
+}
+
+export interface TypefullyAnalyticsParams {
+    start_date: string
+    end_date: string
+    include_replies?: boolean
+    limit?: number
+    offset?: number
+}
+
 // ─── API Error ───────────────────────────────────────────────────────────────
 
 export interface TypefullyApiError {

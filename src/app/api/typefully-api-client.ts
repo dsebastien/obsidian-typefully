@@ -9,6 +9,7 @@ import {
     TYPEFULLY_API_QUEUE,
     TYPEFULLY_API_QUEUE_SCHEDULE,
     TYPEFULLY_API_ME,
+    TYPEFULLY_API_ANALYTICS,
     MEDIA_POLL_INITIAL_DELAY_MS,
     MEDIA_POLL_MAX_TIMEOUT_MS
 } from '../constants'
@@ -27,7 +28,9 @@ import type {
     TypefullyTagCreatePayload,
     TypefullyQueueSchedule,
     TypefullyQueueResponse,
-    TypefullyQueueDay
+    TypefullyQueueDay,
+    TypefullyAnalyticsPost,
+    TypefullyAnalyticsParams
 } from '../types/typefully-api.intf'
 import { log } from '../../utils/log'
 
@@ -216,6 +219,27 @@ export class TypefullyApiClient {
     ): Promise<TypefullyQueueSchedule> {
         const path = `${TYPEFULLY_API_SOCIAL_SETS}/${socialSetId}${TYPEFULLY_API_QUEUE_SCHEDULE}`
         return this.request<TypefullyQueueSchedule>('PUT', path, schedule)
+    }
+
+    // ─── Analytics ──────────────────────────────────────────────────────────
+
+    async listAnalyticsPosts(
+        socialSetId: string,
+        platform: string,
+        params: TypefullyAnalyticsParams
+    ): Promise<TypefullyPaginatedResponse<TypefullyAnalyticsPost>> {
+        const queryParts: string[] = [
+            `start_date=${encodeURIComponent(params.start_date)}`,
+            `end_date=${encodeURIComponent(params.end_date)}`
+        ]
+        if (params.include_replies) queryParts.push('include_replies=true')
+        if (params.limit) queryParts.push(`limit=${params.limit}`)
+        if (params.offset) queryParts.push(`offset=${params.offset}`)
+
+        const query = `?${queryParts.join('&')}`
+        const path = `${TYPEFULLY_API_SOCIAL_SETS}/${socialSetId}${TYPEFULLY_API_ANALYTICS}/${platform}/posts${query}`
+
+        return this.request<TypefullyPaginatedResponse<TypefullyAnalyticsPost>>('GET', path)
     }
 
     // ─── Internal ────────────────────────────────────────────────────────────

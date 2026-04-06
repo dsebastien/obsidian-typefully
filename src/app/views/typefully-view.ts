@@ -9,8 +9,9 @@ import { renderDraftCreatePage } from './pages/draft-create-page'
 import { renderQueuePage } from './pages/queue-page'
 import { renderQueueSchedulePage } from './pages/queue-schedule-page'
 import { renderPostedListPage } from './pages/posted-list-page'
+import { renderAnalyticsPage } from './pages/analytics-page'
 
-type TabId = 'drafts' | 'queue' | 'schedule' | 'posted'
+type TabId = 'drafts' | 'queue' | 'schedule' | 'posted' | 'analytics'
 
 function getTabForPage(page: ViewPage): TabId {
     switch (page.type) {
@@ -25,6 +26,8 @@ function getTabForPage(page: ViewPage): TabId {
             return 'schedule'
         case 'posted-list':
             return 'posted'
+        case 'analytics':
+            return 'analytics'
     }
 }
 
@@ -119,7 +122,8 @@ export class TypefullyView extends ItemView {
             { id: 'drafts', label: 'Drafts', page: { type: 'drafts-list' } },
             { id: 'queue', label: 'Queue', page: { type: 'queue' } },
             { id: 'posted', label: 'Posted', page: { type: 'posted-list' } },
-            { id: 'schedule', label: 'Schedule', page: { type: 'queue-schedule' } }
+            { id: 'schedule', label: 'Schedule', page: { type: 'queue-schedule' } },
+            { id: 'analytics', label: 'Analytics', page: { type: 'analytics' } }
         ]
 
         for (const tab of tabDefs) {
@@ -133,7 +137,12 @@ export class TypefullyView extends ItemView {
         }
 
         // Refresh button for list pages
-        const refreshablePages: ViewPage['type'][] = ['drafts-list', 'queue', 'posted-list']
+        const refreshablePages: ViewPage['type'][] = [
+            'drafts-list',
+            'queue',
+            'posted-list',
+            'analytics'
+        ]
         if (refreshablePages.includes(this.current.type)) {
             const refreshBtn = header.createEl('button', {
                 cls: 'typefully-view-refresh-btn clickable-icon',
@@ -187,6 +196,9 @@ export class TypefullyView extends ItemView {
                 break
             case 'posted-list':
                 renderPostedListPage(content, client, socialSetId)
+                break
+            case 'analytics':
+                renderAnalyticsPage(content, client, socialSetId)
                 break
         }
     }
