@@ -1,5 +1,11 @@
 # Release Notes
 
+## 3.2.1 (2026-04-15)
+
+### Bug Fixes
+
+- **all:** fixed bug at startup
+
 ## 3.2.0 (2026-04-06)
 
 ### Features
