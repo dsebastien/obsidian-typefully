@@ -1,3 +1,8 @@
+---
+title: Configuration
+nav_order: 3
+---
+
 # Configuration
 
 All plugin settings are available in Obsidian Settings > Community Plugins > Typefully.

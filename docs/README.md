@@ -1,3 +1,9 @@
+---
+title: Overview
+nav_order: 1
+permalink: /
+---
+
 # Obsidian Typefully
 
 Publish your Obsidian notes to social media platforms through [Typefully](https://typefully.com). This plugin provides comprehensive Typefully API v2 integration, letting you manage your social media workflow entirely from Obsidian.

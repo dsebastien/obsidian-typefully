@@ -1,3 +1,8 @@
+---
+title: API features
+nav_order: 10
+---
+
 # API Features
 
 This document lists the Typefully API v2 endpoints and their support status in this plugin.
