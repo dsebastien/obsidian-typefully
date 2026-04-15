@@ -184,7 +184,13 @@ export class TypefullyApiClient {
 
     async listTags(socialSetId: string): Promise<TypefullyTag[]> {
         const path = `${TYPEFULLY_API_SOCIAL_SETS}/${socialSetId}${TYPEFULLY_API_TAGS}`
-        return this.request<TypefullyTag[]>('GET', path)
+        const response = await this.request<
+            TypefullyTag[] | { results?: TypefullyTag[]; tags?: TypefullyTag[] } | null
+        >('GET', path)
+        if (Array.isArray(response)) return response
+        if (response && Array.isArray(response.results)) return response.results
+        if (response && Array.isArray(response.tags)) return response.tags
+        return []
     }
 
     async createTag(
