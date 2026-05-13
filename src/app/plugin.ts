@@ -270,7 +270,7 @@ export class TypefullyPlugin extends Plugin {
             const msg = `Typefully draft created for: ${enabledPlatformNames}`
             log(msg, 'debug', result)
             new Notice(msg, NOTICE_TIMEOUT)
-            activeWindow.setTimeout(() => this.refreshView(), DRAFT_ACTION_REFRESH_DELAY_MS)
+            window.setTimeout(() => this.refreshView(), DRAFT_ACTION_REFRESH_DELAY_MS)
         } else {
             log('Failed to publish Typefully draft', 'debug', result)
             if (result.errorDetails) {

@@ -90,10 +90,7 @@ function renderDraftItem(
                             new Notice('Draft published', NOTICE_TIMEOUT)
                             state.drafts = []
                             state.offset = 0
-                            activeWindow.setTimeout(
-                                () => loadDrafts(),
-                                DRAFT_ACTION_REFRESH_DELAY_MS
-                            )
+                            window.setTimeout(() => loadDrafts(), DRAFT_ACTION_REFRESH_DELAY_MS)
                         } catch (error) {
                             log('Failed to publish draft', 'error', error)
                             new Notice('Failed to publish draft', NOTICE_TIMEOUT)
@@ -114,7 +111,7 @@ function renderDraftItem(
                     new Notice('Draft scheduled for next free slot', NOTICE_TIMEOUT)
                     state.drafts = []
                     state.offset = 0
-                    activeWindow.setTimeout(() => loadDrafts(), DRAFT_ACTION_REFRESH_DELAY_MS)
+                    window.setTimeout(() => loadDrafts(), DRAFT_ACTION_REFRESH_DELAY_MS)
                 } catch (error) {
                     log('Failed to schedule draft', 'error', error)
                     new Notice('Failed to schedule draft', NOTICE_TIMEOUT)
@@ -135,10 +132,7 @@ function renderDraftItem(
                             new Notice('Draft deleted', NOTICE_TIMEOUT)
                             state.drafts = []
                             state.offset = 0
-                            activeWindow.setTimeout(
-                                () => loadDrafts(),
-                                DRAFT_ACTION_REFRESH_DELAY_MS
-                            )
+                            window.setTimeout(() => loadDrafts(), DRAFT_ACTION_REFRESH_DELAY_MS)
                         } catch (error) {
                             log('Failed to delete draft', 'error', error)
                             new Notice('Failed to delete draft', NOTICE_TIMEOUT)

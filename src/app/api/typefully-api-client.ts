@@ -298,6 +298,6 @@ export class TypefullyApiClient {
     }
 
     private sleep(ms: number): Promise<void> {
-        return new Promise((resolve) => activeWindow.setTimeout(resolve, ms))
+        return new Promise((resolve) => window.setTimeout(resolve, ms))
     }
 }
