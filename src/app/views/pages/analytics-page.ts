@@ -334,7 +334,7 @@ export function renderAnalyticsPage(
     }
 
     // Note about platform limitation
-    filters.createEl('span', {
+    filters.createSpan({
         text: 'X (Twitter) only',
         cls: 'typefully-analytics-platform-note'
     })

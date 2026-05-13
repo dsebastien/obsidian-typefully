@@ -8,6 +8,7 @@ import type { PlatformSettings, PluginSettings } from '../types/plugin-settings.
 import { PLATFORM_NAMES } from '../types/plugin-settings.intf'
 import { fetchSocialSets } from '../utils/publish-typefully-draft.fn'
 import { NOTICE_TIMEOUT } from '../constants'
+import { BUY_ME_A_COFFEE_BADGE_DATA_URL } from '../assets/buy-me-a-coffee'
 
 export class TypefullySettingTab extends PluginSettingTab {
     plugin: TypefullyPlugin
@@ -412,7 +413,7 @@ export class TypefullySettingTab extends PluginSettingTab {
                 loadingEl.remove()
 
                 if (tags.length === 0) {
-                    tagsContainer.createEl('span', {
+                    tagsContainer.createSpan({
                         text: 'No tags yet.',
                         cls: 'setting-item-description'
                     })
@@ -500,8 +501,7 @@ export class TypefullySettingTab extends PluginSettingTab {
             href: 'https://www.buymeacoffee.com/dsebastien'
         })
         const imgEl = linkEl.createEl('img')
-        imgEl.src =
-            'https://github.com/dsebastien/obsidian-plugin-template/blob/main/src/assets/buy-me-a-coffee.png?raw=true'
+        imgEl.src = BUY_ME_A_COFFEE_BADGE_DATA_URL
         imgEl.alt = 'Buy me a coffee'
         imgEl.width = width
     }

@@ -77,7 +77,7 @@ function renderSchedule(
     const byDay = groupRulesByDay(schedule.rules)
     const timezone = schedule.timezone
 
-    container.createEl('div', {
+    container.createDiv({
         cls: 'typefully-schedule-timezone',
         text: `Timezone: ${timezone}`
     })

@@ -1,7 +1,7 @@
 {
     "name": "obsidian-typefully",
     "version": "3.2.1",
-    "description": "Typefully integration. Publish social media posts with ease",
+    "description": "Publish social media posts with ease using the Typefully integration.",
     "author": {
         "name": "Sébastien Dubois",
         "email": "sebastien@developassion.be",
@@ -27,7 +27,7 @@
         "npm": ">=10.1.0"
     },
     "main": "main.js",
-    "packageManager": "bun@1.3.2",
+    "packageManager": "bun@1.3.14",
     "config": {
         "commitizen": {
             "path": "node_modules/cz-customizable"

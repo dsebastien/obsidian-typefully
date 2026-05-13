@@ -25,13 +25,27 @@ Publish your Obsidian notes to social media platforms through [Typefully](https:
 - **Markdown cleaning**: Automatically strips Obsidian-specific syntax and image references for clean social posts
 - **API key validation**: Instant validation and profile display when configuring your API key
 
+## Installation
+
+### From the Obsidian community catalog (recommended)
+
+1. In Obsidian, go to **Settings → Community plugins**.
+2. Disable **Restricted mode** if you have not already.
+3. Select **Browse**, search for **Typefully**, install it, and then enable it.
+
+### Manual installation
+
+1. Download `main.js`, `manifest.json`, and `styles.css` from the latest [GitHub release](https://github.com/dsebastien/obsidian-typefully/releases).
+2. Copy them into `<YourVault>/.obsidian/plugins/typefully/` (create the folder if it does not exist).
+3. Reload Obsidian and enable the plugin in **Settings → Community plugins**.
+
 ## Quick Start
 
-1. Install the plugin from Obsidian's Community Plugins
-2. Get your Typefully API key from [Typefully Settings > API & Integrations](https://typefully.com/settings)
-3. Enter your API key in the plugin settings
-4. Enable your target platforms
-5. Open a note and use the command palette or context menu to publish
+1. Install the plugin (see above) and enable it.
+2. Get your Typefully API key from [Typefully Settings > API & Integrations](https://typefully.com/settings).
+3. Enter your API key in the plugin settings.
+4. Enable your target platforms.
+5. Open a note and use the command palette or context menu to publish.
 
 ## About
 

@@ -49,8 +49,9 @@
     margin-bottom: 10px;
 }
 
-.typefully-modal-input-wide {
-    width: 100% !important;
+/* Doubled class bumps specificity so Obsidian's input styles don't shrink the field */
+.typefully-modal-input-wide.typefully-modal-input-wide {
+    width: 100%;
     min-width: 0;
 }
 
@@ -290,7 +291,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin: 8px 0 12px 0;
+    margin: 8px 0 12px;
 }
 
 .typefully-settings-tag {

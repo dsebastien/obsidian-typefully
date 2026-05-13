@@ -19,9 +19,18 @@ An Obsidian plugin that integrates with [Typefully](https://typefully.com) to pu
 
 ## Installation
 
-1. Open **Settings > Community Plugins** in Obsidian
-2. Search for "Typefully" and install
-3. Enter your API key from [Typefully Settings > API & Integrations](https://typefully.com/settings)
+### From the Obsidian community catalog (recommended)
+
+1. In Obsidian, go to **Settings → Community plugins**.
+2. Disable **Restricted mode** if you have not already.
+3. Select **Browse**, search for **Typefully**, install it, and then enable it.
+4. Enter your API key from [Typefully Settings > API & Integrations](https://typefully.com/settings).
+
+### Manual installation
+
+1. Download `main.js`, `manifest.json`, and `styles.css` from the latest [GitHub release](https://github.com/dsebastien/obsidian-typefully/releases).
+2. Copy them into `<YourVault>/.obsidian/plugins/typefully/` (create the folder if it does not exist).
+3. Reload Obsidian and enable the plugin in **Settings → Community plugins**.
 
 ## Documentation
 

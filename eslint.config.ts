@@ -3,8 +3,9 @@ import tseslint from 'typescript-eslint'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import globals from 'globals'
 import obsidianmd from 'eslint-plugin-obsidianmd'
+import { defineConfig } from 'eslint/config'
 
-export default tseslint.config(
+export default defineConfig([
     eslint.configs.recommended,
     ...tseslint.configs.recommended,
     // @ts-expect-error - obsidianmd types are incomplete but the config works at runtime
@@ -30,7 +31,10 @@ export default tseslint.config(
                 createDiv: 'readonly',
                 createEl: 'readonly',
                 createSpan: 'readonly',
-                createFragment: 'readonly'
+                createFragment: 'readonly',
+                // Obsidian popout-window-aware globals
+                activeWindow: 'readonly',
+                activeDocument: 'readonly'
             },
             parserOptions: {
                 projectService: true,
@@ -53,12 +57,10 @@ export default tseslint.config(
             // Obsidian methods are dynamically added to prototypes
             '@typescript-eslint/no-unsafe-enum-comparison': 'off',
             'no-prototype-builtins': 'off',
-            // Disable dependency ban rule - lint-staged is intentionally used
-            'depend/ban-dependencies': 'off',
             // Allow confirm for delete confirmations
             'no-alert': 'off',
             // Disable sentence case rule - it has false positives for already-correct text
             'obsidianmd/ui/sentence-case': 'off'
         }
     }
-)
+])

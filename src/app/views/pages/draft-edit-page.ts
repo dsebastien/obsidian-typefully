@@ -246,7 +246,7 @@ export async function renderDraftEditPage(
                     buildPayload()
                     await client.updateDraft(socialSetId, d.id, { ...payload, publish_at: 'now' })
                     new Notice('Draft published', NOTICE_TIMEOUT)
-                    setTimeout(
+                    activeWindow.setTimeout(
                         () => setPage({ type: 'drafts-list' }),
                         DRAFT_ACTION_REFRESH_DELAY_MS
                     )
@@ -268,7 +268,7 @@ export async function renderDraftEditPage(
                         publish_at: 'next-free-slot'
                     })
                     new Notice('Draft scheduled for next free slot', NOTICE_TIMEOUT)
-                    setTimeout(
+                    activeWindow.setTimeout(
                         () => setPage({ type: 'drafts-list' }),
                         DRAFT_ACTION_REFRESH_DELAY_MS
                     )
