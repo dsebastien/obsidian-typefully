@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.4](https://github.com/dsebastien/obsidian-typefully/compare/3.2.3...3.2.4) (2026-05-14)
+
 ## [3.2.3](https://github.com/dsebastien/obsidian-typefully/compare/3.2.2...3.2.3) (2026-05-13)
 
 ## [3.2.2](https://github.com/dsebastien/obsidian-typefully/compare/3.2.1...3.2.2) (2026-05-13)
