@@ -6,7 +6,8 @@ import type {
     TypefullyPlatforms
 } from '../../types/typefully-draft-contents.intf'
 import type { PluginSettings, PlatformSettings } from '../../types/plugin-settings.intf'
-import { NOTICE_TIMEOUT } from '../../constants'
+import { NOTICE_TIMEOUT, MSG_PUBLISH_NOW_DEFERRED_X_URL } from '../../constants'
+import { resolvePublishNow } from '../../utils/resolve-publish-now.fn'
 import { log } from '../../../utils/log'
 import type { ViewPage } from '../typefully-view-state'
 import { formatISO } from 'date-fns'
@@ -185,15 +186,24 @@ export function renderDraftCreatePage(
                 createBtn.disabled = true
                 createBtn.setText(loadingText)
 
-                const content: TypefullyDraftContents = {
-                    platforms: buildPlatforms(settings, posts)
-                }
-                if (publishAt) {
+                const platforms = buildPlatforms(settings, posts)
+                const content: TypefullyDraftContents = { platforms }
+                let deferred = false
+                if (publishAt === 'now') {
+                    // X blocks direct publishing of drafts containing URLs, so
+                    // defer to a near-future scheduled time when needed.
+                    const resolution = resolvePublishNow(posts, platforms.x?.enabled ?? false)
+                    content.publish_at = resolution.publishAt
+                    deferred = resolution.deferred
+                } else if (publishAt) {
                     content.publish_at = publishAt
                 }
 
                 const draft = await client.createDraft(socialSetId, content)
-                new Notice('Draft created', NOTICE_TIMEOUT)
+                new Notice(
+                    deferred ? MSG_PUBLISH_NOW_DEFERRED_X_URL : 'Draft created',
+                    NOTICE_TIMEOUT
+                )
                 navigate({ type: 'draft-edit', draftId: draft.id, draft })
             } catch (error) {
                 const msg = error instanceof Error ? error.message : 'Failed to create draft'

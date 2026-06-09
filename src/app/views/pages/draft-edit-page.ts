@@ -7,7 +7,12 @@ import type {
     TypefullyDraftPlatformDetail
 } from '../../types/typefully-api.intf'
 import { ConfirmModal } from '../../modals/confirm-modal'
-import { NOTICE_TIMEOUT, DRAFT_ACTION_REFRESH_DELAY_MS } from '../../constants'
+import {
+    NOTICE_TIMEOUT,
+    DRAFT_ACTION_REFRESH_DELAY_MS,
+    MSG_PUBLISH_NOW_DEFERRED_X_URL
+} from '../../constants'
+import { resolvePublishNow } from '../../utils/resolve-publish-now.fn'
 import { log } from '../../../utils/log'
 import type { ViewPage } from '../typefully-view-state'
 import { parseISO, formatISO } from 'date-fns'
@@ -244,8 +249,18 @@ export async function renderDraftEditPage(
                 try {
                     nowBtn.disabled = true
                     buildPayload()
-                    await client.updateDraft(socialSetId, d.id, { ...payload, publish_at: 'now' })
-                    new Notice('Draft published', NOTICE_TIMEOUT)
+                    const { publishAt, deferred } = resolvePublishNow(
+                        posts,
+                        platformEnabled['x'] ?? false
+                    )
+                    await client.updateDraft(socialSetId, d.id, {
+                        ...payload,
+                        publish_at: publishAt
+                    })
+                    new Notice(
+                        deferred ? MSG_PUBLISH_NOW_DEFERRED_X_URL : 'Draft published',
+                        NOTICE_TIMEOUT
+                    )
                     window.setTimeout(
                         () => setPage({ type: 'drafts-list' }),
                         DRAFT_ACTION_REFRESH_DELAY_MS
