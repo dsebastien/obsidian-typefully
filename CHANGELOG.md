@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.0](https://github.com/dsebastien/obsidian-typefully/compare/3.2.4...3.3.0) (2026-06-09)
+
+### Features
+
+- **all:** automatically load next entries in tabs ([07511d6](https://github.com/dsebastien/obsidian-typefully/commit/07511d64a0b884bc9e64bcc73f0b8dbcf1589b9b))
+
+### Bug Fixes
+
+- **all:** worked around x limitation when posts include a url ([0c5660f](https://github.com/dsebastien/obsidian-typefully/commit/0c5660fffff6f25a624f01f065f1c3f24690a0e2))
+
 ## [3.2.4](https://github.com/dsebastien/obsidian-typefully/compare/3.2.3...3.2.4) (2026-05-14)
 
 ## [3.2.3](https://github.com/dsebastien/obsidian-typefully/compare/3.2.2...3.2.3) (2026-05-13)

@@ -1,5 +1,15 @@
 # Release Notes
 
+## 3.3.0 (2026-06-09)
+
+### Features
+
+- **all:** automatically load next entries in tabs
+
+### Bug Fixes
+
+- **all:** worked around x limitation when posts include a url
+
 ## 3.2.4 (2026-05-14)
 
 ## 3.2.3 (2026-05-13)
