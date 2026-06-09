@@ -319,6 +319,12 @@
     background: var(--background-modifier-hover);
 }
 
+/* Infinite-scroll sentinel (drafts view) */
+.typefully-load-more-sentinel {
+    height: 1px;
+    width: 100%;
+}
+
 /* ─── View layout ─────────────────────────────────────────────────────────── */
 
 .typefully-view {

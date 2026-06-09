@@ -14,6 +14,7 @@ interface PostedListState {
     sortOrder: '-published_at' | 'published_at'
     offset: number
     hasMore: boolean
+    isLoading: boolean
     listContainer: HTMLElement | null
 }
 
@@ -65,8 +66,11 @@ export function renderPostedListPage(
         sortOrder: '-published_at',
         offset: 0,
         hasMore: false,
+        isLoading: false,
         listContainer: null
     }
+
+    let sentinelObserver: IntersectionObserver | null = null
 
     const filtersEl = container.createDiv({ cls: 'typefully-draft-filters' })
 
@@ -85,8 +89,9 @@ export function renderPostedListPage(
     void loadPosts()
 
     async function loadPosts() {
-        if (!state.listContainer) return
+        if (!state.listContainer || state.isLoading) return
 
+        state.isLoading = true
         try {
             const params: TypefullyDraftListParams = {
                 status: 'published',
@@ -97,17 +102,22 @@ export function renderPostedListPage(
 
             const response = await client.listDrafts(socialSetId, params)
             state.drafts.push(...response.results)
+            state.offset += response.results.length
             state.hasMore = response.next !== null
 
             renderList()
         } catch (error) {
             log('Failed to load published posts', 'error', error)
             new Notice('Failed to load published posts', NOTICE_TIMEOUT)
+        } finally {
+            state.isLoading = false
         }
     }
 
     function renderList() {
         if (!state.listContainer) return
+
+        sentinelObserver?.disconnect()
         state.listContainer.empty()
 
         if (state.drafts.length === 0) {
@@ -123,14 +133,16 @@ export function renderPostedListPage(
         }
 
         if (state.hasMore) {
-            const loadMoreBtn = state.listContainer.createEl('button', {
-                text: 'Load more...',
-                cls: 'typefully-load-more'
-            })
-            loadMoreBtn.addEventListener('click', () => {
-                state.offset += PAGE_SIZE
-                void loadPosts()
-            })
+            const sentinel = state.listContainer.createDiv({ cls: 'typefully-load-more-sentinel' })
+            sentinelObserver = new IntersectionObserver(
+                (entries) => {
+                    if (entries.some((entry) => entry.isIntersecting)) {
+                        void loadPosts()
+                    }
+                },
+                { rootMargin: '200px' }
+            )
+            sentinelObserver.observe(sentinel)
         }
     }
 }

@@ -27,6 +27,7 @@ interface DraftsListState {
         | '-published_at'
     offset: number
     hasMore: boolean
+    isLoading: boolean
     listContainer: HTMLElement | null
 }
 
@@ -163,8 +164,11 @@ export function renderDraftsListPage(
         sortOrder: '-updated_at',
         offset: 0,
         hasMore: false,
+        isLoading: false,
         listContainer: null
     }
+
+    let sentinelObserver: IntersectionObserver | null = null
 
     const filtersEl = container.createDiv({ cls: 'typefully-draft-filters' })
 
@@ -196,8 +200,9 @@ export function renderDraftsListPage(
     void loadDrafts()
 
     async function loadDrafts() {
-        if (!state.listContainer) return
+        if (!state.listContainer || state.isLoading) return
 
+        state.isLoading = true
         try {
             const params: TypefullyDraftListParams = {
                 order_by: state.sortOrder,
@@ -210,17 +215,22 @@ export function renderDraftsListPage(
 
             const response = await client.listDrafts(socialSetId, params)
             state.drafts.push(...response.results)
+            state.offset += response.results.length
             state.hasMore = response.next !== null
 
             renderList()
         } catch (error) {
             log('Failed to load drafts', 'error', error)
             new Notice('Failed to load drafts', NOTICE_TIMEOUT)
+        } finally {
+            state.isLoading = false
         }
     }
 
     function renderList() {
         if (!state.listContainer) return
+
+        sentinelObserver?.disconnect()
         state.listContainer.empty()
 
         if (state.drafts.length === 0) {
@@ -245,14 +255,16 @@ export function renderDraftsListPage(
         }
 
         if (state.hasMore) {
-            const loadMoreBtn = state.listContainer.createEl('button', {
-                text: 'Load more...',
-                cls: 'typefully-load-more'
-            })
-            loadMoreBtn.addEventListener('click', () => {
-                state.offset += PAGE_SIZE
-                void loadDrafts()
-            })
+            const sentinel = state.listContainer.createDiv({ cls: 'typefully-load-more-sentinel' })
+            sentinelObserver = new IntersectionObserver(
+                (entries) => {
+                    if (entries.some((entry) => entry.isIntersecting)) {
+                        void loadDrafts()
+                    }
+                },
+                { rootMargin: '200px' }
+            )
+            sentinelObserver.observe(sentinel)
         }
     }
 }
