@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.1](https://github.com/dsebastien/obsidian-typefully/compare/3.3.0...3.3.1) (2026-06-17)
+
+### Bug Fixes
+
+- **deps:** override vulnerable transitive dev dependencies ([1fde453](https://github.com/dsebastien/obsidian-typefully/commit/1fde4538c72b790879c5ad14d3231e8023adb7b7))
+- **deps:** pin ajv override to 6.15.0 for parity with template ([500fced](https://github.com/dsebastien/obsidian-typefully/commit/500fced4d8bdca8dc165d359d483737a1569759c))
+
 ## [3.3.0](https://github.com/dsebastien/obsidian-typefully/compare/3.2.4...3.3.0) (2026-06-09)
 
 ### Features

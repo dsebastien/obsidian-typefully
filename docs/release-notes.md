@@ -1,5 +1,12 @@
 # Release Notes
 
+## 3.3.1 (2026-06-17)
+
+### Bug Fixes
+
+- **deps:** override vulnerable transitive dev dependencies
+- **deps:** pin ajv override to 6.15.0 for parity with template
+
 ## 3.3.0 (2026-06-09)
 
 ### Features
