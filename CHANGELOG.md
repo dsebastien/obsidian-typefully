@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.4.0](https://github.com/dsebastien/obsidian-typefully/compare/3.3.2...3.4.0) (2026-07-27)
+
+### Features
+
+- **plugin:** show a what's new dialog once after plugin updates ([092b7cb](https://github.com/dsebastien/obsidian-typefully/commit/092b7cbe5ac2b5f5f78b6502304684039e66ce8b))
+
 ## [3.3.2](https://github.com/dsebastien/obsidian-typefully/compare/3.3.1...3.3.2) (2026-07-17)
 
 ## [3.3.1](https://github.com/dsebastien/obsidian-typefully/compare/3.3.0...3.3.1) (2026-06-17)
