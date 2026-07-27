@@ -3,7 +3,7 @@
     "name": "Typefully",
     "description": "Publish social media posts with ease using the Typefully integration.",
     "version": "3.3.2",
-    "minAppVersion": "1.7.2",
+    "minAppVersion": "1.8.7",
     "isDesktopOnly": false,
     "author": "Sébastien Dubois",
     "authorUrl": "https://dsebastien.net",
