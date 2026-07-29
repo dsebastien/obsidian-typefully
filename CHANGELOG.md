@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.6.0](https://github.com/dsebastien/obsidian-typefully/compare/3.5.0...3.6.0) (2026-07-29)
+
+### Features
+
+- **plugin:** add Knowii community to the what's new dialog and harden it ([fbb838a](https://github.com/dsebastien/obsidian-typefully/commit/fbb838ab2acd2f7120ddca49876f5920d701ea15))
+
 ## [3.5.0](https://github.com/dsebastien/obsidian-typefully/compare/3.4.0...3.5.0) (2026-07-29)
 
 ### Features
