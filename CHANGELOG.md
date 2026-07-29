@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.5.0](https://github.com/dsebastien/obsidian-typefully/compare/3.4.0...3.5.0) (2026-07-29)
+
+### Features
+
+- **plugin:** add a setting to exclude tags from appended tags ([e5f7c4b](https://github.com/dsebastien/obsidian-typefully/commit/e5f7c4b2dcf8119918c8f6916b16484b0af4cbee)), closes [#8](https://github.com/dsebastien/obsidian-typefully/issues/8)
+
 ## [3.4.0](https://github.com/dsebastien/obsidian-typefully/compare/3.3.2...3.4.0) (2026-07-27)
 
 ### Features

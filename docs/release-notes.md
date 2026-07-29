@@ -1,5 +1,11 @@
 # Release Notes
 
+## 3.5.0 (2026-07-29)
+
+### Features
+
+- **plugin:** add a setting to exclude tags from appended tags
+
 ## 3.4.0 (2026-07-27)
 
 ### Features
