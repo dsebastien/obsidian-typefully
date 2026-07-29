@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.7.0](https://github.com/dsebastien/obsidian-typefully/compare/3.6.0...3.7.0) (2026-07-29)
+
+### Features
+
+- **plugin:** aggregate what's new dialogs across simultaneously updated plugins ([5dcb96f](https://github.com/dsebastien/obsidian-typefully/commit/5dcb96f80ffe3d3e01c3b28aff5b60883f2ba09c))
+
 ## [3.6.0](https://github.com/dsebastien/obsidian-typefully/compare/3.5.0...3.6.0) (2026-07-29)
 
 ### Features
