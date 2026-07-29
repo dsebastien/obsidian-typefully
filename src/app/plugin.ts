@@ -1,4 +1,4 @@
-import { registerWhatsNewDialog } from './whats-new'
+import { registerWhatsNewView } from './whats-new'
 import { Notice, Plugin } from 'obsidian'
 import type { TFile } from 'obsidian'
 import { DEFAULT_PLATFORM_SETTINGS, DEFAULT_SETTINGS } from './types/plugin-settings.intf'
@@ -51,7 +51,7 @@ export class TypefullyPlugin extends Plugin {
      */
     override async onload() {
         // Must run before anything can call saveData (fresh-install detection)
-        registerWhatsNewDialog(this)
+        registerWhatsNewView(this)
         log('Initializing', 'debug')
         await this.loadSettings()
 
