@@ -14,6 +14,12 @@ export interface PluginSettings {
     threadify: boolean
     autoSchedule: boolean
     appendTags: boolean
+    /**
+     * Tags that must never be appended to posts, without the leading '#'.
+     * Matching is case-insensitive and covers nested tags (excluding 'dev'
+     * also excludes 'dev/frontend').
+     */
+    excludedTags: string[]
     enableAllPlatforms: boolean
     platforms: PlatformSettings
 }
@@ -34,6 +40,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
     threadify: false,
     autoSchedule: false,
     appendTags: false,
+    excludedTags: [],
     enableAllPlatforms: false,
     platforms: { ...DEFAULT_PLATFORM_SETTINGS }
 }

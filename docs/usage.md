@@ -150,6 +150,16 @@ When enabled, tags from your note (including frontmatter tags) are automatically
 **Example:**
 A note with `tags: [productivity, obsidian]` in frontmatter will have `#productivity #obsidian` appended.
 
+### Excluding Tags
+
+Organizational tags (`permanent_notes`, `literature_notes`, etc.) rarely belong in a social media post. List them in the **Tags to exclude** setting, separated by commas or newlines, and they are left out when tags are appended.
+
+- The leading `#` is optional and matching is case-insensitive: `permanent_notes`, `#permanent_notes` and `Permanent_Notes` all match the same tag.
+- Excluding a tag also excludes its nested tags: excluding `dev` also excludes `dev/frontend`.
+
+**Example:**
+With `permanent_notes, dev` excluded, a note tagged `#permanent_notes #dev/frontend #productivity` only appends `#productivity`.
+
 ### Tag Management
 
 In plugin settings under the "Tags" section:

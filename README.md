@@ -15,7 +15,7 @@ An Obsidian plugin that integrates with [Typefully](https://typefully.com) to pu
 - View queue schedule and upcoming slots
 - Optional publish modal for per-draft scheduling, notes, and X settings
 - Automatic Markdown cleaning (strips frontmatter, wiki links, blockquotes, image syntax)
-- Append note tags as hashtags
+- Append note tags as hashtags, with an exclusion list for the ones you never want to publish
 
 ## Installation
 

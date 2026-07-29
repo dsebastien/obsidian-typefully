@@ -53,6 +53,7 @@ Your user profile (name, email, avatar) is displayed at the top of the settings 
 | Enable Auto scheduling     | toggle | `false` | Automatically schedule posts to the next free slot in your Typefully queue. |
 | Enable Threadify           | toggle | `false` | Split content into multiple posts at 4 consecutive newlines.                |
 | Append tags to posts       | toggle | `false` | Append note tags as hashtags at the end of posts.                           |
+| Tags to exclude            | text   | empty   | Tags that are never appended to posts (comma or newline separated).         |
 | Enable Auto retweet        | toggle | `false` | Enable AutoRT according to your Typefully account settings.                 |
 | Enable Auto plug           | toggle | `false` | Enable AutoPlug according to your Typefully account settings.               |
 

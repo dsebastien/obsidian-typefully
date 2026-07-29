@@ -18,6 +18,7 @@ import { isExcalidrawFile } from './utils/is-excalidraw-file.fn'
 import { publishTypefullyDraft } from './utils/publish-typefully-draft.fn'
 import { cleanMarkdownForTypeFully } from './utils/clean-markdown-for-typefully.fn'
 import { getFileTags } from './utils/get-file-tags.fn'
+import { filterExcludedTags } from './utils/filter-excluded-tags.fn'
 import type { TypefullyPlatforms, TypefullyPost } from './types/typefully-draft-contents.intf'
 import { TypefullyApiClient } from './api/typefully-api-client'
 import type { TypefullyUser } from './types/typefully-api.intf'
@@ -202,10 +203,14 @@ export class TypefullyPlugin extends Plugin {
         let cleanedContent = cleanMarkdownForTypeFully(content)
 
         if (this.settings.appendTags && tags.length > 0) {
-            log('Tags to append: ', 'debug', tags)
-            let tagsString = '\n\n'
-            tagsString += tags.join(' ')
-            cleanedContent += tagsString
+            const tagsToAppend = filterExcludedTags(tags, this.settings.excludedTags)
+
+            if (tagsToAppend.length > 0) {
+                log('Tags to append: ', 'debug', tagsToAppend)
+                let tagsString = '\n\n'
+                tagsString += tagsToAppend.join(' ')
+                cleanedContent += tagsString
+            }
         }
 
         // Build posts array - split by 4 newlines if threadify is enabled
@@ -462,6 +467,14 @@ export class TypefullyPlugin extends Plugin {
 
             if (typeof loadedSettings.appendTags === 'boolean') {
                 draft.appendTags = loadedSettings.appendTags
+            } else {
+                needToSaveSettings = true
+            }
+
+            if (Array.isArray(loadedSettings.excludedTags)) {
+                draft.excludedTags = loadedSettings.excludedTags.filter(
+                    (tag) => typeof tag === 'string' && '' !== tag.trim()
+                )
             } else {
                 needToSaveSettings = true
             }

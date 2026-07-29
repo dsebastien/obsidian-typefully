@@ -16,6 +16,13 @@
     max-width: 200px;
 }
 
+.typefully-excluded-tags-input {
+    width: 100%;
+    max-width: 300px;
+    min-height: 60px;
+    resize: vertical;
+}
+
 .typefully-social-sets-list {
     margin-left: 20px;
     margin-bottom: 15px;

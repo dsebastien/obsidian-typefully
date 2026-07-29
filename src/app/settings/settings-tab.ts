@@ -7,6 +7,7 @@ import type { Draft } from 'immer'
 import type { PlatformSettings, PluginSettings } from '../types/plugin-settings.intf'
 import { PLATFORM_NAMES } from '../types/plugin-settings.intf'
 import { fetchSocialSets } from '../utils/publish-typefully-draft.fn'
+import { formatExcludedTags, parseExcludedTags } from '../utils/parse-excluded-tags.fn'
 import { NOTICE_TIMEOUT } from '../constants'
 import { BUY_ME_A_COFFEE_BADGE_DATA_URL } from '../assets/buy-me-a-coffee'
 
@@ -271,6 +272,7 @@ export class TypefullySettingTab extends PluginSettingTab {
         this.renderAutoSchedule(containerEl)
         this.renderThreadify(containerEl)
         this.renderAppendTags(containerEl)
+        this.renderExcludedTags(containerEl)
         this.renderAutoRetweet(containerEl)
         this.renderAutoPlug(containerEl)
     }
@@ -370,6 +372,30 @@ export class TypefullySettingTab extends PluginSettingTab {
                     )
                     await this.plugin.saveSettings()
                 })
+            })
+    }
+
+    renderExcludedTags(containerEl: HTMLElement) {
+        new Setting(containerEl)
+            .setName('Tags to exclude')
+            .setDesc(
+                'Tags that must never be appended to posts (e.g., permanent_notes, literature_notes). Separate them with commas or newlines. Excluding a tag also excludes its nested tags.'
+            )
+            .addTextArea((textArea) => {
+                textArea.setPlaceholder('permanent_notes, literature_notes')
+                textArea.setValue(formatExcludedTags(this.plugin.settings.excludedTags))
+                textArea.onChange(async (newValue: string) => {
+                    const excludedTags = parseExcludedTags(newValue)
+                    log('Tags to exclude set to: ', 'debug', excludedTags)
+                    this.plugin.settings = produce(
+                        this.plugin.settings,
+                        (draft: Draft<PluginSettings>) => {
+                            draft.excludedTags = excludedTags
+                        }
+                    )
+                    await this.plugin.saveSettings()
+                })
+                textArea.inputEl.addClass('typefully-excluded-tags-input')
             })
     }
 
