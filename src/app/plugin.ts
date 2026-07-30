@@ -191,11 +191,8 @@ export class TypefullyPlugin extends Plugin {
             id: 'refresh-drafts',
             name: 'Refresh drafts',
             callback: () => {
-                const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TYPEFULLY)
-                if (leaves.length > 0) {
-                    const view = leaves[0]!.view as TypefullyView
-                    view.setPage({ type: 'drafts-list' })
-                }
+                const view = this.getTypefullyViews()[0]
+                view?.setPage({ type: 'drafts-list' })
             }
         })
 
@@ -657,11 +654,28 @@ export class TypefullyPlugin extends Plugin {
      * Refresh the Typefully panel if it is open.
      */
     refreshView() {
-        const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TYPEFULLY)
-        for (const leaf of leaves) {
-            const view = leaf.view as TypefullyView
+        for (const view of this.getTypefullyViews()) {
             view.refresh()
         }
+    }
+
+    /**
+     * Get the loaded Typefully views.
+     *
+     * A leaf that has never been opened in the current session is deferred:
+     * its `view` is a placeholder without the TypefullyView methods, so every
+     * access has to be guarded by an instanceof check. Deferred views are
+     * skipped: they render from scratch when the user opens them, so there is
+     * nothing to refresh.
+     */
+    private getTypefullyViews(): TypefullyView[] {
+        const views: TypefullyView[] = []
+        for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_TYPEFULLY)) {
+            if (leaf.view instanceof TypefullyView) {
+                views.push(leaf.view)
+            }
+        }
+        return views
     }
 
     override onunload() {}
@@ -685,8 +699,13 @@ export class TypefullyPlugin extends Plugin {
         if (leaf) {
             await workspace.revealLeaf(leaf)
             if (initialPage) {
-                const view = leaf.view as TypefullyView
-                view.setPage(initialPage)
+                // Revealing a deferred leaf loads it, but the view instance is
+                // only replaced once that finished, so it still has to be
+                // checked before use
+                await leaf.loadIfDeferred()
+                if (leaf.view instanceof TypefullyView) {
+                    leaf.view.setPage(initialPage)
+                }
             }
         }
     }
