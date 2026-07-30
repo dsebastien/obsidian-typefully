@@ -1,5 +1,17 @@
 # Release Notes
 
+## 3.9.0 (2026-07-30)
+
+### Features
+
+- **plugin:** make the link color on note images readable and configurable
+
+### Bug Fixes
+
+- **plugin:** check image limits before uploading anything
+- **plugin:** tidy up link styling in generated images
+- **plugin:** upload presigned media via requestUrl only
+
 ## 3.8.0 (2026-07-30)
 
 ### Features

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.9.0](https://github.com/dsebastien/obsidian-typefully/compare/3.8.0...3.9.0) (2026-07-30)
+
+### Features
+
+- **plugin:** make the link color on note images readable and configurable ([3724032](https://github.com/dsebastien/obsidian-typefully/commit/3724032299c7169de7bcf84f9da14636a6d03378))
+
+### Bug Fixes
+
+- **plugin:** check image limits before uploading anything ([5586f39](https://github.com/dsebastien/obsidian-typefully/commit/5586f397391f94c875970c80aac57320ef39de33))
+- **plugin:** tidy up link styling in generated images ([690af14](https://github.com/dsebastien/obsidian-typefully/commit/690af14143d508d4cd3d3fe6bf921ee9a39c5bbd))
+- **plugin:** upload presigned media via requestUrl only ([a479ce3](https://github.com/dsebastien/obsidian-typefully/commit/a479ce3d071de05ef98a1bb9d9a5255a57ef918c))
+
 ## [3.8.0](https://github.com/dsebastien/obsidian-typefully/compare/3.7.0...3.8.0) (2026-07-30)
 
 ### Features
