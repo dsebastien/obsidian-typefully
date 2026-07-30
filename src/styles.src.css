@@ -1102,3 +1102,186 @@
 .typefully-whats-new-body .typefully-whats-new-links .setting-item-description {
     @apply pr-3;
 }
+
+/* ─── Screenshot card (publish an image of the current note) ─────────────────
+   A styled, social-media-ready card rendered in a temporary overlay and
+   captured as an image. Colors are intentionally fixed (not theme variables)
+   so the published image looks the same regardless of the active theme. */
+.typefully-screenshot-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.typefully-screenshot-card {
+    /* Gradient colors and font are set as CSS variables from the plugin
+       settings. The card is constrained to stay fully visible in the window
+       since the capture can only grab what is on screen. */
+    position: relative;
+    padding: 48px;
+    display: flex;
+    overflow: hidden;
+    background: linear-gradient(
+        135deg,
+        var(--typefully-ss-gradient-start, #667eea) 0%,
+        var(--typefully-ss-gradient-end, #764ba2) 100%
+    );
+    font-family: var(
+        --typefully-ss-font,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        sans-serif
+    );
+}
+
+.typefully-screenshot-card--portrait {
+    width: min(840px, 92vw, calc((100vh - 48px) * 0.8));
+    aspect-ratio: 4 / 5;
+}
+
+.typefully-screenshot-card--square {
+    width: min(840px, 92vw, calc(100vh - 48px));
+    aspect-ratio: 1 / 1;
+}
+
+.typefully-screenshot-card--landscape {
+    width: min(1080px, 92vw, calc((100vh - 48px) * 1.77));
+    aspect-ratio: 16 / 9;
+}
+
+.typefully-screenshot-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
+    overflow: hidden;
+    padding: 48px;
+    border-radius: 24px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+    background-color: var(--typefully-ss-card-bg);
+    color: var(--typefully-ss-text);
+}
+
+.typefully-screenshot-content--light {
+    --typefully-ss-card-bg: #ffffff;
+    --typefully-ss-heading: #1e1e2e;
+    --typefully-ss-text: #333347;
+    --typefully-ss-muted: #55556b;
+}
+
+.typefully-screenshot-content--dark {
+    --typefully-ss-card-bg: #16161e;
+    --typefully-ss-heading: #f0f0f5;
+    --typefully-ss-text: #d5d5e0;
+    --typefully-ss-muted: #a0a0b8;
+}
+
+.typefully-screenshot-content--custom {
+    /* Colors come from the plugin settings via CSS variables set on the card;
+       muted/heading shades are derived from the chosen text color */
+    --typefully-ss-card-bg: var(--typefully-ss-custom-bg, #ffffff);
+    --typefully-ss-heading: var(--typefully-ss-custom-text, #333347);
+    --typefully-ss-text: var(--typefully-ss-custom-text, #333347);
+    --typefully-ss-muted: color-mix(
+        in srgb,
+        var(--typefully-ss-custom-text, #333347) 70%,
+        var(--typefully-ss-custom-bg, #ffffff)
+    );
+}
+
+/* Text size scales everything inside the card (title, body, watermark)
+   since the inner sizes are all em-based */
+.typefully-screenshot-card--text-small {
+    font-size: 0.85em;
+}
+
+.typefully-screenshot-card--text-medium {
+    font-size: 1em;
+}
+
+.typefully-screenshot-card--text-large {
+    font-size: 1.25em;
+}
+
+.typefully-screenshot-title {
+    margin: 0 0 24px;
+    font-size: 2em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--typefully-ss-heading);
+}
+
+.typefully-screenshot-watermark {
+    position: absolute;
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--typefully-ss-watermark-color, rgba(255, 255, 255, 0.85));
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.typefully-screenshot-watermark--top-left {
+    top: 14px;
+    left: 20px;
+}
+
+.typefully-screenshot-watermark--top-right {
+    top: 14px;
+    right: 20px;
+}
+
+.typefully-screenshot-watermark--bottom-left {
+    bottom: 14px;
+    left: 20px;
+}
+
+.typefully-screenshot-watermark--bottom-right {
+    bottom: 14px;
+    right: 20px;
+}
+
+.typefully-screenshot-markdown {
+    font-size: 1.125em;
+    line-height: 1.7;
+    color: var(--typefully-ss-text);
+}
+
+.typefully-screenshot-markdown p {
+    margin: 0 0 16px;
+}
+
+.typefully-screenshot-markdown h1,
+.typefully-screenshot-markdown h2,
+.typefully-screenshot-markdown h3,
+.typefully-screenshot-markdown h4 {
+    margin: 24px 0 12px;
+    color: var(--typefully-ss-heading);
+}
+
+.typefully-screenshot-markdown a {
+    color: var(--typefully-ss-gradient-start, #667eea);
+    text-decoration: none;
+}
+
+.typefully-screenshot-markdown blockquote {
+    margin: 16px 0;
+    padding-left: 16px;
+    border-left: 4px solid var(--typefully-ss-gradient-start, #667eea);
+    color: var(--typefully-ss-muted);
+}
+
+.typefully-screenshot-markdown img {
+    max-width: 100%;
+    border-radius: 12px;
+}
+
+.typefully-screenshot-markdown ul,
+.typefully-screenshot-markdown ol {
+    margin: 0 0 16px;
+    padding-left: 24px;
+}

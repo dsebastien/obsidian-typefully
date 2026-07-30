@@ -1,7 +1,17 @@
 import { registerWhatsNewView } from './whats-new'
-import { Notice, Plugin } from 'obsidian'
+import { Component, MarkdownRenderer, MarkdownView, Notice, Platform, Plugin } from 'obsidian'
 import type { TFile } from 'obsidian'
-import { DEFAULT_PLATFORM_SETTINGS, DEFAULT_SETTINGS } from './types/plugin-settings.intf'
+import {
+    DEFAULT_PLATFORM_SETTINGS,
+    DEFAULT_SCREENSHOT_SETTINGS,
+    DEFAULT_SETTINGS,
+    SCREENSHOT_ASPECT_RATIOS,
+    SCREENSHOT_BACKGROUND_IDS,
+    SCREENSHOT_CARD_THEMES,
+    SCREENSHOT_FONT_IDS,
+    SCREENSHOT_TEXT_SIZES,
+    SCREENSHOT_WATERMARK_POSITIONS
+} from './types/plugin-settings.intf'
 import type { PluginSettings } from './types/plugin-settings.intf'
 import { TypefullySettingTab } from './settings/settings-tab'
 import { log } from '../utils/log'
@@ -12,8 +22,12 @@ import {
     DRAFT_ACTION_REFRESH_DELAY_MS,
     MARKDOWN_FILE_EXTENSION,
     MSG_API_KEY_CONFIGURATION_REQUIRED,
-    NOTICE_TIMEOUT
+    NOTICE_TIMEOUT,
+    SCREENSHOT_CAPTURE_DELAY_MS
 } from './constants'
+import { captureElementScreenshot } from './utils/capture-element-screenshot.fn'
+import { removeFrontMatter } from './utils/remove-front-matter.fn'
+import { resolveScreenshotStyle } from './utils/resolve-screenshot-style.fn'
 import { isExcalidrawFile } from './utils/is-excalidraw-file.fn'
 import { publishTypefullyDraft } from './utils/publish-typefully-draft.fn'
 import { cleanMarkdownForTypeFully } from './utils/clean-markdown-for-typefully.fn'
@@ -103,6 +117,45 @@ export class TypefullyPlugin extends Plugin {
         })
 
         this.addCommand({
+            id: 'publish-note-screenshot',
+            name: 'Publish a screenshot of the current note',
+            checkCallback: (checking) => {
+                // Screenshot capture relies on Electron APIs (desktop only)
+                if (!Platform.isDesktopApp) {
+                    return false
+                }
+                const view = this.app.workspace.getActiveViewOfType(MarkdownView)
+                if (!view) {
+                    return false
+                }
+                if (!checking) {
+                    void this.publishNoteScreenshot(view)
+                }
+                return true
+            }
+        })
+
+        this.addCommand({
+            id: 'publish-selection-screenshot',
+            name: 'Publish a screenshot of the current selection',
+            checkCallback: (checking) => {
+                // Screenshot capture relies on Electron APIs (desktop only)
+                if (!Platform.isDesktopApp) {
+                    return false
+                }
+                const view = this.app.workspace.getActiveViewOfType(MarkdownView)
+                const selection = view?.editor.getSelection()
+                if (!view || !selection || '' === selection.trim()) {
+                    return false
+                }
+                if (!checking) {
+                    void this.publishSelectionScreenshot(view, selection)
+                }
+                return true
+            }
+        })
+
+        this.addCommand({
             id: 'open-view',
             name: 'Open panel',
             callback: () => {
@@ -178,21 +231,71 @@ export class TypefullyPlugin extends Plugin {
                         }
                     )
                 })
+                if (Platform.isDesktopApp) {
+                    menu.addItem((item) => {
+                        item.setIcon('camera')
+                        item.setTitle(
+                            'Publish a screenshot of the current note to Typefully'
+                        ).onClick(async () => {
+                            const markdownView =
+                                this.app.workspace.getActiveViewOfType(MarkdownView)
+
+                            if (!markdownView) {
+                                new Notice(
+                                    'Please open a note before calling this command',
+                                    NOTICE_TIMEOUT
+                                )
+                                return
+                            }
+
+                            await this.publishNoteScreenshot(markdownView)
+                        })
+                    })
+                    if ('' !== editor.getSelection().trim()) {
+                        menu.addItem((item) => {
+                            item.setIcon('camera')
+                            item.setTitle(
+                                'Publish a screenshot of the current selection to Typefully'
+                            ).onClick(async () => {
+                                const markdownView =
+                                    this.app.workspace.getActiveViewOfType(MarkdownView)
+
+                                if (!markdownView) {
+                                    new Notice(
+                                        'Please open a note before calling this command',
+                                        NOTICE_TIMEOUT
+                                    )
+                                    return
+                                }
+
+                                await this.publishSelectionScreenshot(
+                                    markdownView,
+                                    editor.getSelection()
+                                )
+                            })
+                        })
+                    }
+                }
             })
         )
     }
 
-    async publish(content: string, tags: string[]) {
-        // Check if at least one platform is enabled
+    /**
+     * Check if at least one target platform is enabled in the settings
+     */
+    private hasEnabledPlatform(): boolean {
         const { platforms } = this.settings
-        const hasEnabledPlatform =
+        return (
             platforms.x ||
             platforms.linkedin ||
             platforms.threads ||
             platforms.bluesky ||
             platforms.mastodon
+        )
+    }
 
-        if (!hasEnabledPlatform) {
+    async publish(content: string, tags: string[]) {
+        if (!this.hasEnabledPlatform()) {
             new Notice('Please enable at least one target platform in settings', NOTICE_TIMEOUT)
             return
         }
@@ -230,6 +333,15 @@ export class TypefullyPlugin extends Plugin {
         }
 
         log('Text to publish', 'debug', cleanedContent)
+
+        await this.publishPosts(posts)
+    }
+
+    /**
+     * Publish the given posts as a Typefully draft on all enabled platforms
+     */
+    private async publishPosts(posts: TypefullyPost[]) {
+        const { platforms } = this.settings
 
         // Build platforms object based on settings
         const platformConfig = { enabled: true, posts }
@@ -367,6 +479,165 @@ export class TypefullyPlugin extends Plugin {
 
     async publishContent(content: string, tags: string[]) {
         return this.publish(content, tags)
+    }
+
+    /**
+     * Render the note as a styled, social-media-ready image card, capture it,
+     * and publish it to Typefully as a draft with the image attached.
+     * Desktop only.
+     */
+    async publishNoteScreenshot(view: MarkdownView) {
+        const file = view.file
+        if (!file) {
+            new Notice('Please open a note before calling this command', NOTICE_TIMEOUT)
+            return
+        }
+
+        log('Publishing an image of the current note to Typefully', 'debug')
+
+        // The front matter (note properties) is not part of the image
+        const markdown = removeFrontMatter(await this.app.vault.read(file))
+        await this.publishMarkdownAsImage(markdown, file, view, { allowTitle: true })
+    }
+
+    /**
+     * Render the current selection as a styled image card, capture it, and
+     * publish it to Typefully as a draft with the image attached.
+     * Desktop only.
+     */
+    async publishSelectionScreenshot(view: MarkdownView, selection: string) {
+        const file = view.file
+        if (!file) {
+            new Notice('Please open a note before calling this command', NOTICE_TIMEOUT)
+            return
+        }
+
+        if ('' === selection.trim()) {
+            new Notice('Please select some text first', NOTICE_TIMEOUT)
+            return
+        }
+
+        log('Publishing an image of the current selection to Typefully', 'debug')
+
+        // The note title is not part of a selection image: the selected text
+        // is the whole point
+        await this.publishMarkdownAsImage(selection, file, view, { allowTitle: false })
+    }
+
+    /**
+     * Render the given markdown as a styled image card, capture it, and
+     * publish it to Typefully as a draft with the image attached.
+     */
+    private async publishMarkdownAsImage(
+        markdown: string,
+        file: TFile,
+        view: MarkdownView,
+        options: { allowTitle: boolean }
+    ) {
+        if (!this.hasEnabledPlatform()) {
+            new Notice('Please enable at least one target platform in settings', NOTICE_TIMEOUT)
+            return
+        }
+
+        const client = this.getApiClient()
+        if (!client) {
+            new Notice(MSG_API_KEY_CONFIGURATION_REQUIRED, NOTICE_TIMEOUT)
+            return
+        }
+
+        const socialSetId = this.settings.socialSetId
+        if (!socialSetId) {
+            new Notice(
+                'Please select a social set in the plugin settings before publishing a screenshot',
+                NOTICE_TIMEOUT
+            )
+            return
+        }
+
+        // Build a styled card with the rendered content in an overlay,
+        // capture it, and remove the overlay again. The card (not the
+        // Obsidian UI) is what ends up in the published image.
+        const doc = view.containerEl.doc
+        const overlay = doc.body.createDiv({ cls: 'typefully-screenshot-overlay' })
+        // Short-lived component scoping the markdown rendering, unloaded as
+        // soon as the capture is done
+        const renderComponent = new Component()
+        renderComponent.load()
+        let screenshot: ArrayBuffer | null = null
+        try {
+            const screenshotSettings = this.settings.screenshot
+            const style = resolveScreenshotStyle(screenshotSettings)
+
+            const card = overlay.createDiv({
+                cls: [
+                    'typefully-screenshot-card',
+                    `typefully-screenshot-card--${screenshotSettings.aspectRatio}`,
+                    `typefully-screenshot-card--text-${screenshotSettings.textSize}`
+                ]
+            })
+            card.style.setProperty('--typefully-ss-gradient-start', style.gradientStart)
+            card.style.setProperty('--typefully-ss-gradient-end', style.gradientEnd)
+            card.style.setProperty('--typefully-ss-font', style.fontFamily)
+            card.style.setProperty(
+                '--typefully-ss-custom-bg',
+                screenshotSettings.customCardBackground
+            )
+            card.style.setProperty('--typefully-ss-custom-text', screenshotSettings.customCardText)
+            card.style.setProperty(
+                '--typefully-ss-watermark-color',
+                screenshotSettings.watermarkColor
+            )
+
+            const content = card.createDiv({
+                cls: [
+                    'typefully-screenshot-content',
+                    `typefully-screenshot-content--${screenshotSettings.cardTheme}`
+                ]
+            })
+            if (options.allowTitle && screenshotSettings.showTitle) {
+                content.createEl('h1', { text: file.basename, cls: 'typefully-screenshot-title' })
+            }
+            const body = content.createDiv({ cls: 'typefully-screenshot-markdown' })
+
+            if ('' !== screenshotSettings.watermarkText.trim()) {
+                card.createDiv({
+                    cls: [
+                        'typefully-screenshot-watermark',
+                        `typefully-screenshot-watermark--${screenshotSettings.watermarkPosition}`
+                    ],
+                    text: screenshotSettings.watermarkText.trim()
+                })
+            }
+
+            await MarkdownRenderer.render(this.app, markdown, body, file.path, renderComponent)
+
+            // Give the layout, fonts, and embedded images time to settle
+            await new Promise((resolve) => window.setTimeout(resolve, SCREENSHOT_CAPTURE_DELAY_MS))
+
+            screenshot = await captureElementScreenshot(card)
+        } finally {
+            renderComponent.unload()
+            overlay.remove()
+        }
+
+        if (!screenshot) {
+            new Notice('Failed to capture an image of the current note', NOTICE_TIMEOUT)
+            return
+        }
+
+        const filename = `${file.basename}-screenshot.png`
+        new Notice('Uploading screenshot...', 2000)
+
+        let mediaId: string
+        try {
+            mediaId = await client.uploadAndWaitForMedia(socialSetId, filename, screenshot)
+        } catch (error) {
+            log('Failed to upload the screenshot to Typefully', 'warn', error)
+            new Notice('Failed to upload the screenshot to Typefully', NOTICE_TIMEOUT)
+            return
+        }
+
+        await this.publishPosts([{ text: '', media_ids: [mediaId] }])
     }
 
     /**
@@ -512,6 +783,68 @@ export class TypefullyPlugin extends Plugin {
                 }
             } else {
                 draft.platforms = { ...DEFAULT_PLATFORM_SETTINGS }
+                needToSaveSettings = true
+            }
+
+            // Screenshot (note image) settings - merge with defaults
+            if (loadedSettings.screenshot && typeof loadedSettings.screenshot === 'object') {
+                const loaded = loadedSettings.screenshot
+                draft.screenshot = {
+                    background: SCREENSHOT_BACKGROUND_IDS.includes(loaded.background)
+                        ? loaded.background
+                        : DEFAULT_SCREENSHOT_SETTINGS.background,
+                    customGradientStart:
+                        typeof loaded.customGradientStart === 'string'
+                            ? loaded.customGradientStart
+                            : DEFAULT_SCREENSHOT_SETTINGS.customGradientStart,
+                    customGradientEnd:
+                        typeof loaded.customGradientEnd === 'string'
+                            ? loaded.customGradientEnd
+                            : DEFAULT_SCREENSHOT_SETTINGS.customGradientEnd,
+                    cardTheme: SCREENSHOT_CARD_THEMES.includes(loaded.cardTheme)
+                        ? loaded.cardTheme
+                        : DEFAULT_SCREENSHOT_SETTINGS.cardTheme,
+                    customCardBackground:
+                        typeof loaded.customCardBackground === 'string'
+                            ? loaded.customCardBackground
+                            : DEFAULT_SCREENSHOT_SETTINGS.customCardBackground,
+                    customCardText:
+                        typeof loaded.customCardText === 'string'
+                            ? loaded.customCardText
+                            : DEFAULT_SCREENSHOT_SETTINGS.customCardText,
+                    font: SCREENSHOT_FONT_IDS.includes(loaded.font)
+                        ? loaded.font
+                        : DEFAULT_SCREENSHOT_SETTINGS.font,
+                    customFont:
+                        typeof loaded.customFont === 'string'
+                            ? loaded.customFont
+                            : DEFAULT_SCREENSHOT_SETTINGS.customFont,
+                    textSize: SCREENSHOT_TEXT_SIZES.includes(loaded.textSize)
+                        ? loaded.textSize
+                        : DEFAULT_SCREENSHOT_SETTINGS.textSize,
+                    aspectRatio: SCREENSHOT_ASPECT_RATIOS.includes(loaded.aspectRatio)
+                        ? loaded.aspectRatio
+                        : DEFAULT_SCREENSHOT_SETTINGS.aspectRatio,
+                    showTitle:
+                        typeof loaded.showTitle === 'boolean'
+                            ? loaded.showTitle
+                            : DEFAULT_SCREENSHOT_SETTINGS.showTitle,
+                    watermarkText:
+                        typeof loaded.watermarkText === 'string'
+                            ? loaded.watermarkText
+                            : DEFAULT_SCREENSHOT_SETTINGS.watermarkText,
+                    watermarkPosition: SCREENSHOT_WATERMARK_POSITIONS.includes(
+                        loaded.watermarkPosition
+                    )
+                        ? loaded.watermarkPosition
+                        : DEFAULT_SCREENSHOT_SETTINGS.watermarkPosition,
+                    watermarkColor:
+                        typeof loaded.watermarkColor === 'string'
+                            ? loaded.watermarkColor
+                            : DEFAULT_SCREENSHOT_SETTINGS.watermarkColor
+                }
+            } else {
+                draft.screenshot = { ...DEFAULT_SCREENSHOT_SETTINGS }
                 needToSaveSettings = true
             }
         })

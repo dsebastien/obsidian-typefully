@@ -15,15 +15,17 @@ nav_order: 2
 
 ## Commands
 
-| Command                       | Description                                                                                     |
-| ----------------------------- | ----------------------------------------------------------------------------------------------- |
-| Open Typefully panel          | Opens or reveals the Typefully panel in the right sidebar                                       |
-| Publish the current note      | Creates a Typefully draft from the entire note content (works in both reading and editing view) |
-| Publish the current selection | Creates a Typefully draft from selected text (editing/source view only)                         |
-| List drafts                   | Opens the Typefully panel to the Drafts tab                                                     |
-| View queue                    | Opens the Typefully panel to the Queue tab                                                      |
-| View queue schedule           | Opens the Typefully panel to the Schedule tab                                                   |
-| Refresh drafts                | Re-fetches and re-renders the drafts list if the panel is open                                  |
+| Command                                       | Description                                                                                                                          |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Open Typefully panel                          | Opens or reveals the Typefully panel in the right sidebar                                                                            |
+| Publish the current note                      | Creates a Typefully draft from the entire note content (works in both reading and editing view)                                      |
+| Publish the current selection                 | Creates a Typefully draft from selected text (editing/source view only)                                                              |
+| Publish a screenshot of the current note      | Renders the note as a styled image card and creates a Typefully draft with it attached (desktop only)                                |
+| Publish a screenshot of the current selection | Renders the selected text as a styled image card and creates a Typefully draft with it attached (desktop only, requires a selection) |
+| List drafts                                   | Opens the Typefully panel to the Drafts tab                                                                                          |
+| View queue                                    | Opens the Typefully panel to the Queue tab                                                                                           |
+| View queue schedule                           | Opens the Typefully panel to the Schedule tab                                                                                        |
+| Refresh drafts                                | Re-fetches and re-renders the drafts list if the panel is open                                                                       |
 
 ### Using Commands
 
@@ -40,7 +42,7 @@ The "Publish the current note" command works in both **reading view** and **edit
 
 1. Select text in your note (or right-click anywhere for the full note)
 2. Right-click to open the context menu
-3. Choose "Publish the current note to Typefully" or "Publish the current selection to Typefully"
+3. Choose "Publish the current note to Typefully", "Publish the current selection to Typefully", "Publish a screenshot of the current note to Typefully", or — when text is selected — "Publish a screenshot of the current selection to Typefully" (screenshot entries are desktop only)
 
 ## Features
 
@@ -91,6 +93,22 @@ Supported formats: PNG, JPEG, GIF, WebP, SVG, MP4, PDF (LinkedIn only).
 When Threadify is enabled, images are attached to the thread segment they appear in.
 
 Image syntax is automatically stripped from the published text.
+
+### Screenshot Publishing
+
+The "Publish a screenshot of the current note" command turns the note into a styled, social-media-ready image card — gradient background, white content card with the note title and rendered Markdown — and creates a Typefully draft with that image attached as media (no text content). Ideal for Instagram-style posts.
+
+"Publish a screenshot of the current selection" does the same thing with just the selected text, which is the easiest way to turn one paragraph or quote from a longer note into a post. Selection images never include the note title, whatever the "Show note title" setting is: the selected text is the whole content.
+
+The look of the card is customizable in the plugin settings ("Note images" section): gradient background (presets or custom colors), light/dark card theme, font, aspect ratio (portrait 4:5, square, or landscape 16:9), note title visibility, and an optional watermark (e.g. your handle) in a corner of your choice. See [Configuration](configuration.md).
+
+Notes:
+
+- **Desktop only**: Image capture relies on Electron APIs that are not available on mobile
+- The design is independent of your Obsidian theme, so the image looks the same in dark and light mode
+- Note properties (front matter) are excluded from the image
+- Long notes are clipped to the card: this feature shines with short, quote-style notes
+- Requires an API key and a selected social set in the plugin settings
 
 ### Draft Management
 

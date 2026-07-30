@@ -7,6 +7,7 @@ An Obsidian plugin that integrates with [Typefully](https://typefully.com) to pu
 - Dedicated Typefully panel in the right sidebar with Drafts, Queue, and Schedule tabs
 - Publish notes or selected text to multiple platforms simultaneously
 - Attach vault images to posts (auto-upload via presigned URLs)
+- Turn the current note into a styled, social-media-ready image card and publish it (desktop only)
 - Browse, view, edit, and delete Typefully drafts from the panel
 - Edit queue schedule directly from the panel
 - Schedule posts: immediately, next free slot, or specific date/time

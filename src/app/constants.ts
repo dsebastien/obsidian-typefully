@@ -42,6 +42,43 @@ export const MARKDOWN_LINK_REGEX = /\[(.*?)\]\(.*?\)/g
 export const DRAFT_ACTION_REFRESH_DELAY_MS = 1500
 
 /**
+ * Gradient background presets for the note image card
+ */
+export const SCREENSHOT_BACKGROUNDS: Record<string, { label: string; start: string; end: string }> =
+    {
+        purple: { label: 'Purple haze', start: '#667eea', end: '#764ba2' },
+        sunset: { label: 'Sunset', start: '#f6d365', end: '#fda085' },
+        ocean: { label: 'Ocean', start: '#2193b0', end: '#6dd5ed' },
+        forest: { label: 'Forest', start: '#11998e', end: '#38ef7d' },
+        midnight: { label: 'Midnight', start: '#232526', end: '#414345' }
+    }
+
+/**
+ * Font stacks for the note image card
+ */
+export const SCREENSHOT_FONTS: Record<string, { label: string; family: string }> = {
+    sans: {
+        label: 'Sans-serif',
+        family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    },
+    serif: {
+        label: 'Serif',
+        family: "Georgia, 'Iowan Old Style', 'Times New Roman', serif"
+    },
+    mono: {
+        label: 'Monospace',
+        family: "'JetBrains Mono', Menlo, Consolas, 'Courier New', monospace"
+    }
+}
+
+/**
+ * Delay before capturing a note screenshot.
+ * Gives the context menu / command palette time to close so it does not
+ * end up in the captured image.
+ */
+export const SCREENSHOT_CAPTURE_DELAY_MS = 200
+
+/**
  * Media upload polling configuration
  */
 export const MEDIA_POLL_INITIAL_DELAY_MS = 200

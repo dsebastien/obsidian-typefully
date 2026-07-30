@@ -4,13 +4,49 @@ import type TypefullyPlugin from '../../main'
 import { log } from '../../utils/log'
 import { produce } from 'immer'
 import type { Draft } from 'immer'
-import type { PlatformSettings, PluginSettings } from '../types/plugin-settings.intf'
-import { PLATFORM_NAMES } from '../types/plugin-settings.intf'
+import type {
+    PlatformSettings,
+    PluginSettings,
+    ScreenshotAspectRatio,
+    ScreenshotBackgroundId,
+    ScreenshotCardTheme,
+    ScreenshotFontId,
+    ScreenshotSettings,
+    ScreenshotTextSize,
+    ScreenshotWatermarkPosition
+} from '../types/plugin-settings.intf'
+import {
+    PLATFORM_NAMES,
+    SCREENSHOT_ASPECT_RATIOS,
+    SCREENSHOT_BACKGROUND_IDS,
+    SCREENSHOT_FONT_IDS,
+    SCREENSHOT_TEXT_SIZES,
+    SCREENSHOT_WATERMARK_POSITIONS
+} from '../types/plugin-settings.intf'
 import { fetchSocialSets } from '../utils/publish-typefully-draft.fn'
 import { formatExcludedTags, parseExcludedTags } from '../utils/parse-excluded-tags.fn'
-import { NOTICE_TIMEOUT } from '../constants'
+import { NOTICE_TIMEOUT, SCREENSHOT_BACKGROUNDS, SCREENSHOT_FONTS } from '../constants'
 import { BUY_ME_A_COFFEE_BADGE_DATA_URL } from '../assets/buy-me-a-coffee'
 import { renderSupportSection } from '../ui/support-links'
+
+const ASPECT_RATIO_LABELS: Record<ScreenshotAspectRatio, string> = {
+    portrait: 'Portrait (4:5)',
+    square: 'Square (1:1)',
+    landscape: 'Landscape (16:9)'
+}
+
+const TEXT_SIZE_LABELS: Record<ScreenshotTextSize, string> = {
+    small: 'Small',
+    medium: 'Medium',
+    large: 'Large'
+}
+
+const WATERMARK_POSITION_LABELS: Record<ScreenshotWatermarkPosition, string> = {
+    'top-left': 'Top left',
+    'top-right': 'Top right',
+    'bottom-left': 'Bottom left',
+    'bottom-right': 'Bottom right'
+}
 
 export class TypefullySettingTab extends PluginSettingTab {
     plugin: TypefullyPlugin
@@ -31,6 +67,7 @@ export class TypefullySettingTab extends PluginSettingTab {
         this.renderSocialSetSection(containerEl)
         this.renderPlatformsSection(containerEl)
         this.renderPublishingOptions(containerEl)
+        this.renderNoteImageSection(containerEl)
         this.renderTagsSection(containerEl)
         this.renderFollowButton(containerEl)
         this.renderSupportHeader(containerEl)
@@ -397,6 +434,228 @@ export class TypefullySettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings()
                 })
                 textArea.inputEl.addClass('typefully-excluded-tags-input')
+            })
+    }
+
+    /**
+     * Update the screenshot (note image) settings and persist them
+     */
+    private async updateScreenshotSettings(
+        update: (draft: Draft<ScreenshotSettings>) => void
+    ): Promise<void> {
+        this.plugin.settings = produce(this.plugin.settings, (draft: Draft<PluginSettings>) => {
+            update(draft.screenshot)
+        })
+        await this.plugin.saveSettings()
+    }
+
+    renderNoteImageSection(containerEl: HTMLElement) {
+        new Setting(containerEl).setName('Note images').setHeading()
+
+        containerEl.createEl('p', {
+            text: 'Appearance of the image card created by the "Publish a screenshot of the current note" command.',
+            cls: 'setting-item-description'
+        })
+
+        const screenshot = this.plugin.settings.screenshot
+
+        new Setting(containerEl)
+            .setName('Background')
+            .setDesc('Gradient displayed behind the content card.')
+            .addDropdown((dropdown) => {
+                for (const id of SCREENSHOT_BACKGROUND_IDS) {
+                    dropdown.addOption(
+                        id,
+                        id === 'custom' ? 'Custom' : (SCREENSHOT_BACKGROUNDS[id]?.label ?? id)
+                    )
+                }
+                dropdown.setValue(screenshot.background)
+                dropdown.onChange(async (value) => {
+                    await this.updateScreenshotSettings((draft) => {
+                        draft.background = value as ScreenshotBackgroundId
+                    })
+                    this.display() // Refresh to show/hide the custom color pickers
+                })
+            })
+
+        if (screenshot.background === 'custom') {
+            new Setting(containerEl)
+                .setName('Custom gradient colors')
+                .setDesc('Start and end colors of the background gradient.')
+                .addColorPicker((picker) => {
+                    picker.setValue(screenshot.customGradientStart)
+                    picker.onChange(async (value: string) => {
+                        await this.updateScreenshotSettings((draft) => {
+                            draft.customGradientStart = value
+                        })
+                    })
+                })
+                .addColorPicker((picker) => {
+                    picker.setValue(screenshot.customGradientEnd)
+                    picker.onChange(async (value: string) => {
+                        await this.updateScreenshotSettings((draft) => {
+                            draft.customGradientEnd = value
+                        })
+                    })
+                })
+        }
+
+        new Setting(containerEl)
+            .setName('Card theme')
+            .setDesc('Colors of the content card.')
+            .addDropdown((dropdown) => {
+                dropdown.addOption('light', 'Light (white card, dark text)')
+                dropdown.addOption('dark', 'Dark (dark card, light text)')
+                dropdown.addOption('custom', 'Custom colors')
+                dropdown.setValue(screenshot.cardTheme)
+                dropdown.onChange(async (value) => {
+                    await this.updateScreenshotSettings((draft) => {
+                        draft.cardTheme = value as ScreenshotCardTheme
+                    })
+                    this.display() // Refresh to show/hide the custom color pickers
+                })
+            })
+
+        if (screenshot.cardTheme === 'custom') {
+            new Setting(containerEl)
+                .setName('Custom card colors')
+                .setDesc('Background and text colors of the content card.')
+                .addColorPicker((picker) => {
+                    picker.setValue(screenshot.customCardBackground)
+                    picker.onChange(async (value: string) => {
+                        await this.updateScreenshotSettings((draft) => {
+                            draft.customCardBackground = value
+                        })
+                    })
+                })
+                .addColorPicker((picker) => {
+                    picker.setValue(screenshot.customCardText)
+                    picker.onChange(async (value: string) => {
+                        await this.updateScreenshotSettings((draft) => {
+                            draft.customCardText = value
+                        })
+                    })
+                })
+        }
+
+        new Setting(containerEl)
+            .setName('Font')
+            .setDesc('Font used for the text on the card.')
+            .addDropdown((dropdown) => {
+                for (const id of SCREENSHOT_FONT_IDS) {
+                    dropdown.addOption(
+                        id,
+                        id === 'custom' ? 'Custom' : (SCREENSHOT_FONTS[id]?.label ?? id)
+                    )
+                }
+                dropdown.setValue(screenshot.font)
+                dropdown.onChange(async (value) => {
+                    await this.updateScreenshotSettings((draft) => {
+                        draft.font = value as ScreenshotFontId
+                    })
+                    this.display() // Refresh to show/hide the custom font input
+                })
+            })
+
+        if (screenshot.font === 'custom') {
+            new Setting(containerEl)
+                .setName('Custom font family')
+                .setDesc(
+                    'CSS font family, e.g. "Inter" or "Comic Sans MS". The font must be installed on your system.'
+                )
+                .addText((text) => {
+                    text.setPlaceholder('Inter')
+                    text.setValue(screenshot.customFont)
+                    text.onChange(async (value: string) => {
+                        await this.updateScreenshotSettings((draft) => {
+                            draft.customFont = value
+                        })
+                    })
+                })
+        }
+
+        new Setting(containerEl)
+            .setName('Text size')
+            .setDesc('Overall size of the text on the card.')
+            .addDropdown((dropdown) => {
+                for (const id of SCREENSHOT_TEXT_SIZES) {
+                    dropdown.addOption(id, TEXT_SIZE_LABELS[id])
+                }
+                dropdown.setValue(screenshot.textSize)
+                dropdown.onChange(async (value) => {
+                    await this.updateScreenshotSettings((draft) => {
+                        draft.textSize = value as ScreenshotTextSize
+                    })
+                })
+            })
+
+        new Setting(containerEl)
+            .setName('Format')
+            .setDesc('Aspect ratio of the image.')
+            .addDropdown((dropdown) => {
+                for (const id of SCREENSHOT_ASPECT_RATIOS) {
+                    dropdown.addOption(id, ASPECT_RATIO_LABELS[id])
+                }
+                dropdown.setValue(screenshot.aspectRatio)
+                dropdown.onChange(async (value) => {
+                    await this.updateScreenshotSettings((draft) => {
+                        draft.aspectRatio = value as ScreenshotAspectRatio
+                    })
+                })
+            })
+
+        new Setting(containerEl)
+            .setName('Show note title')
+            .setDesc('If enabled, the note title is displayed at the top of the card.')
+            .addToggle((toggle: ToggleComponent) => {
+                toggle.setValue(screenshot.showTitle)
+                toggle.onChange(async (newValue: boolean) => {
+                    await this.updateScreenshotSettings((draft) => {
+                        draft.showTitle = newValue
+                    })
+                })
+            })
+
+        new Setting(containerEl)
+            .setName('Watermark text')
+            .setDesc(
+                'Short text stamped on the image, e.g. your name or handle. Leave empty to disable.'
+            )
+            .addText((text) => {
+                text.setPlaceholder('dSebastien')
+                text.setValue(screenshot.watermarkText)
+                text.onChange(async (value: string) => {
+                    await this.updateScreenshotSettings((draft) => {
+                        draft.watermarkText = value
+                    })
+                })
+            })
+
+        new Setting(containerEl)
+            .setName('Watermark position')
+            .setDesc('Corner of the image where the watermark appears.')
+            .addDropdown((dropdown) => {
+                for (const id of SCREENSHOT_WATERMARK_POSITIONS) {
+                    dropdown.addOption(id, WATERMARK_POSITION_LABELS[id])
+                }
+                dropdown.setValue(screenshot.watermarkPosition)
+                dropdown.onChange(async (value) => {
+                    await this.updateScreenshotSettings((draft) => {
+                        draft.watermarkPosition = value as ScreenshotWatermarkPosition
+                    })
+                })
+            })
+
+        new Setting(containerEl)
+            .setName('Watermark color')
+            .setDesc('Color of the watermark text.')
+            .addColorPicker((picker) => {
+                picker.setValue(screenshot.watermarkColor)
+                picker.onChange(async (value: string) => {
+                    await this.updateScreenshotSettings((draft) => {
+                        draft.watermarkColor = value
+                    })
+                })
             })
     }
 
