@@ -1263,9 +1263,22 @@
     color: var(--typefully-ss-heading);
 }
 
+/* MarkdownRenderer emits Obsidian's own link markup: external links carry an
+   arrow icon as a background image plus trailing padding, and unresolved
+   internal links are faded and dash-underlined. Neither reads well in a static
+   image, and `.internal-link.is-unresolved` outweighs a plain descendant
+   selector, so the reset below has to match its specificity. */
 .typefully-screenshot-markdown a {
     color: var(--typefully-ss-gradient-start, #667eea);
     text-decoration: none;
+    background-image: none;
+    padding: 0;
+}
+
+.typefully-screenshot-markdown a.is-unresolved {
+    color: var(--typefully-ss-gradient-start, #667eea);
+    text-decoration: none;
+    opacity: 1;
 }
 
 .typefully-screenshot-markdown blockquote {
