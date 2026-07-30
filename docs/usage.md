@@ -36,6 +36,8 @@ nav_order: 2
 3. Search for "Typefully"
 4. Select the desired command
 
+![The Obsidian command palette filtered on "typefully", listing the plugin's commands](images/commands.png)
+
 The "Publish the current note" command works in both **reading view** and **editing/source view**. The "Publish the current selection" command requires editing/source view since it needs an active editor to read the selection.
 
 **Context Menu (editing/source view only):**
@@ -43,6 +45,8 @@ The "Publish the current note" command works in both **reading view** and **edit
 1. Select text in your note (or right-click anywhere for the full note)
 2. Right-click to open the context menu
 3. Choose "Publish the current note to Typefully", "Publish the current selection to Typefully", "Publish a screenshot of the current note to Typefully", or — when text is selected — "Publish a screenshot of the current selection to Typefully" (screenshot entries are desktop only)
+
+![The editor context menu showing the four Typefully entries: publish the note, publish the selection, and publish a screenshot of either](images/context-menu.png)
 
 ## Features
 
@@ -60,11 +64,12 @@ Enable/disable platforms individually or use "Enable all platforms" for convenie
 
 ### Typefully Panel
 
-The Typefully panel opens in the right sidebar and persists alongside your notes. It has four tabs:
+The Typefully panel opens in the right sidebar and persists alongside your notes. It has five tabs:
 
 - **Drafts**: Browse, filter, sort, view, edit, and delete your Typefully drafts
 - **Queue**: View upcoming scheduled slots for the next 7 days, click drafts to see details
-- **Schedule**: Edit your queue schedule (toggle days, add/remove time slots, save changes)
+- **Posted**: Browse the posts you already published
+- **Schedule**: Edit your queue schedule (add, adjust, and remove the time slots of each day)
 - **Analytics**: View post performance metrics for X (Twitter)
 
 Open the panel via the ribbon icon, the "Open Typefully panel" command, or any of the draft/queue commands.
@@ -123,6 +128,8 @@ Open the Typefully panel (Drafts tab) to manage your drafts:
 - **Delete** drafts with confirmation
 - **Paginate** through results with "Load more"
 
+![The Drafts tab of the Typefully panel, listing drafts with publish now, next free slot, and delete buttons](images/panel-drafts.png)
+
 ### Queue View
 
 Open the Typefully panel (Queue tab) to see your upcoming schedule:
@@ -130,6 +137,18 @@ Open the Typefully panel (Queue tab) to see your upcoming schedule:
 - Shows scheduled slots for the next 7 days
 - Each slot shows either a draft preview or "Available"
 - Click a draft preview to view its full details
+
+![The Queue tab showing time slots per day, some holding a draft preview and others free](images/panel-queue.png)
+
+### Queue Schedule Editing
+
+Open the Typefully panel (Schedule tab) to edit the posting schedule your queue draws from:
+
+- Shows your Typefully timezone and the time slots of each day
+- Add slots with "+ Add time", drop them with "Remove", and adjust any time in place
+- Click "Save schedule" to push the new schedule to Typefully, or "Cancel" to discard
+
+![The Schedule tab showing the posting time slots of each weekday, with add and remove controls](images/panel-schedule.png)
 
 ### Analytics
 
@@ -142,6 +161,8 @@ Open the Typefully panel (Analytics tab) to view performance metrics for your X 
 - **Posts table**: Sortable list of all posts with detailed metrics (sort by impressions or date)
 
 Data loads automatically when you select a date range. The default view shows the last 30 days.
+
+![The Analytics tab showing impressions, engagement and post totals, a top posts chart, an engagement breakdown, and a sortable posts table](images/panel-analytics.png)
 
 ### Threadify (Thread Creation)
 

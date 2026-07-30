@@ -59,7 +59,7 @@ Your user profile (name, email, avatar) is displayed at the top of the settings 
 
 ### Note Images
 
-Appearance of the image card created by the "Publish a screenshot of the current note" command.
+Appearance of the image card created by the "Publish a screenshot of the current note" and "Publish a screenshot of the current selection" commands.
 
 | Setting                | Type     | Default             | Description                                                                                |
 | ---------------------- | -------- | ------------------- | ------------------------------------------------------------------------------------------ |
@@ -89,7 +89,7 @@ Tags can also be selected per-draft in the publish options modal.
 
 When configured, this section shows your current Typefully queue schedule (read-only).
 
-To edit the schedule, open the Typefully panel (Schedule tab) where you can toggle days, add/remove time slots, and save changes.
+To edit the schedule, open the Typefully panel (Schedule tab) where you can add, adjust, and remove the time slots of each day, then save your changes.
 
 ## Advanced Configuration
 

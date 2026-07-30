@@ -12,8 +12,8 @@ Publish your Obsidian notes to social media platforms through [Typefully](https:
 
 - **Multi-platform publishing**: Publish to X, LinkedIn, Threads, Bluesky, and Mastodon simultaneously
 - **Image attachments**: Embed vault images in your posts with automatic upload
-- **Screenshot publishing**: Turn the current note into a styled, social-media-ready image card and publish it (desktop only)
-- **Dedicated Typefully panel**: Persistent sidebar view with Drafts, Queue, and Schedule tabs
+- **Screenshot publishing**: Turn the current note or selection into a styled, social-media-ready image card and publish it (desktop only)
+- **Dedicated Typefully panel**: Persistent sidebar view with Drafts, Queue, Posted, Schedule, and Analytics tabs
 - **Draft management**: Browse, view, edit, delete, and schedule drafts from the panel
 - **Queue schedule editing**: Edit your posting schedule directly from the panel
 - **Publish modal**: Set schedule, title, notes, tags, and X-specific settings per draft
