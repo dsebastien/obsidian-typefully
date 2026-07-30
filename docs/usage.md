@@ -96,7 +96,9 @@ Image syntax is automatically stripped from the published text.
 
 ### Screenshot Publishing
 
-The "Publish a screenshot of the current note" command turns the note into a styled, social-media-ready image card — gradient background, white content card with the note title and rendered Markdown — and creates a Typefully draft with that image attached as media (no text content). Ideal for Instagram-style posts.
+The "Publish a screenshot of the current note" command turns the note into a styled, social-media-ready image card — gradient background, content card with the note title and rendered Markdown — and creates a Typefully draft with that image attached as media (no text content). Ideal for Instagram-style posts.
+
+![A quote rendered as a Typefully note image: a dark content card on a blue-to-pink gradient, with a watermark in the bottom right corner](images/note-image-example.png)
 
 "Publish a screenshot of the current selection" does the same thing with just the selected text, which is the easiest way to turn one paragraph or quote from a longer note into a post. Selection images never include the note title, whatever the "Show note title" setting is: the selected text is the whole content.
 
