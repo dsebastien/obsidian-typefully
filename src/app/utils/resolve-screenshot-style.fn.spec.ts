@@ -3,6 +3,7 @@ import { resolveScreenshotStyle } from './resolve-screenshot-style.fn'
 import { DEFAULT_SCREENSHOT_SETTINGS } from '../types/plugin-settings.intf'
 import type { ScreenshotSettings } from '../types/plugin-settings.intf'
 import { SCREENSHOT_BACKGROUNDS, SCREENSHOT_FONTS } from '../constants'
+import { LINK_COLOR_ON_DARK, LINK_COLOR_ON_LIGHT } from './resolve-link-color.fn'
 
 const makeSettings = (overrides: Partial<ScreenshotSettings>): ScreenshotSettings => ({
     ...DEFAULT_SCREENSHOT_SETTINGS,
@@ -51,5 +52,26 @@ describe('resolveScreenshotStyle', () => {
     it('should fall back to the default font when the custom font is blank', () => {
         const style = resolveScreenshotStyle(makeSettings({ font: 'custom', customFont: '   ' }))
         expect(style.fontFamily).toBe(SCREENSHOT_FONTS['sans']!.family)
+    })
+
+    it('should derive the link color from the card theme', () => {
+        expect(resolveScreenshotStyle(makeSettings({ cardTheme: 'dark' })).linkColor).toBe(
+            LINK_COLOR_ON_DARK
+        )
+        expect(resolveScreenshotStyle(makeSettings({ cardTheme: 'light' })).linkColor).toBe(
+            LINK_COLOR_ON_LIGHT
+        )
+    })
+
+    it('should derive the link color from a custom card background', () => {
+        const style = resolveScreenshotStyle(
+            makeSettings({ cardTheme: 'custom', customCardBackground: '#101014' })
+        )
+        expect(style.linkColor).toBe(LINK_COLOR_ON_DARK)
+    })
+
+    it('should use the configured link color when one is set', () => {
+        const style = resolveScreenshotStyle(makeSettings({ linkColor: '#ff8800' }))
+        expect(style.linkColor).toBe('#ff8800')
     })
 })

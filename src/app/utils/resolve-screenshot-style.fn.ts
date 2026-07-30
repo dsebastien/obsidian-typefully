@@ -1,11 +1,13 @@
 import type { ScreenshotSettings } from '../types/plugin-settings.intf'
 import { DEFAULT_SCREENSHOT_SETTINGS } from '../types/plugin-settings.intf'
-import { SCREENSHOT_BACKGROUNDS, SCREENSHOT_FONTS } from '../constants'
+import { SCREENSHOT_BACKGROUNDS, SCREENSHOT_CARD_BACKGROUNDS, SCREENSHOT_FONTS } from '../constants'
+import { resolveLinkColor } from './resolve-link-color.fn'
 
 export interface ScreenshotStyle {
     gradientStart: string
     gradientEnd: string
     fontFamily: string
+    linkColor: string
 }
 
 /**
@@ -35,5 +37,13 @@ export const resolveScreenshotStyle = (settings: ScreenshotSettings): Screenshot
         fontFamily = (SCREENSHOT_FONTS[settings.font] ?? defaultFont).family
     }
 
-    return { gradientStart, gradientEnd, fontFamily }
+    // Links are coloured against the card, not the gradient behind it
+    const cardBackground =
+        'custom' === settings.cardTheme
+            ? settings.customCardBackground || DEFAULT_SCREENSHOT_SETTINGS.customCardBackground
+            : (SCREENSHOT_CARD_BACKGROUNDS[settings.cardTheme] ??
+              SCREENSHOT_CARD_BACKGROUNDS[DEFAULT_SCREENSHOT_SETTINGS.cardTheme]!)
+    const linkColor = resolveLinkColor(cardBackground, settings.linkColor)
+
+    return { gradientStart, gradientEnd, fontFamily, linkColor }
 }

@@ -598,6 +598,7 @@ export class TypefullyPlugin extends Plugin {
             card.style.setProperty('--typefully-ss-gradient-start', style.gradientStart)
             card.style.setProperty('--typefully-ss-gradient-end', style.gradientEnd)
             card.style.setProperty('--typefully-ss-font', style.fontFamily)
+            card.style.setProperty('--typefully-ss-link', style.linkColor)
             card.style.setProperty(
                 '--typefully-ss-custom-bg',
                 screenshotSettings.customCardBackground
@@ -883,7 +884,11 @@ export class TypefullyPlugin extends Plugin {
                     watermarkColor:
                         typeof loaded.watermarkColor === 'string'
                             ? loaded.watermarkColor
-                            : DEFAULT_SCREENSHOT_SETTINGS.watermarkColor
+                            : DEFAULT_SCREENSHOT_SETTINGS.watermarkColor,
+                    linkColor:
+                        typeof loaded.linkColor === 'string'
+                            ? loaded.linkColor
+                            : DEFAULT_SCREENSHOT_SETTINGS.linkColor
                 }
             } else {
                 draft.screenshot = { ...DEFAULT_SCREENSHOT_SETTINGS }

@@ -1269,14 +1269,16 @@
    image, and `.internal-link.is-unresolved` outweighs a plain descendant
    selector, so the reset below has to match its specificity. */
 .typefully-screenshot-markdown a {
-    color: var(--typefully-ss-gradient-start, #667eea);
+    color: var(--typefully-ss-link, #1a56db);
     text-decoration: none;
     background-image: none;
     padding: 0;
+    /* Bare URLs are long and would otherwise run past the card edge */
+    overflow-wrap: anywhere;
 }
 
 .typefully-screenshot-markdown a.is-unresolved {
-    color: var(--typefully-ss-gradient-start, #667eea);
+    color: var(--typefully-ss-link, #1a56db);
     text-decoration: none;
     opacity: 1;
 }

@@ -51,6 +51,11 @@ export interface ScreenshotSettings {
     watermarkText: string
     watermarkPosition: ScreenshotWatermarkPosition
     watermarkColor: string
+    /**
+     * Colour used for links on the note image.
+     * Empty string derives a readable colour from the card background.
+     */
+    linkColor: string
 }
 
 export interface PluginSettings {
@@ -105,7 +110,8 @@ export const DEFAULT_SCREENSHOT_SETTINGS: ScreenshotSettings = {
     showTitle: true,
     watermarkText: '',
     watermarkPosition: 'bottom-right',
-    watermarkColor: '#ffffff'
+    watermarkColor: '#ffffff',
+    linkColor: ''
 }
 
 export const DEFAULT_PLATFORM_SETTINGS: PlatformSettings = {

@@ -110,3 +110,13 @@ export const PLATFORM_MEDIA_LIMITS: Record<string, number> = {
     bluesky: 4,
     mastodon: 4
 }
+
+/**
+ * Card background colours per theme, mirroring the
+ * `.typefully-screenshot-content--*` rules in the stylesheet. Kept here so the
+ * automatic link colour can be derived without reading computed styles.
+ */
+export const SCREENSHOT_CARD_BACKGROUNDS: Record<string, string> = {
+    light: '#ffffff',
+    dark: '#16161e'
+}

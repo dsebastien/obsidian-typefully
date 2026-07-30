@@ -28,6 +28,7 @@ import { formatExcludedTags, parseExcludedTags } from '../utils/parse-excluded-t
 import { NOTICE_TIMEOUT, SCREENSHOT_BACKGROUNDS, SCREENSHOT_FONTS } from '../constants'
 import { BUY_ME_A_COFFEE_BADGE_DATA_URL } from '../assets/buy-me-a-coffee'
 import { renderSupportSection } from '../ui/support-links'
+import { resolveScreenshotStyle } from '../utils/resolve-screenshot-style.fn'
 
 const ASPECT_RATIO_LABELS: Record<ScreenshotAspectRatio, string> = {
     portrait: 'Portrait (4:5)',
@@ -657,6 +658,38 @@ export class TypefullySettingTab extends PluginSettingTab {
                     })
                 })
             })
+
+        const linkColorSetting = new Setting(containerEl)
+            .setName('Link color')
+            .setDesc(
+                '' === screenshot.linkColor
+                    ? 'Automatic: a readable color is derived from the card background. Pick one to override it.'
+                    : 'Color of links on the image. Reset to go back to the automatic color.'
+            )
+        linkColorSetting.addColorPicker((picker) => {
+            // The picker always holds a color, so show the automatic one when
+            // nothing has been chosen rather than an arbitrary default
+            picker.setValue(resolveScreenshotStyle(screenshot).linkColor)
+            picker.onChange(async (value: string) => {
+                await this.updateScreenshotSettings((draft) => {
+                    draft.linkColor = value
+                })
+                this.display() // Refresh to update the description
+            })
+        })
+        if ('' !== screenshot.linkColor) {
+            linkColorSetting.addExtraButton((button) => {
+                button
+                    .setIcon('rotate-ccw')
+                    .setTooltip('Reset to the automatic color')
+                    .onClick(async () => {
+                        await this.updateScreenshotSettings((draft) => {
+                            draft.linkColor = ''
+                        })
+                        this.display() // Refresh to show the derived color
+                    })
+            })
+        }
     }
 
     renderUserProfile(containerEl: HTMLElement) {
