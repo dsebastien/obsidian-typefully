@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.8.0](https://github.com/dsebastien/obsidian-typefully/compare/3.7.0...3.8.0) (2026-07-30)
+
+### Features
+
+- **plugin:** publish notes and selections as branded images ([bfbcf8e](https://github.com/dsebastien/obsidian-typefully/commit/bfbcf8ede2bb70b7a61e2f0f7ac6cf641745466d))
+- **plugin:** show what's new in a tab instead of a modal dialog ([a3d0311](https://github.com/dsebastien/obsidian-typefully/commit/a3d0311dfc44627f90024543027374be97ab42a6))
+- **plugin:** surface support CTAs everywhere users can see them ([35331c8](https://github.com/dsebastien/obsidian-typefully/commit/35331c8fe84cc0b2a30a55aa47087e3cc15f5b43))
+
+### Bug Fixes
+
+- **plugin:** make media uploads work again ([5ec8508](https://github.com/dsebastien/obsidian-typefully/commit/5ec8508463e61dfe1547b554c0a6007ec157d439))
+- **plugin:** stop crashing on deferred panel leaves ([29611a7](https://github.com/dsebastien/obsidian-typefully/commit/29611a7431de89cd3106133d9cc8c10105de7f51))
+
 ## [3.7.0](https://github.com/dsebastien/obsidian-typefully/compare/3.6.0...3.7.0) (2026-07-29)
 
 ### Features

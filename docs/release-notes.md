@@ -1,5 +1,18 @@
 # Release Notes
 
+## 3.8.0 (2026-07-30)
+
+### Features
+
+- **plugin:** publish notes and selections as branded images
+- **plugin:** show what's new in a tab instead of a modal dialog
+- **plugin:** surface support CTAs everywhere users can see them
+
+### Bug Fixes
+
+- **plugin:** make media uploads work again
+- **plugin:** stop crashing on deferred panel leaves
+
 ## 3.7.0 (2026-07-29)
 
 ### Features
