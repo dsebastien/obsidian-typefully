@@ -49,6 +49,8 @@ export const uploadVaultMedia = async (
             return null
         }
 
+        // The MIME type is not sent to the API (the presigned upload only
+        // accepts raw bytes), but it gates unsupported media types early
         const mimeType = getMimeType(file.name)
         if (!mimeType) {
             log(`Unsupported media type: ${file.name}`, 'warn')
@@ -56,7 +58,7 @@ export const uploadVaultMedia = async (
         }
 
         const data = await app.vault.readBinary(file)
-        const mediaId = await client.uploadAndWaitForMedia(socialSetId, file.name, data, mimeType)
+        const mediaId = await client.uploadAndWaitForMedia(socialSetId, file.name, data)
 
         return { mediaId, originalPath: imagePath }
     } catch (error) {

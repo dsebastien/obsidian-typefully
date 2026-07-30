@@ -33,6 +33,7 @@ import type {
     TypefullyAnalyticsParams
 } from '../types/typefully-api.intf'
 import { log } from '../../utils/log'
+import { sanitizeMediaFilename } from '../utils/sanitize-media-filename.fn'
 
 export class TypefullyApiRequestError extends Error {
     statusCode: number
@@ -129,21 +130,44 @@ export class TypefullyApiClient {
         return this.request<TypefullyMediaUploadResponse>('POST', path, payload)
     }
 
-    async uploadMediaFile(
-        uploadUrl: string,
-        data: ArrayBuffer,
-        contentType: string
-    ): Promise<void> {
-        // Presigned S3 URLs may reject extra headers added by Obsidian's requestUrl,
-        // so we try requestUrl first and fall back to native fetch.
-        // Presigned S3 URLs may reject extra headers added by Obsidian's requestUrl.
-        // We use requestUrl which is the Obsidian-approved network API.
-        await requestUrl({
-            url: uploadUrl,
-            method: 'PUT',
-            headers: { 'Content-Type': contentType },
-            body: data
-        })
+    async uploadMediaFile(uploadUrl: string, data: ArrayBuffer): Promise<void> {
+        // The presigned URL expects a plain PUT request with the raw file
+        // bytes and no extra headers (a Content-Type header breaks the S3
+        // signature). requestUrl goes first because it bypasses CORS — the
+        // upload bucket does not allow the app://obsidian.md origin, so
+        // native fetch is only a last-resort fallback.
+        let requestUrlFailure: unknown
+        try {
+            const response = await requestUrl({
+                url: uploadUrl,
+                method: 'PUT',
+                body: data,
+                throw: false
+            })
+            if (response.status >= 200 && response.status < 300) {
+                return
+            }
+            requestUrlFailure = `status ${response.status}: ${response.text}`
+        } catch (error) {
+            requestUrlFailure = error
+        }
+        log('Presigned media upload via requestUrl failed', 'warn', requestUrlFailure)
+
+        // eslint-disable-next-line no-restricted-globals -- last-resort fallback after requestUrl already failed above; the presigned URL requires a plain PUT with raw bytes
+        const fetchResponse = await fetch(uploadUrl, { method: 'PUT', body: data })
+        if (!fetchResponse.ok) {
+            const body = await fetchResponse.text()
+            log(
+                `Presigned media upload via fetch failed with status ${fetchResponse.status}`,
+                'warn',
+                body
+            )
+            throw new TypefullyApiRequestError(
+                `Media file upload failed with status ${fetchResponse.status}`,
+                fetchResponse.status,
+                body
+            )
+        }
     }
 
     async getMediaStatus(socialSetId: string, mediaId: string): Promise<TypefullyMediaStatus> {
@@ -158,11 +182,12 @@ export class TypefullyApiClient {
     async uploadAndWaitForMedia(
         socialSetId: string,
         filename: string,
-        data: ArrayBuffer,
-        contentType: string
+        data: ArrayBuffer
     ): Promise<string> {
-        const { media_id, upload_url } = await this.requestMediaUpload(socialSetId, { filename })
-        await this.uploadMediaFile(upload_url, data, contentType)
+        const { media_id, upload_url } = await this.requestMediaUpload(socialSetId, {
+            file_name: sanitizeMediaFilename(filename)
+        })
+        await this.uploadMediaFile(upload_url, data)
 
         let delay = MEDIA_POLL_INITIAL_DELAY_MS
         const deadline = Date.now() + MEDIA_POLL_MAX_TIMEOUT_MS

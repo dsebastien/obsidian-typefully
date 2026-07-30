@@ -178,11 +178,62 @@ describe('TypefullyApiClient', () => {
                 json: { media_id: 'media-1', upload_url: 'https://s3.example.com/upload' }
             })
 
-            const result = await client.requestMediaUpload('123', { filename: 'image.png' })
+            const result = await client.requestMediaUpload('123', { file_name: 'image.png' })
 
             expect(result.media_id).toBe('media-1')
             expect(result.upload_url).toBe('https://s3.example.com/upload')
         })
+    })
+
+    describe('uploadAndWaitForMedia', () => {
+        test('sanitizes the filename before requesting the upload', async () => {
+            // The status polling relies on window.setTimeout, which does not
+            // exist in the bun test environment
+            const globalRef = globalThis as { window?: unknown }
+            const originalWindow = globalRef.window
+            globalRef.window = {
+                setTimeout: (fn: () => void) => setTimeout(fn, 0)
+            }
+
+            try {
+                await runUploadAndWaitForMediaTest()
+            } finally {
+                if (originalWindow === undefined) {
+                    delete globalRef.window
+                } else {
+                    globalRef.window = originalWindow
+                }
+            }
+        })
+
+        const runUploadAndWaitForMediaTest = async () => {
+            mockRequestUrl
+                .mockResolvedValueOnce({
+                    status: 200,
+                    json: { media_id: 'media-1', upload_url: 'https://s3.example.com/upload' }
+                })
+                // PUT of the file bytes to the presigned URL
+                .mockResolvedValueOnce({ status: 200, json: {} })
+                // Status polling
+                .mockResolvedValueOnce({
+                    status: 200,
+                    json: { media_id: 'media-1', status: 'ready' }
+                })
+
+            const result = await client.uploadAndWaitForMedia(
+                '123',
+                'My Note-screenshot.png',
+                new ArrayBuffer(4)
+            )
+
+            expect(result).toBe('media-1')
+            // The mock is typed without arguments, so the recorded call args
+            // need an explicit cast to inspect the request body
+            const [uploadRequest] = mockRequestUrl.mock.calls[0] as unknown as [{ body: string }]
+            expect(JSON.parse(uploadRequest.body)).toEqual({
+                file_name: 'My-Note-screenshot.png'
+            })
+        }
     })
 
     describe('getMediaStatus', () => {

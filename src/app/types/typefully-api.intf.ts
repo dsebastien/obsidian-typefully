@@ -102,7 +102,11 @@ export interface TypefullyDraftUpdatePayload {
 // ─── Media Upload ────────────────────────────────────────────────────────────
 
 export interface TypefullyMediaUploadRequest {
-    filename: string
+    /**
+     * Original filename with extension. Only letters, numbers, hyphens,
+     * underscores, periods, and parentheses are accepted by the API.
+     */
+    file_name: string
 }
 
 export interface TypefullyMediaUploadResponse {
