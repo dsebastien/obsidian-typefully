@@ -133,41 +133,24 @@ export class TypefullyApiClient {
     async uploadMediaFile(uploadUrl: string, data: ArrayBuffer): Promise<void> {
         // The presigned URL expects a plain PUT request with the raw file
         // bytes and no extra headers (a Content-Type header breaks the S3
-        // signature). requestUrl goes first because it bypasses CORS — the
-        // upload bucket does not allow the app://obsidian.md origin, so
-        // native fetch is only a last-resort fallback.
-        let requestUrlFailure: unknown
-        try {
-            const response = await requestUrl({
-                url: uploadUrl,
-                method: 'PUT',
-                body: data,
-                throw: false
-            })
-            if (response.status >= 200 && response.status < 300) {
-                return
-            }
-            requestUrlFailure = `status ${response.status}: ${response.text}`
-        } catch (error) {
-            requestUrlFailure = error
+        // signature). requestUrl also bypasses CORS, which matters because
+        // the upload bucket does not allow the app://obsidian.md origin.
+        const response = await requestUrl({
+            url: uploadUrl,
+            method: 'PUT',
+            body: data,
+            throw: false
+        })
+        if (response.status >= 200 && response.status < 300) {
+            return
         }
-        log('Presigned media upload via requestUrl failed', 'warn', requestUrlFailure)
 
-        // eslint-disable-next-line no-restricted-globals -- last-resort fallback after requestUrl already failed above; the presigned URL requires a plain PUT with raw bytes
-        const fetchResponse = await fetch(uploadUrl, { method: 'PUT', body: data })
-        if (!fetchResponse.ok) {
-            const body = await fetchResponse.text()
-            log(
-                `Presigned media upload via fetch failed with status ${fetchResponse.status}`,
-                'warn',
-                body
-            )
-            throw new TypefullyApiRequestError(
-                `Media file upload failed with status ${fetchResponse.status}`,
-                fetchResponse.status,
-                body
-            )
-        }
+        log(`Presigned media upload failed with status ${response.status}`, 'warn', response.text)
+        throw new TypefullyApiRequestError(
+            `Media file upload failed with status ${response.status}`,
+            response.status,
+            response.text
+        )
     }
 
     async getMediaStatus(socialSetId: string, mediaId: string): Promise<TypefullyMediaStatus> {
