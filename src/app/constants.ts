@@ -97,3 +97,16 @@ export const MEDIA_MIME_TYPES: Record<string, string> = {
     mp4: 'video/mp4',
     pdf: 'application/pdf'
 }
+
+/**
+ * Maximum number of images a single post may carry, per platform.
+ * Uploads are rejected by the API once a post exceeds its platform's limit, so
+ * this is checked before anything is uploaded.
+ */
+export const PLATFORM_MEDIA_LIMITS: Record<string, number> = {
+    x: 4,
+    linkedin: 20,
+    threads: 20,
+    bluesky: 4,
+    mastodon: 4
+}

@@ -33,6 +33,7 @@ import { publishTypefullyDraft } from './utils/publish-typefully-draft.fn'
 import { cleanMarkdownForTypeFully } from './utils/clean-markdown-for-typefully.fn'
 import { getFileTags } from './utils/get-file-tags.fn'
 import { filterExcludedTags } from './utils/filter-excluded-tags.fn'
+import { checkMediaLimits } from './utils/check-media-limits.fn'
 import type { TypefullyPlatforms, TypefullyPost } from './types/typefully-draft-contents.intf'
 import { TypefullyApiClient } from './api/typefully-api-client'
 import type { TypefullyUser } from './types/typefully-api.intf'
@@ -326,7 +327,8 @@ export class TypefullyPlugin extends Plugin {
 
         // Upload images if any found and API client is available
         if (extractedImages.length > 0) {
-            await this.attachMediaToPosts(extractedImages, posts, content)
+            const attached = await this.attachMediaToPosts(extractedImages, posts, content)
+            if (!attached) return
         }
 
         log('Text to publish', 'debug', cleanedContent)
@@ -399,19 +401,40 @@ export class TypefullyPlugin extends Plugin {
     /**
      * Upload extracted images and attach media_ids to the appropriate posts.
      * When threadify is enabled, images are mapped to the thread segment they belong to.
+     *
+     * @returns false when the note exceeds a platform's per-post image limit,
+     * in which case nothing was uploaded and publishing must not continue.
      */
     private async attachMediaToPosts(
         images: ExtractedImage[],
         posts: TypefullyPost[],
         originalContent: string
-    ): Promise<void> {
+    ): Promise<boolean> {
         const client = this.getApiClient()
-        if (!client) return
+        if (!client) return true
 
         const socialSetId = this.settings.socialSetId
         if (!socialSetId) {
             log('No social set ID for media upload, skipping images', 'warn')
-            return
+            return true
+        }
+
+        // Map every image to its post up front: the platform limits have to be
+        // checked before anything is uploaded, otherwise a note that is over
+        // the limit leaves orphaned media behind when the draft is rejected.
+        const postIndexes = images.map((image) =>
+            this.findPostIndexForImage(image, originalContent, posts)
+        )
+        const imagesPerPost = posts.map(
+            (_, index) => postIndexes.filter((postIndex) => index === postIndex).length
+        )
+
+        const violation = checkMediaLimits(imagesPerPost, this.settings.platforms)
+        if (violation) {
+            const msg = `${violation.platform} accepts at most ${violation.limit} images per post, but this note would attach ${violation.count}. Nothing was uploaded.`
+            log(msg, 'warn', { imagesPerPost })
+            new Notice(msg, NOTICE_TIMEOUT)
+            return false
         }
 
         const totalImages = images.length
@@ -422,14 +445,14 @@ export class TypefullyPlugin extends Plugin {
             const uploaded = await uploadVaultMedia(this.app, client, socialSetId, image.path)
             if (!uploaded) continue
 
-            // Find which post segment this image belongs to
-            const postIndex = this.findPostIndexForImage(image, originalContent, posts)
-            const target = posts[postIndex]
+            const target = posts[postIndexes[i]!]
             if (target) {
                 if (!target.media_ids) target.media_ids = []
                 target.media_ids.push(uploaded.mediaId)
             }
         }
+
+        return true
     }
 
     /**
