@@ -1,5 +1,11 @@
 # Release Notes
 
+## 3.10.0 (2026-08-04)
+
+### Features
+
+- **plugin:** use the note's h1 heading as note image title
+
 ## 3.9.0 (2026-07-30)
 
 ### Features

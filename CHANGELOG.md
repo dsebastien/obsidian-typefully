@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.10.0](https://github.com/dsebastien/obsidian-typefully/compare/3.9.0...3.10.0) (2026-08-04)
+
+### Features
+
+- **plugin:** use the note's h1 heading as note image title ([8250df7](https://github.com/dsebastien/obsidian-typefully/commit/8250df782ed39e85bb5b3e79da162b196c79590e))
+
 ## [3.9.0](https://github.com/dsebastien/obsidian-typefully/compare/3.8.0...3.9.0) (2026-07-30)
 
 ### Features
