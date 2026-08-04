@@ -26,6 +26,7 @@ import {
     SCREENSHOT_CAPTURE_DELAY_MS
 } from './constants'
 import { captureElementScreenshot } from './utils/capture-element-screenshot.fn'
+import { extractH1Title } from './utils/extract-h1-title.fn'
 import { removeFrontMatter } from './utils/remove-front-matter.fn'
 import { resolveScreenshotStyle } from './utils/resolve-screenshot-style.fn'
 import { isExcalidrawFile } from './utils/is-excalidraw-file.fn'
@@ -615,8 +616,19 @@ export class TypefullyPlugin extends Plugin {
                     `typefully-screenshot-content--${screenshotSettings.cardTheme}`
                 ]
             })
+            let markdownToRender = markdown
             if (options.allowTitle && screenshotSettings.showTitle) {
-                content.createEl('h1', { text: file.basename, cls: 'typefully-screenshot-title' })
+                // When the note carries its own level 1 heading, use it as the
+                // card title and drop it from the body, so that the image does
+                // not end up with two titles
+                const extracted = extractH1Title(markdown)
+                if (extracted) {
+                    markdownToRender = extracted.markdown
+                }
+                content.createEl('h1', {
+                    text: extracted ? extracted.title : file.basename,
+                    cls: 'typefully-screenshot-title'
+                })
             }
             const body = content.createDiv({ cls: 'typefully-screenshot-markdown' })
 
@@ -630,7 +642,13 @@ export class TypefullyPlugin extends Plugin {
                 })
             }
 
-            await MarkdownRenderer.render(this.app, markdown, body, file.path, renderComponent)
+            await MarkdownRenderer.render(
+                this.app,
+                markdownToRender,
+                body,
+                file.path,
+                renderComponent
+            )
 
             // Give the layout, fonts, and embedded images time to settle
             await new Promise((resolve) => window.setTimeout(resolve, SCREENSHOT_CAPTURE_DELAY_MS))

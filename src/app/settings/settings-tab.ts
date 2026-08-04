@@ -607,7 +607,9 @@ export class TypefullySettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Show note title')
-            .setDesc('If enabled, the note title is displayed at the top of the card.')
+            .setDesc(
+                'If enabled, a title is displayed at the top of the card: the first level 1 heading of the note if it has one, otherwise the note name.'
+            )
             .addToggle((toggle: ToggleComponent) => {
                 toggle.setValue(screenshot.showTitle)
                 toggle.onChange(async (newValue: boolean) => {

@@ -105,6 +105,8 @@ The "Publish a screenshot of the current note" command turns the note into a sty
 
 ![A quote rendered as a Typefully note image: a dark content card on a blue-to-pink gradient, with a watermark in the bottom right corner](images/note-image-example.png)
 
+If the note itself starts with a level 1 heading (`# My title`), that heading is used as the card title and removed from the body, so the image never shows two titles. Notes without a level 1 heading keep using the note name as title.
+
 "Publish a screenshot of the current selection" does the same thing with just the selected text, which is the easiest way to turn one paragraph or quote from a longer note into a post. Selection images never include the note title, whatever the "Show note title" setting is: the selected text is the whole content.
 
 The look of the card is customizable in the plugin settings ("Note images" section): gradient background (presets or custom colors), light/dark card theme, font, aspect ratio (portrait 4:5, square, or landscape 16:9), note title visibility, and an optional watermark (e.g. your handle) in a corner of your choice. See [Configuration](configuration.md).

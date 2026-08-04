@@ -61,20 +61,20 @@ Your user profile (name, email, avatar) is displayed at the top of the settings 
 
 Appearance of the image card created by the "Publish a screenshot of the current note" and "Publish a screenshot of the current selection" commands.
 
-| Setting                | Type     | Default             | Description                                                                                |
-| ---------------------- | -------- | ------------------- | ------------------------------------------------------------------------------------------ |
-| Background             | dropdown | Purple haze         | Gradient behind the content card: Purple haze, Sunset, Ocean, Forest, Midnight, or Custom. |
-| Custom gradient colors | color x2 | `#667eea`/`#764ba2` | Start and end colors of the gradient (shown when Background is Custom).                    |
-| Card theme             | dropdown | Light               | Light (white card, dark text), Dark (dark card, light text), or Custom colors.             |
-| Custom card colors     | color x2 | `#ffffff`/`#333347` | Background and text colors of the content card (shown when Card theme is Custom).          |
-| Font                   | dropdown | Sans-serif          | Sans-serif, Serif, Monospace, or Custom.                                                   |
-| Custom font family     | text     | empty               | CSS font family used when Font is Custom. Must be installed on your system.                |
-| Text size              | dropdown | Medium              | Overall size of the text on the card: Small, Medium, or Large.                             |
-| Format                 | dropdown | Portrait (4:5)      | Aspect ratio of the image: Portrait (4:5), Square (1:1), or Landscape (16:9).              |
-| Show note title        | toggle   | `true`              | Display the note title at the top of the card. Never applies to selection screenshots.     |
-| Watermark text         | text     | empty               | Short text stamped on the image (e.g. your handle). Empty disables the watermark.          |
-| Watermark position     | dropdown | Bottom right        | Corner of the image where the watermark appears.                                           |
-| Watermark color        | color    | `#ffffff`           | Color of the watermark text.                                                               |
+| Setting                | Type     | Default             | Description                                                                                                                                                    |
+| ---------------------- | -------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Background             | dropdown | Purple haze         | Gradient behind the content card: Purple haze, Sunset, Ocean, Forest, Midnight, or Custom.                                                                     |
+| Custom gradient colors | color x2 | `#667eea`/`#764ba2` | Start and end colors of the gradient (shown when Background is Custom).                                                                                        |
+| Card theme             | dropdown | Light               | Light (white card, dark text), Dark (dark card, light text), or Custom colors.                                                                                 |
+| Custom card colors     | color x2 | `#ffffff`/`#333347` | Background and text colors of the content card (shown when Card theme is Custom).                                                                              |
+| Font                   | dropdown | Sans-serif          | Sans-serif, Serif, Monospace, or Custom.                                                                                                                       |
+| Custom font family     | text     | empty               | CSS font family used when Font is Custom. Must be installed on your system.                                                                                    |
+| Text size              | dropdown | Medium              | Overall size of the text on the card: Small, Medium, or Large.                                                                                                 |
+| Format                 | dropdown | Portrait (4:5)      | Aspect ratio of the image: Portrait (4:5), Square (1:1), or Landscape (16:9).                                                                                  |
+| Show note title        | toggle   | `true`              | Display a title at the top of the card: the note's first level 1 heading (`#`) if it has one, otherwise the note name. Never applies to selection screenshots. |
+| Watermark text         | text     | empty               | Short text stamped on the image (e.g. your handle). Empty disables the watermark.                                                                              |
+| Watermark position     | dropdown | Bottom right        | Corner of the image where the watermark appears.                                                                                                               |
+| Watermark color        | color    | `#ffffff`           | Color of the watermark text.                                                                                                                                   |
 
 ### Tags
 
