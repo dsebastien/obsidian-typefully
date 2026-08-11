@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.11.0](https://github.com/dsebastien/obsidian-typefully/compare/3.10.0...3.11.0) (2026-08-11)
+
+### Features
+
+- **plugin:** publish images and videos directly ([134430e](https://github.com/dsebastien/obsidian-typefully/commit/134430ef26f214189bc71e821d6c729747c80019)), closes [#13](https://github.com/dsebastien/obsidian-typefully/issues/13)
+
 ## [3.10.0](https://github.com/dsebastien/obsidian-typefully/compare/3.9.0...3.10.0) (2026-08-04)
 
 ### Features

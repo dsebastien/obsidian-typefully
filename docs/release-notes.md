@@ -1,5 +1,11 @@
 # Release Notes
 
+## 3.11.0 (2026-08-11)
+
+### Features
+
+- **plugin:** publish images and videos directly
+
 ## 3.10.0 (2026-08-04)
 
 ### Features
