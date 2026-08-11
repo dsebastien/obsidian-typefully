@@ -1,6 +1,13 @@
 import { registerWhatsNewView } from './whats-new'
-import { Component, MarkdownRenderer, MarkdownView, Notice, Platform, Plugin } from 'obsidian'
-import type { TFile } from 'obsidian'
+import {
+    Component,
+    MarkdownRenderer,
+    MarkdownView,
+    Notice,
+    Platform,
+    Plugin,
+    TFile
+} from 'obsidian'
 import {
     DEFAULT_PLATFORM_SETTINGS,
     DEFAULT_SCREENSHOT_SETTINGS,
@@ -41,6 +48,10 @@ import type { TypefullyUser } from './types/typefully-api.intf'
 import { extractImagesFromMarkdown } from './utils/extract-images-from-markdown.fn'
 import type { ExtractedImage } from './utils/extract-images-from-markdown.fn'
 import { uploadVaultMedia } from './utils/upload-vault-media.fn'
+import { getMediaKind, isPublishableMediaFile } from './utils/classify-media-file.fn'
+import type { MediaKind } from './utils/classify-media-file.fn'
+import { describeMediaSelectionWarning } from './utils/describe-media-selection-warning.fn'
+import { ConfirmModal } from './modals/confirm-modal'
 import { TypefullyView } from './views/typefully-view'
 import { VIEW_TYPE_TYPEFULLY } from './views/typefully-view-state'
 import type { ViewPage } from './views/typefully-view-state'
@@ -152,6 +163,21 @@ export class TypefullyPlugin extends Plugin {
                 }
                 if (!checking) {
                     void this.publishSelectionScreenshot(view, selection)
+                }
+                return true
+            }
+        })
+
+        this.addCommand({
+            id: 'publish-media-file',
+            name: 'Publish the current image or video',
+            checkCallback: (checking) => {
+                const currentFile = this.app.workspace.getActiveFile()
+                if (!currentFile || !isPublishableMediaFile(currentFile)) {
+                    return false
+                }
+                if (!checking) {
+                    void this.publishMediaFiles([currentFile])
                 }
                 return true
             }
@@ -277,6 +303,142 @@ export class TypefullyPlugin extends Plugin {
                 }
             })
         )
+
+        // Right click on an image or a video in the file explorer (or on its
+        // tab) to publish it directly, without a note around it
+        this.registerEvent(
+            this.app.workspace.on('file-menu', (menu, file) => {
+                if (!(file instanceof TFile) || !isPublishableMediaFile(file)) {
+                    return
+                }
+
+                menu.addItem((item) => {
+                    item.setIcon('arrows-up-from-line')
+                    item.setTitle('Publish to Typefully').onClick(() => {
+                        void this.publishMediaFiles([file])
+                    })
+                })
+            })
+        )
+
+        // Same, for a multi-file selection in the file explorer
+        this.registerEvent(
+            this.app.workspace.on('files-menu', (menu, files) => {
+                const mediaFiles = files.filter(
+                    (file): file is TFile => file instanceof TFile && isPublishableMediaFile(file)
+                )
+
+                if (0 === mediaFiles.length) {
+                    return
+                }
+
+                menu.addItem((item) => {
+                    item.setIcon('arrows-up-from-line')
+                    item.setTitle(
+                        `Publish ${mediaFiles.length} file${1 === mediaFiles.length ? '' : 's'} to Typefully`
+                    ).onClick(() => {
+                        void this.publishMediaFiles(mediaFiles)
+                    })
+                })
+            })
+        )
+    }
+
+    /**
+     * Publish vault images and/or videos to Typefully as a single draft with
+     * no text, with every file attached in the given order.
+     *
+     * Files that are not publishable media are ignored, so a mixed selection
+     * in the file explorer still publishes what it can.
+     */
+    async publishMediaFiles(files: TFile[]) {
+        const mediaFiles = files.filter(isPublishableMediaFile)
+
+        if (0 === mediaFiles.length) {
+            new Notice('Please select an image or a video first', NOTICE_TIMEOUT)
+            return
+        }
+
+        if (!this.hasEnabledPlatform()) {
+            new Notice('Please enable at least one target platform in settings', NOTICE_TIMEOUT)
+            return
+        }
+
+        const client = this.getApiClient()
+        if (!client) {
+            new Notice(MSG_API_KEY_CONFIGURATION_REQUIRED, NOTICE_TIMEOUT)
+            return
+        }
+
+        const socialSetId = this.settings.socialSetId
+        if (!socialSetId) {
+            new Notice(
+                'Please select a social set in the plugin settings before publishing media',
+                NOTICE_TIMEOUT
+            )
+            return
+        }
+
+        // The platform limits are checked before anything is uploaded,
+        // otherwise a rejected draft leaves orphaned media behind
+        const violation = checkMediaLimits([mediaFiles.length], this.settings.platforms)
+        if (violation) {
+            const msg = `${violation.platform} accepts at most ${violation.limit} media files per post, but you selected ${violation.count}. Nothing was uploaded.`
+            log(msg, 'warn')
+            new Notice(msg, NOTICE_TIMEOUT)
+            return
+        }
+
+        const kinds = mediaFiles
+            .map((file) => getMediaKind(file.extension))
+            .filter((kind): kind is MediaKind => null !== kind)
+        const warning = describeMediaSelectionWarning(kinds)
+
+        if (warning) {
+            new ConfirmModal(this.app, warning, () => {
+                void this.uploadAndPublishMedia(mediaFiles, socialSetId)
+            }).open()
+            return
+        }
+
+        await this.uploadAndPublishMedia(mediaFiles, socialSetId)
+    }
+
+    /**
+     * Upload the given media files and publish them as a single media-only
+     * draft. Files that fail to upload are reported and skipped.
+     */
+    private async uploadAndPublishMedia(mediaFiles: TFile[], socialSetId: string) {
+        const client = this.getApiClient()
+        if (!client) {
+            new Notice(MSG_API_KEY_CONFIGURATION_REQUIRED, NOTICE_TIMEOUT)
+            return
+        }
+
+        log(`Publishing ${mediaFiles.length} media file(s) to Typefully`, 'debug')
+
+        const mediaIds: string[] = []
+        const total = mediaFiles.length
+
+        for (let i = 0; i < total; i++) {
+            const file = mediaFiles[i]!
+            new Notice(`Uploading ${file.name} (${i + 1}/${total})...`, 2000)
+
+            const uploaded = await uploadVaultMedia(this.app, client, socialSetId, file.path)
+            if (!uploaded) {
+                new Notice(`Failed to upload ${file.name}`, NOTICE_TIMEOUT)
+                continue
+            }
+
+            mediaIds.push(uploaded.mediaId)
+        }
+
+        if (0 === mediaIds.length) {
+            new Notice('Failed to upload the selected media to Typefully', NOTICE_TIMEOUT)
+            return
+        }
+
+        await this.publishPosts([{ text: '', media_ids: mediaIds }])
     }
 
     /**

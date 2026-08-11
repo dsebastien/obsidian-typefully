@@ -95,8 +95,18 @@ export const MEDIA_MIME_TYPES: Record<string, string> = {
     webp: 'image/webp',
     svg: 'image/svg+xml',
     mp4: 'video/mp4',
+    mov: 'video/quicktime',
+    webm: 'video/webm',
     pdf: 'application/pdf'
 }
+
+/**
+ * Vault file extensions that can be published directly as media (without a
+ * note around them). A subset of `MEDIA_MIME_TYPES`: PDFs are uploadable as
+ * note attachments but are not a social media post on their own.
+ */
+export const MEDIA_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
+export const MEDIA_VIDEO_EXTENSIONS = ['mp4', 'mov', 'webm']
 
 /**
  * Maximum number of images a single post may carry, per platform.

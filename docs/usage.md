@@ -22,6 +22,7 @@ nav_order: 2
 | Publish the current selection                 | Creates a Typefully draft from selected text (editing/source view only)                                                              |
 | Publish a screenshot of the current note      | Renders the note as a styled image card and creates a Typefully draft with it attached (desktop only)                                |
 | Publish a screenshot of the current selection | Renders the selected text as a styled image card and creates a Typefully draft with it attached (desktop only, requires a selection) |
+| Publish the current image or video            | Creates a Typefully draft with the currently open image or video attached (only available when a media file is active)               |
 | List drafts                                   | Opens the Typefully panel to the Drafts tab                                                                                          |
 | View queue                                    | Opens the Typefully panel to the Queue tab                                                                                           |
 | View queue schedule                           | Opens the Typefully panel to the Schedule tab                                                                                        |
@@ -47,6 +48,13 @@ The "Publish the current note" command works in both **reading view** and **edit
 3. Choose "Publish the current note to Typefully", "Publish the current selection to Typefully", "Publish a screenshot of the current note to Typefully", or — when text is selected — "Publish a screenshot of the current selection to Typefully" (screenshot entries are desktop only)
 
 ![The editor context menu showing the four Typefully entries: publish the note, publish the selection, and publish a screenshot of either](images/context-menu.png)
+
+**File Explorer (images and videos):**
+
+1. Right-click an image or a video in the file explorer
+2. Choose "Publish to Typefully"
+
+Select several files first (`Ctrl/Cmd + click` or `Shift + click`) and the entry becomes "Publish N files to Typefully", attaching all of them to a single draft. See [Publishing Images and Videos Directly](#publishing-images-and-videos-directly).
 
 ## Features
 
@@ -93,11 +101,21 @@ The plugin automatically detects images in your notes and uploads them to Typefu
 - **Wiki-style**: `![[photo.png]]` or `![[photo.png|alt text]]`
 - **Standard Markdown**: `![alt text](path/to/image.jpg)`
 
-Supported formats: PNG, JPEG, GIF, WebP, SVG, MP4, PDF (LinkedIn only).
+Supported formats: PNG, JPEG, GIF, WebP, SVG, MP4, MOV, WebM, PDF (LinkedIn only).
 
 When Threadify is enabled, images are attached to the thread segment they appear in.
 
 Image syntax is automatically stripped from the published text.
+
+### Publishing Images and Videos Directly
+
+Media files can be published without a note around them. Right-click an image or a video in the file explorer and choose **Publish to Typefully**: the file is uploaded and a draft is created with it attached and no text. The "Publish the current image or video" command does the same for the media file currently open.
+
+Supported formats: PNG, JPEG, GIF, WebP, SVG for images, MP4, MOV, WebM for videos. PDFs are not offered here — they can only be attached from within a note.
+
+Selecting several files publishes them all as a single draft, in selection order. Before anything is uploaded, the selection is checked against the per-post media limit of every enabled platform (X and Bluesky accept 4, LinkedIn and Threads 20); going over cancels the whole thing so no orphaned media is left behind on Typefully.
+
+Two selections trigger a confirmation prompt because the platforms disagree on them: several videos at once, and a video mixed with images. Most platforms accept only one video per post and refuse to mix a video with images, so the draft may be rejected — confirm to publish anyway.
 
 ### Screenshot Publishing
 
