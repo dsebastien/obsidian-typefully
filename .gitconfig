@@ -11,3 +11,8 @@
 [hook "format-staged"]
     event = pre-commit
     command = scripts/git-hooks/format-staged.sh
+
+[hook "rule-integrity"]
+    event = pre-commit
+    command = scripts/git-hooks/check-rule-integrity.sh
+
