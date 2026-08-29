@@ -1092,6 +1092,34 @@ export class TypefullyPlugin extends Plugin {
         log('Settings saved', 'debug', this.settings)
     }
 
+    /** Serializes settings writes; see updateSettings. */
+    private settingsWriteChain: Promise<void> = Promise.resolve()
+
+    /**
+     * Apply a mutation to the settings (via immer) and persist the result.
+     * The single write path — the declarative settings tab routes every
+     * control edit through here so persistence happens in exactly one place.
+     *
+     * Persist-then-commit: memory is swapped only after saveData() succeeds,
+     * so a rejected write rolls the control back to the on-disk truth.
+     * Serialized: writes queue and each mutation derives from the previous
+     * COMMITTED state — without this, overlapping calls produce from the same
+     * base across the save await and the second commit silently drops the
+     * first edit. That matters here because several rows write derived
+     * fields (the platform toggles keep `enableAllPlatforms` in sync), so two
+     * quick toggles must not each build on the same stale base.
+     */
+    updateSettings(mutator: (draft: Draft<PluginSettings>) => void): Promise<void> {
+        const run = async (): Promise<void> => {
+            const next = produce(this.settings, mutator)
+            await this.saveData(next)
+            this.settings = next
+        }
+        const p = this.settingsWriteChain.then(run, run)
+        this.settingsWriteChain = p.catch(() => {})
+        return p
+    }
+
     async canBePublishedToTypefully(file: TFile): Promise<boolean> {
         if (!file.path) {
             return false

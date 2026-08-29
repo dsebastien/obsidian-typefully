@@ -1,6 +1,15 @@
 /* Typefully Plugin Styles */
 @import 'tailwindcss';
 
+/* The support and profile blocks inside the declarative settings pane render
+   as a stack of full-width rows inside a `.setting-item`, which Obsidian lays
+   out as a flex ROW — this class restores block flow. It MUST stay unlayered:
+   unlayered CSS beats layered CSS whatever the specificity, and Obsidian's
+   own `.setting-item { display: flex }` is unlayered. */
+.settings-stack {
+    display: block;
+}
+
 .support-header-margin {
     margin-top: 1rem;
 }
