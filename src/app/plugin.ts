@@ -60,7 +60,7 @@ export class TypefullyPlugin extends Plugin {
     /**
      * The plugin settings are immutable
      */
-    settings: PluginSettings = produce(DEFAULT_SETTINGS, () => DEFAULT_SETTINGS)
+    override settings: PluginSettings = produce(DEFAULT_SETTINGS, () => DEFAULT_SETTINGS)
 
     /**
      * Cached API client instance. Recreated when the API key changes.

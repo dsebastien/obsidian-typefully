@@ -16,7 +16,6 @@ describe('getFileTags', () => {
         } as unknown as App
     }
 
-    // eslint-disable-next-line obsidianmd/no-tfile-tfolder-cast
     const createMockFile = (path: string): TFile => ({ path }) as TFile
 
     beforeEach(() => {

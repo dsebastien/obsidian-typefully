@@ -1,4 +1,3 @@
-/* eslint-disable obsidianmd/no-tfile-tfolder-cast */
 import { describe, expect, test, beforeEach, afterEach } from 'bun:test'
 import { isExcalidrawFile } from './is-excalidraw-file.fn'
 import type { TFile } from 'obsidian'

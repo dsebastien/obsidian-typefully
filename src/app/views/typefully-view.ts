@@ -94,7 +94,7 @@ export class TypefullyView extends ItemView {
         const client = this.plugin.getApiClient()
         if (!client || !this.plugin.settings.socialSetId) {
             contentEl.createEl('p', {
-                text: 'Please configure your Typefully API key and Social Set ID in settings.'
+                text: 'Please configure your Typefully API key and social set ID in settings.'
             })
             return
         }

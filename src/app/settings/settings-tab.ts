@@ -58,7 +58,7 @@ export class TypefullySettingTab extends PluginSettingTab {
         this.plugin = plugin
     }
 
-    display(): void {
+    override display(): void {
         const { containerEl } = this
         containerEl.empty()
         this.platformToggles.clear()
@@ -146,8 +146,8 @@ export class TypefullySettingTab extends PluginSettingTab {
         new Setting(containerEl).setName('Social set').setHeading()
 
         const socialSetSetting = new Setting(containerEl)
-            .setName('Social Set ID')
-            .setDesc('Your Typefully Social Set ID. Click "Load" to fetch available sets.')
+            .setName('Social set ID')
+            .setDesc('Your Typefully social set ID. Click "Load" to fetch available sets.')
             .addText((text) => {
                 text.setPlaceholder('Auto-detect')
                     .setValue(this.plugin.settings.socialSetId)
@@ -318,7 +318,7 @@ export class TypefullySettingTab extends PluginSettingTab {
 
     renderAutoRetweet(containerEl: HTMLElement) {
         new Setting(containerEl)
-            .setName('Enable Auto retweet')
+            .setName('Enable auto retweet')
             .setDesc(
                 'If enabled, the post will have an AutoRT enabled, according to the one set on Typefully for the account.'
             )
@@ -338,7 +338,7 @@ export class TypefullySettingTab extends PluginSettingTab {
 
     renderAutoPlug(containerEl: HTMLElement) {
         new Setting(containerEl)
-            .setName('Enable Auto plug')
+            .setName('Enable auto plug')
             .setDesc(
                 'If enabled, the post will have an AutoPlug enabled, according to the one set on Typefully for the account.'
             )
@@ -378,7 +378,7 @@ export class TypefullySettingTab extends PluginSettingTab {
 
     renderAutoSchedule(containerEl: HTMLElement) {
         new Setting(containerEl)
-            .setName('Enable Auto scheduling')
+            .setName('Enable auto scheduling')
             .setDesc('If enabled, the post will be automatically scheduled in the next free slot.')
             .addToggle((toggle: ToggleComponent) => {
                 toggle.setValue(this.plugin.settings.autoSchedule)
@@ -716,7 +716,7 @@ export class TypefullySettingTab extends PluginSettingTab {
 
         if (!this.plugin.settings.apiKey || !this.plugin.settings.socialSetId) {
             containerEl.createEl('p', {
-                text: 'Configure your API key and Social Set ID to manage tags.',
+                text: 'Configure your API key and social set ID to manage tags.',
                 cls: 'setting-item-description'
             })
             return
