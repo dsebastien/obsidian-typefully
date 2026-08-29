@@ -10,6 +10,17 @@
  */
 import { mock } from 'bun:test'
 
+// Obsidian exposes `activeDocument`/`activeWindow` as globals so plugins can
+// work in popout windows. There is no DOM under `bun test`, so provide the
+// minimum the code under test reads: with no focused element, the settings
+// pane's typing guard resolves to "nothing focused" and never touches the DOM.
+const testGlobals = globalThis as unknown as {
+    activeDocument?: { activeElement: Element | null }
+    activeWindow?: { setTimeout: typeof setTimeout; clearTimeout: typeof clearTimeout }
+}
+testGlobals.activeDocument ??= { activeElement: null }
+testGlobals.activeWindow ??= { setTimeout, clearTimeout }
+
 // Mock the obsidian module (fire-and-forget, no need to await)
 void mock.module('obsidian', () => ({
     Notice: class Notice {

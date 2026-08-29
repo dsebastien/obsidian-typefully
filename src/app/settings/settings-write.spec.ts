@@ -215,6 +215,43 @@ describe('platform toggles', () => {
     })
 })
 
+describe('the migration save shares the write queue', () => {
+    test('a migration write cannot land after a later user edit', async () => {
+        let release = (): void => {}
+        const gate = new Promise<void>((resolve) => {
+            release = resolve
+        })
+        let first = true
+        const { plugin } = createHarness({
+            saveData: () => {
+                if (first) {
+                    first = false
+                    return gate
+                }
+                return Promise.resolve()
+            }
+        })
+
+        // Stand-in for loadSettings' post-migration persist: it must go
+        // through the same chain, or its slow save can finish last and put
+        // the pre-edit state back on disk.
+        const migration = plugin.updateSettings(() => {
+            // persists the already-migrated in-memory state
+        })
+        const userEdit = plugin.updateSettings((draft) => {
+            draft.socialSetId = 'typed-by-the-user'
+        })
+        release()
+        await Promise.all([migration, userEdit])
+
+        const lastWrite = (
+            plugin as unknown as { saveData: ReturnType<typeof mock> }
+        ).saveData.mock.calls.at(-1)?.[0] as PluginSettings
+        expect(lastWrite.socialSetId).toBe('typed-by-the-user')
+        expect(plugin.settings.socialSetId).toBe('typed-by-the-user')
+    })
+})
+
 describe('setControlValue', () => {
     test('parses the excluded-tags textarea into the stored list', async () => {
         const { tab, plugin } = createHarness()

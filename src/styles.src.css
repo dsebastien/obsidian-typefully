@@ -25,7 +25,20 @@
     max-width: 200px;
 }
 
-.typefully-excluded-tags-input {
+/* The excluded-tags editor used to carry `typefully-excluded-tags-input`; a
+   declarative textarea control cannot set a class, so the sizing is scoped
+   through the Publish group's own class instead. Unlayered on purpose:
+   Obsidian's own control sizing is unlayered too. */
+.typefully-settings-publish .setting-item:has(textarea) {
+    display: block;
+}
+
+.typefully-settings-publish .setting-item:has(textarea) .setting-item-control {
+    width: 100%;
+    padding-top: var(--size-4-2);
+}
+
+.typefully-settings-publish textarea {
     width: 100%;
     max-width: 300px;
     min-height: 60px;

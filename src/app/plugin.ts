@@ -1079,7 +1079,15 @@ export class TypefullyPlugin extends Plugin {
         log(`Settings loaded`, 'debug', this.settings)
 
         if (needToSaveSettings) {
-            void this.saveSettings()
+            // Through the same queue as user edits: a fire-and-forget
+            // saveSettings() could still be in flight when the settings pane
+            // writes, finish last, and put the pre-edit state back on disk.
+            void this.updateSettings(() => {
+                // The migration already produced `this.settings`; this write
+                // exists to persist it in queue order.
+            }).catch(() => {
+                log('Failed to persist migrated settings', 'warn')
+            })
         }
     }
 

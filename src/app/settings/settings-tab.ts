@@ -104,6 +104,16 @@ export class TypefullySettingTab extends PluginSettingTab {
     /** Social sets fetched on demand by the "Load available sets" button. */
     private socialSets: TypefullySocialSet[] = []
 
+    /** Set while a re-render is waiting for a text control to lose focus. */
+    private refreshPending = false
+
+    /**
+     * Monotonic id for API-key validations. Only the newest one may publish
+     * its result: keystrokes fire a validation each, and a slow answer for an
+     * earlier key must not overwrite the verdict of a later one.
+     */
+    private validationGeneration = 0
+
     constructor(app: App, plugin: TypefullyPlugin) {
         super(app, plugin)
         this.plugin = plugin
@@ -156,6 +166,11 @@ export class TypefullySettingTab extends PluginSettingTab {
                                     .setValue(this.plugin.settings.apiKey)
                                     .onChange((newValue) => {
                                         log(`Typefully API Key set`, 'debug')
+                                        // Sets fetched for the previous key
+                                        // must not stay clickable: selecting
+                                        // one would store an id this account
+                                        // cannot use.
+                                        this.socialSets = []
                                         this.plugin
                                             .updateSettings((draft) => {
                                                 draft.apiKey = newValue
@@ -166,6 +181,9 @@ export class TypefullySettingTab extends PluginSettingTab {
                                                 } else {
                                                     this.clearApiKeyStatus(setting.settingEl)
                                                     this.plugin.cachedUser = null
+                                                    // The account block above
+                                                    // is gated on this.
+                                                    this.refresh()
                                                 }
                                             })
                                             .catch(() => {
@@ -173,6 +191,18 @@ export class TypefullySettingTab extends PluginSettingTab {
                                                     'Failed to save settings.',
                                                     NOTICE_TIMEOUT
                                                 )
+                                                // Put the stored value back so
+                                                // the field cannot disagree
+                                                // with what other controls
+                                                // (e.g. "Load available sets")
+                                                // read — unless the user has
+                                                // typed on, in which case the
+                                                // next write heals it and a
+                                                // rollback would eat their
+                                                // input.
+                                                if (text.getValue() === newValue) {
+                                                    text.setValue(this.plugin.settings.apiKey)
+                                                }
                                             })
                                     })
                             })
@@ -213,6 +243,12 @@ export class TypefullySettingTab extends PluginSettingTab {
                                                     'Failed to save settings.',
                                                     NOTICE_TIMEOUT
                                                 )
+                                                // See the API-key row: restore
+                                                // only when nothing newer has
+                                                // been typed.
+                                                if (text.getValue() === newValue) {
+                                                    text.setValue(this.plugin.settings.socialSetId)
+                                                }
                                             })
                                     })
                             })
@@ -250,6 +286,10 @@ export class TypefullySettingTab extends PluginSettingTab {
             {
                 type: 'group',
                 heading: 'Publish',
+                // Scopes the excluded-tags textarea sizing (see
+                // styles.src.css): a declarative control cannot carry a class
+                // of its own, so the group provides the hook.
+                cls: 'typefully-settings-publish',
                 items: [
                     {
                         name: 'Enable auto scheduling',
@@ -572,7 +612,11 @@ export class TypefullySettingTab extends PluginSettingTab {
                             `Selected: ${socialSet.name} (@${socialSet.username})`,
                             NOTICE_TIMEOUT
                         )
-                        this.update()
+                        // The old tab's list lived in the DOM and disappeared
+                        // on the next display(); keep that behavior so a stale
+                        // list cannot outlive the choice it was fetched for.
+                        this.socialSets = []
+                        this.refresh()
                     })().catch(() => {
                         new Notice('Failed to save settings.', NOTICE_TIMEOUT)
                     })
@@ -675,7 +719,7 @@ export class TypefullySettingTab extends PluginSettingTab {
                                         name: newTagName.trim()
                                     })
                                     new Notice(`Tag "${newTagName}" created`, NOTICE_TIMEOUT)
-                                    this.update()
+                                    this.refresh()
                                 } catch (error) {
                                     log('Failed to create tag', 'error', error)
                                     new Notice('Failed to create tag', NOTICE_TIMEOUT)
@@ -686,6 +730,37 @@ export class TypefullySettingTab extends PluginSettingTab {
                 }
             }
         ]
+    }
+
+    /**
+     * Re-render the pane, but never while a text control in it has focus: the
+     * framework rebuilds every row from `getControlValue`, which reads the
+     * COMMITTED settings, so a re-render landing mid-typing would replace the
+     * input with the last-saved value and the next keystroke would persist
+     * that stale text plus one character. The render is deferred to the
+     * moment the field is left instead of being dropped, so rows that appear
+     * or disappear with the new state still show up.
+     */
+    private refresh(): void {
+        const focused = activeDocument.activeElement
+        if (!this.hasFocusedTextControl() || !focused) {
+            this.update()
+            return
+        }
+        if (this.refreshPending) {
+            return
+        }
+        this.refreshPending = true
+        focused.addEventListener(
+            'focusout',
+            () => {
+                this.refreshPending = false
+                // Focus may have moved to another text control; try again
+                // from there rather than clobbering that one too.
+                this.refresh()
+            },
+            { once: true }
+        )
     }
 
     private clearApiKeyStatus(settingEl: HTMLElement): void {
@@ -710,18 +785,53 @@ export class TypefullySettingTab extends PluginSettingTab {
             return
         }
 
+        const hadUser = null !== this.plugin.cachedUser
+        // Each keystroke starts a validation; only the newest may publish its
+        // result. Without this, a slow answer for an earlier key can land
+        // after a later key succeeded and leave the status and the cached
+        // profile describing two different accounts.
+        this.validationGeneration += 1
+        const generation = this.validationGeneration
         try {
             const user = await client.getMe()
+            if (generation !== this.validationGeneration) {
+                return
+            }
             this.plugin.cachedUser = user
             statusEl.empty()
             statusEl.addClass('typefully-api-status-ok')
             statusEl.setText(`Connected as ${user.name}`)
         } catch {
+            if (generation !== this.validationGeneration) {
+                return
+            }
             this.plugin.cachedUser = null
             statusEl.empty()
             statusEl.addClass('typefully-api-status-error')
             statusEl.setText('Invalid API key')
         }
+        // The account block at the top of the pane is gated on cachedUser, and
+        // this is the only thing that ever sets it. Re-render when the answer
+        // CHANGED, so a pane opened before the key was validated still shows
+        // the profile — but never while a text control has focus: the
+        // framework reseeds rows from the committed settings, which would
+        // replace whatever the user is typing.
+        if (hadUser !== (null !== this.plugin.cachedUser) && !this.hasFocusedTextControl()) {
+            this.refresh()
+        }
+    }
+
+    /**
+     * True when the focus sits in a text control inside this pane, i.e. when a
+     * re-render would replace what the user is typing with the last-saved
+     * value and the next keystroke would persist that stale text.
+     */
+    private hasFocusedTextControl(): boolean {
+        const focused = activeDocument.activeElement
+        if (!focused || !this.containerEl.contains(focused)) {
+            return false
+        }
+        return focused.instanceOf(HTMLInputElement) || focused.instanceOf(HTMLTextAreaElement)
     }
 
     /**
@@ -745,7 +855,7 @@ export class TypefullySettingTab extends PluginSettingTab {
 
         this.socialSets = socialSets.results
         input?.setValue(this.plugin.settings.socialSetId)
-        this.update()
+        this.refresh()
     }
 
     /**
@@ -762,7 +872,7 @@ export class TypefullySettingTab extends PluginSettingTab {
             })
             .then(() => {
                 if (rerender) {
-                    this.update()
+                    this.refresh()
                 }
             })
             .catch(() => {
@@ -831,7 +941,7 @@ export class TypefullySettingTab extends PluginSettingTab {
                     }
                 })
                 // The individual toggles are derived from this write.
-                this.update()
+                this.refresh()
                 return
             }
             case 'autoSchedule': {
@@ -906,7 +1016,7 @@ export class TypefullySettingTab extends PluginSettingTab {
             )
         })
         // The "all platforms" toggle is derived from this write.
-        this.update()
+        this.refresh()
     }
 
     private readScreenshotValue(field: string): unknown {
@@ -945,7 +1055,7 @@ export class TypefullySettingTab extends PluginSettingTab {
                     draft.screenshot.background = next as ScreenshotBackgroundId
                 })
                 // Shows/hides the custom gradient pickers.
-                this.update()
+                this.refresh()
                 return
             }
             case 'cardTheme': {
@@ -954,7 +1064,7 @@ export class TypefullySettingTab extends PluginSettingTab {
                     draft.screenshot.cardTheme = next as ScreenshotCardTheme
                 })
                 // Shows/hides the custom card color pickers.
-                this.update()
+                this.refresh()
                 return
             }
             case 'font': {
@@ -963,7 +1073,7 @@ export class TypefullySettingTab extends PluginSettingTab {
                     draft.screenshot.font = next as ScreenshotFontId
                 })
                 // Shows/hides the custom font family row.
-                this.update()
+                this.refresh()
                 return
             }
             case 'customFont': {

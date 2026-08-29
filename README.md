@@ -25,6 +25,8 @@ Any note or selection can become a branded image post, with the colors, font, fo
 
 ## Installation
 
+> Requires Obsidian **1.13.0 or newer** (the settings pane uses the declarative settings API introduced there).
+
 ### Community plugins (recommended)
 
 1. In Obsidian, go to **Settings → Community plugins**.
