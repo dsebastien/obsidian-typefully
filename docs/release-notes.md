@@ -1,5 +1,23 @@
 # Release Notes
 
+## 4.1.0 (2026-09-27)
+
+### Features
+
+- **build:** fail the build on a lockfile the catalog review cannot parse
+- **build:** make the rule floor check that it is still wired in
+- **build:** refuse commits that loosen the rules instead of fixing the finding
+
+### Bug Fixes
+
+- **build:** exclude bun-types alongside @types/bun from the release-age gate
+- **build:** harden the release path from the template
+- **build:** rebuild versions.json from the published releases
+- **deps:** move the fast-uri override off the vulnerable line
+- **plugin:** lowercase the newsletter line
+- **plugin:** report API errors whose body is not JSON as API errors
+- **plugin:** type the API error body and use setDestructive
+
 ## 4.0.0 (2026-08-29)
 
 ### ⚠ BREAKING CHANGES

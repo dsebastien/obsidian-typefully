@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.0](https://github.com/dsebastien/obsidian-typefully/compare/4.0.0...4.1.0) (2026-09-27)
+
+### Features
+
+- **build:** fail the build on a lockfile the catalog review cannot parse ([6d33111](https://github.com/dsebastien/obsidian-typefully/commit/6d331113793b7e85089945c2a16d2df3a70edc89))
+- **build:** make the rule floor check that it is still wired in ([125d1b5](https://github.com/dsebastien/obsidian-typefully/commit/125d1b593d42d6dac246a86f28b807fac7f7f2ad))
+- **build:** refuse commits that loosen the rules instead of fixing the finding ([5420f0d](https://github.com/dsebastien/obsidian-typefully/commit/5420f0d3bbfaef0b6676fcdc9f602b88e8333628))
+
+### Bug Fixes
+
+- **build:** exclude bun-types alongside @types/bun from the release-age gate ([867e9d1](https://github.com/dsebastien/obsidian-typefully/commit/867e9d130f8ef49f94b1d44165f1cf73adb65a38))
+- **build:** harden the release path from the template ([a59964a](https://github.com/dsebastien/obsidian-typefully/commit/a59964a719f881ec7d98f6ac7ef3912e5de2de8d))
+- **build:** rebuild versions.json from the published releases ([a0165d7](https://github.com/dsebastien/obsidian-typefully/commit/a0165d77a8717e33bd2ad78119d885b871523def))
+- **deps:** move the fast-uri override off the vulnerable line ([14c0868](https://github.com/dsebastien/obsidian-typefully/commit/14c086822cd696f34f443425c44bae07ef65299a))
+- **plugin:** lowercase the newsletter line ([87450c7](https://github.com/dsebastien/obsidian-typefully/commit/87450c7714eca646c1017cd4c375c53027c7e808))
+- **plugin:** report API errors whose body is not JSON as API errors ([e384a0a](https://github.com/dsebastien/obsidian-typefully/commit/e384a0abcad4e3dd113a2ad88668f13d42b5658b))
+- **plugin:** type the API error body and use setDestructive ([8e24207](https://github.com/dsebastien/obsidian-typefully/commit/8e2420756480231fe78455eeba054519bceae0dd))
+
 ## [4.0.0](https://github.com/dsebastien/obsidian-typefully/compare/3.11.0...4.0.0) (2026-08-29)
 
 ### ⚠ BREAKING CHANGES
