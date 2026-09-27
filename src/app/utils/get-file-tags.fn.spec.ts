@@ -1,8 +1,8 @@
 import { describe, expect, test, beforeEach } from 'bun:test'
 import type { Mock } from 'bun:test'
 import { getFileTags } from './get-file-tags.fn'
-import { getAllTags } from 'obsidian'
-import type { App, TFile, CachedMetadata } from 'obsidian'
+import { getAllTags, TFile } from 'obsidian'
+import type { App, CachedMetadata } from 'obsidian'
 
 // getAllTags is already mocked via the preloaded test-setup.ts
 const mockGetAllTags = getAllTags as unknown as Mock<() => string[] | null>
@@ -16,7 +16,7 @@ describe('getFileTags', () => {
         } as unknown as App
     }
 
-    const createMockFile = (path: string): TFile => ({ path }) as TFile
+    const createMockFile = (path: string): TFile => Object.assign(new TFile(), { path })
 
     beforeEach(() => {
         mockGetAllTags.mockClear()

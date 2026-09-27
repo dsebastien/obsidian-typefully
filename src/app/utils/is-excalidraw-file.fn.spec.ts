@@ -1,6 +1,10 @@
 import { describe, expect, test, beforeEach, afterEach } from 'bun:test'
 import { isExcalidrawFile } from './is-excalidraw-file.fn'
-import type { TFile } from 'obsidian'
+import { TFile } from 'obsidian'
+
+// `self` rather than `globalThis`: obsidianmd/no-global-this bans the
+// global/globalThis names, and Bun defines `self` as the global object.
+const globalRef = self as unknown as Record<string, unknown>
 
 describe('isExcalidrawFile', () => {
     // Store original global state
@@ -8,50 +12,49 @@ describe('isExcalidrawFile', () => {
 
     beforeEach(() => {
         // Save any existing global
-        originalExcalidrawAutomate = (globalThis as Record<string, unknown>)['ExcalidrawAutomate']
+        originalExcalidrawAutomate = globalRef['ExcalidrawAutomate']
     })
 
     afterEach(() => {
         // Restore original state
         if (originalExcalidrawAutomate !== undefined) {
-            ;(globalThis as Record<string, unknown>)['ExcalidrawAutomate'] =
-                originalExcalidrawAutomate
+            globalRef['ExcalidrawAutomate'] = originalExcalidrawAutomate
         } else {
-            delete (globalThis as Record<string, unknown>)['ExcalidrawAutomate']
+            delete globalRef['ExcalidrawAutomate']
         }
     })
 
     test('returns false when ExcalidrawAutomate is undefined', () => {
-        delete (globalThis as Record<string, unknown>)['ExcalidrawAutomate']
-        const mockFile = { path: 'test.md' } as TFile
+        delete globalRef['ExcalidrawAutomate']
+        const mockFile = Object.assign(new TFile(), { path: 'test.md' })
         expect(isExcalidrawFile(mockFile)).toBe(false)
     })
 
     test('returns true when ExcalidrawAutomate.isExcalidrawFile returns true', () => {
-        ;(globalThis as Record<string, unknown>)['ExcalidrawAutomate'] = {
+        globalRef['ExcalidrawAutomate'] = {
             isExcalidrawFile: () => true
         }
-        const mockFile = { path: 'drawing.excalidraw.md' } as TFile
+        const mockFile = Object.assign(new TFile(), { path: 'drawing.excalidraw.md' })
         expect(isExcalidrawFile(mockFile)).toBe(true)
     })
 
     test('returns false when ExcalidrawAutomate.isExcalidrawFile returns false', () => {
-        ;(globalThis as Record<string, unknown>)['ExcalidrawAutomate'] = {
+        globalRef['ExcalidrawAutomate'] = {
             isExcalidrawFile: () => false
         }
-        const mockFile = { path: 'regular.md' } as TFile
+        const mockFile = Object.assign(new TFile(), { path: 'regular.md' })
         expect(isExcalidrawFile(mockFile)).toBe(false)
     })
 
     test('passes file to ExcalidrawAutomate.isExcalidrawFile', () => {
         let receivedFile: unknown = null
-        ;(globalThis as Record<string, unknown>)['ExcalidrawAutomate'] = {
+        globalRef['ExcalidrawAutomate'] = {
             isExcalidrawFile: (file: TFile) => {
                 receivedFile = file
                 return false
             }
         }
-        const mockFile = { path: 'test.md', name: 'test.md' } as TFile
+        const mockFile = Object.assign(new TFile(), { path: 'test.md', name: 'test.md' })
         isExcalidrawFile(mockFile)
         expect(receivedFile).toBe(mockFile)
     })

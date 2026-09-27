@@ -14,7 +14,9 @@ import { mock } from 'bun:test'
 // work in popout windows. There is no DOM under `bun test`, so provide the
 // minimum the code under test reads: with no focused element, the settings
 // pane's typing guard resolves to "nothing focused" and never touches the DOM.
-const testGlobals = globalThis as unknown as {
+// `self` rather than `globalThis`: obsidianmd/no-global-this bans the
+// global/globalThis names, and Bun defines `self` as the global object.
+const testGlobals = self as unknown as {
     activeDocument?: { activeElement: Element | null }
     activeWindow?: { setTimeout: typeof setTimeout; clearTimeout: typeof clearTimeout }
 }
@@ -22,6 +24,13 @@ testGlobals.activeDocument ??= { activeElement: null }
 testGlobals.activeWindow ??= { setTimeout, clearTimeout }
 
 // Mock the obsidian module (fire-and-forget, no need to await)
+// TAbstractFile/TFile/TFolder are real classes with the same hierarchy as in
+// Obsidian, so specs can build doubles with `Object.assign(new TFile(), {...})`
+// instead of casting plain objects to TFile.
+class TAbstractFile {}
+class TFile extends TAbstractFile {}
+class TFolder extends TAbstractFile {}
+
 void mock.module('obsidian', () => ({
     Notice: class Notice {
         constructor(_message: string, _timeout?: number) {
@@ -31,7 +40,7 @@ void mock.module('obsidian', () => ({
     // These are only used as types, but we provide empty implementations
     // in case they're ever accessed at runtime
     App: class App {},
-    TFile: class TFile {},
+    TFile,
     Plugin: class Plugin {},
     PluginSettingTab: class PluginSettingTab {},
     ItemView: class ItemView {},
@@ -42,14 +51,14 @@ void mock.module('obsidian', () => ({
     FuzzySuggestModal: class FuzzySuggestModal {},
     Setting: class Setting {},
     MarkdownView: class MarkdownView {},
-    MarkdownRenderer: { render: mock(async () => {}) },
-    TAbstractFile: class TAbstractFile {},
-    TFolder: class TFolder {},
+    MarkdownRenderer: { render: mock(() => Promise.resolve()) },
+    TAbstractFile,
+    TFolder,
     AbstractInputSuggest: class AbstractInputSuggest {},
     SearchComponent: class SearchComponent {},
     Platform: { isDesktopApp: true, isMobile: false },
     debounce: (fn: (...args: unknown[]) => unknown) => fn,
     setIcon: () => {},
-    requestUrl: mock(async () => ({ status: 200, json: {} })),
+    requestUrl: mock(() => Promise.resolve({ status: 200, json: {} })),
     getAllTags: mock(() => [] as string[] | null)
 }))

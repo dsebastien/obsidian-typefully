@@ -189,10 +189,12 @@ describe('TypefullyApiClient', () => {
         test('sanitizes the filename before requesting the upload', async () => {
             // The status polling relies on window.setTimeout, which does not
             // exist in the bun test environment
-            const globalRef = globalThis as { window?: unknown }
+            // `self` rather than `globalThis`: obsidianmd/no-global-this bans the
+            // global/globalThis names, and Bun defines `self` as the global object.
+            const globalRef = self as unknown as { window?: unknown }
             const originalWindow = globalRef.window
             globalRef.window = {
-                setTimeout: (fn: () => void) => setTimeout(fn, 0)
+                setTimeout: (fn: () => void) => self.setTimeout(fn, 0)
             }
 
             try {
@@ -393,7 +395,7 @@ describe('TypefullyApiClient', () => {
     })
 
     describe('error handling', () => {
-        test('throws TypefullyApiError on non-2xx response', async () => {
+        test('throws TypefullyApiError on non-2xx response', () => {
             mockRequestUrl.mockResolvedValueOnce({
                 status: 403,
                 json: { detail: 'Forbidden' }
@@ -407,7 +409,7 @@ describe('TypefullyApiClient', () => {
             )
         })
 
-        test('throws with error.message when available', async () => {
+        test('throws with error.message when available', () => {
             mockRequestUrl.mockResolvedValueOnce({
                 status: 400,
                 json: { error: { message: 'Bad request body' } }

@@ -10,14 +10,16 @@ interface GlobalWithWindow {
     window?: unknown
 }
 
-const globalRef = globalThis as GlobalWithWindow
+// `self` rather than `globalThis`: obsidianmd/no-global-this bans the
+// global/globalThis names, and Bun defines `self` as the global object.
+const globalRef = self as unknown as GlobalWithWindow
 const originalWindow = globalRef.window
 
 const setWindowElectron = (electron: ElectronApi | undefined) => {
     globalRef.window = {
         electron,
         innerWidth: 1000,
-        setTimeout: (fn: () => void) => setTimeout(fn, 0)
+        setTimeout: (fn: () => void) => self.setTimeout(fn, 0)
     }
 }
 
@@ -84,7 +86,7 @@ describe('captureElementScreenshot', () => {
             remote: {
                 getCurrentWindow: () => ({
                     webContents: {
-                        capturePage: async () => ({ toPNG: () => new Uint8Array([1]) })
+                        capturePage: () => Promise.resolve({ toPNG: () => new Uint8Array([1]) })
                     }
                 })
             }
@@ -102,9 +104,7 @@ describe('captureElementScreenshot', () => {
             remote: {
                 getCurrentWindow: () => ({
                     webContents: {
-                        capturePage: async () => {
-                            throw new Error('capture failed')
-                        }
+                        capturePage: () => Promise.reject(new Error('capture failed'))
                     }
                 })
             }

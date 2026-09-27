@@ -1,10 +1,11 @@
 import { describe, expect, test, spyOn, beforeEach, afterEach } from 'bun:test'
+import type { Mock } from 'bun:test'
 import { log, LOG_PREFIX, LOG_SEPARATOR } from './log'
 
 describe('log', () => {
-    let debugSpy: ReturnType<typeof spyOn>
-    let warnSpy: ReturnType<typeof spyOn>
-    let errorSpy: ReturnType<typeof spyOn>
+    let debugSpy: Mock<typeof console.debug>
+    let warnSpy: Mock<typeof console.warn>
+    let errorSpy: Mock<typeof console.error>
 
     beforeEach(() => {
         debugSpy = spyOn(console, 'debug').mockImplementation(() => {})
