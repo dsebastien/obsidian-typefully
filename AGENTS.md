@@ -50,6 +50,11 @@ bun run format       # Format with Prettier
 bun run validate     # Run tsc + tests + lint
 ```
 
+Default to using Bun instead of Node.js, with one exception: ESLint runs under Node.
+
+- `bunfig.toml` sets `[run] bun = false`, so scripts with a `node` shebang (eslint, tsc, prettier, commitlint) run under Node, as the community catalog reviewer's lint does. Under Bun, `node:module` `isBuiltin('bun:test')` is true and `obsidianmd/no-nodejs-modules` misreads every spec's `bun:test` import.
+- Node must be on PATH (version in `.nvmrc`). Without it, `bun run lint` stops with a message instead of reporting findings the reviewer never raises. CI sets Node up from `.nvmrc`. A desktop-only plugin (`isDesktopOnly: true`) is exempt from the check: the preset turns the Node-module rules off for it, so Bun lints it the same way.
+
 ## Testing
 
 All utility functions in `src/app/utils/` have corresponding `.spec.ts` test files. Run tests with `bun test`.
@@ -269,6 +274,7 @@ The community-plugin reviewer runs a fixed set of lint rules against every submi
 
 ### Release workflow
 
+- Do not bump `version` in `manifest.json` or edit `versions.json` by hand: `bun run release` does both. `versions.json` gets a new line ONLY when a release raises `minAppVersion`, and that line names the LAST release on the old floor (`"<last release>": "<its minAppVersion>"`), so users left behind by the raise get the newest release that still runs for them. Obsidian reads the file only when the latest manifest's floor is above the user's app, and installs the highest listed release whose floor the app meets. `scripts/version-bump.ts` finds that release as the highest `x.y.z` tag below the new version and fails the release rather than skip the line if it cannot. Every key must be a real published release in `x.y.z` form.
 - Attach only `main.js`, `manifest.json`, and `styles.css` (if present) — never a zip. The CI release workflow in this template already does this; don't add zip-upload steps back.
 - Build in CI; don't post-edit `main.js`.
 - `bun-version-file: package.json` (already wired) keeps Bun pinned across CI and release. Update `packageManager` in `package.json` to bump.
