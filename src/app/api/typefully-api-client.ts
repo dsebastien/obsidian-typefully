@@ -293,21 +293,23 @@ export class TypefullyApiClient {
             return response.json as T
         }
 
-        let detail: string
+        // `response.json` is typed `any` and its getter throws on a body that
+        // is not JSON (an HTML error page from a proxy, say). Read it once,
+        // inside the try: reading it again for the error would throw a
+        // SyntaxError instead of the API error, and callers that retry on a
+        // status code would never see one.
+        let json: unknown
         try {
-            // `response.json` is typed `any` and its getter throws on an
-            // unparsable body, hence the try. Read it as `unknown` and walk
-            // it with `readProperty`, which mirrors `?.` exactly.
-            const json: unknown = response.json
-            // Kept as a cast (not a typeof check) so a non-string detail is
-            // passed through untouched, as the former `any` access did.
-            detail = (readProperty(readProperty(json, 'error'), 'message') ??
-                readProperty(json, 'detail') ??
-                `Request failed with status ${response.status}`) as string
+            json = response.json
         } catch {
-            detail = `Request failed with status ${response.status}`
+            json = undefined
         }
-        throw new TypefullyApiRequestError(detail, response.status, response.json)
+        // Kept as a cast (not a typeof check) so a non-string detail is passed
+        // through untouched, as the former `any` access did.
+        const detail = (readProperty(readProperty(json, 'error'), 'message') ??
+            readProperty(json, 'detail') ??
+            `Request failed with status ${response.status}`) as string
+        throw new TypefullyApiRequestError(detail, response.status, json)
     }
 
     private sleep(ms: number): Promise<void> {
