@@ -24,7 +24,10 @@ export class ConfirmModal extends Modal {
             })
             .addButton((button) => {
                 button
-                    .setWarning()
+                    // setWarning() (deprecated in 1.13) was exactly this pair:
+                    // a destructive button that stays the primary action
+                    .setDestructive()
+                    .setCta()
                     .setButtonText('Confirm')
                     .onClick(() => {
                         this.close()

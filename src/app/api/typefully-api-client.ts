@@ -295,10 +295,15 @@ export class TypefullyApiClient {
 
         let detail: string
         try {
-            detail =
-                response.json?.error?.message ??
-                response.json?.detail ??
-                `Request failed with status ${response.status}`
+            // `response.json` is typed `any` and its getter throws on an
+            // unparsable body, hence the try. Read it as `unknown` and walk
+            // it with `readProperty`, which mirrors `?.` exactly.
+            const json: unknown = response.json
+            // Kept as a cast (not a typeof check) so a non-string detail is
+            // passed through untouched, as the former `any` access did.
+            detail = (readProperty(readProperty(json, 'error'), 'message') ??
+                readProperty(json, 'detail') ??
+                `Request failed with status ${response.status}`) as string
         } catch {
             detail = `Request failed with status ${response.status}`
         }
@@ -308,4 +313,15 @@ export class TypefullyApiClient {
     private sleep(ms: number): Promise<void> {
         return new Promise((resolve) => window.setTimeout(resolve, ms))
     }
+}
+
+/**
+ * Equivalent of `value?.[key]` on an `unknown` value: `undefined` for
+ * `null`/`undefined`, otherwise the property (primitives are boxed as usual).
+ */
+function readProperty(value: unknown, key: string): unknown {
+    if (value === null || value === undefined) {
+        return undefined
+    }
+    return (value as Record<string, unknown>)[key]
 }

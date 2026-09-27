@@ -77,12 +77,16 @@ export class TypefullyView extends ItemView {
         this.render()
     }
 
-    override async onOpen() {
+    // Nothing here awaits; the base signature still demands a promise, and
+    // Obsidian awaits these inside its own async wrapper either way.
+    override onOpen(): Promise<void> {
         this.render()
+        return Promise.resolve()
     }
 
-    override async onClose() {
+    override onClose(): Promise<void> {
         this.contentEl.empty()
+        return Promise.resolve()
     }
 
     render() {
