@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.1](https://github.com/dsebastien/obsidian-typefully/compare/4.1.0...4.1.1) (2026-09-28)
+
+### Bug Fixes
+
+- **plugin:** keep the support block from stacking on every settings refresh ([0d259d6](https://github.com/dsebastien/obsidian-typefully/commit/0d259d6e03e748412e0cb5446150a15cdf7667b9))
+
 ## [4.1.0](https://github.com/dsebastien/obsidian-typefully/compare/4.0.0...4.1.0) (2026-09-27)
 
 ### Features

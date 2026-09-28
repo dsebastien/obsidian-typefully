@@ -1,5 +1,11 @@
 # Release Notes
 
+## 4.1.1 (2026-09-28)
+
+### Bug Fixes
+
+- **plugin:** keep the support block from stacking on every settings refresh
+
 ## 4.1.0 (2026-09-27)
 
 ### Features
