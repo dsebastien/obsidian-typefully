@@ -127,13 +127,15 @@ export class TypefullySettingTab extends PluginSettingTab {
                 name: 'Typefully account',
                 searchable: false,
                 visible: (): boolean => null !== this.plugin.cachedUser,
-                render: (setting): void => {
+                render: (setting): (() => void) | undefined => {
                     const user = this.plugin.cachedUser
                     if (!user) {
-                        return
+                        return undefined
                     }
                     setting.infoEl.remove()
                     setting.settingEl.addClass('settings-stack')
+                    // Removed by the returned cleanup: update() re-runs this
+                    // hook on the SAME row and only resets its control area
                     const profileEl = setting.settingEl.createDiv({
                         cls: 'typefully-user-profile'
                     })
@@ -145,6 +147,7 @@ export class TypefullySettingTab extends PluginSettingTab {
                     const info = profileEl.createDiv({ cls: 'typefully-user-info' })
                     info.createDiv({ cls: 'typefully-user-name', text: user.name })
                     info.createDiv({ cls: 'typefully-user-email', text: user.email })
+                    return () => profileEl.remove()
                 }
             },
             {
@@ -573,14 +576,19 @@ export class TypefullySettingTab extends PluginSettingTab {
                     {
                         name: 'Support',
                         searchable: false,
-                        render: (setting): void => {
+                        render: (setting): (() => void) => {
                             setting.infoEl.remove() // the section draws its own headings
                             // `.setting-item` is a flex ROW; the support block
                             // is a stack of full-width rows.
                             setting.settingEl.addClass('settings-stack')
-                            renderSupportSection(setting.settingEl, (el) => {
+                            // In a wrapper removed by the returned cleanup: update() re-runs
+                            // this hook on the SAME row and only resets its control area, so
+                            // content appended straight to settingEl would pile up.
+                            const blockEl = setting.settingEl.createDiv()
+                            renderSupportSection(blockEl, (el) => {
                                 this.renderBuyMeACoffeeBadge(el)
                             })
+                            return () => blockEl.remove()
                         }
                     }
                 ]
@@ -647,22 +655,28 @@ export class TypefullySettingTab extends PluginSettingTab {
                 // The list is fetched into THIS row rather than triggering a
                 // pane re-render, so a slow API cannot interrupt typing
                 // elsewhere in the pane.
-                render: (setting): void => {
+                render: (setting): (() => void) => {
                     setting.infoEl.remove()
                     setting.settingEl.addClass('settings-stack')
-                    const tagsContainer = setting.settingEl.createDiv({
+                    // Everything this hook draws goes in one wrapper, removed
+                    // by the returned cleanup: update() re-runs the hook on
+                    // the SAME row and only resets its control area. A fetch
+                    // still in flight then fills a detached wrapper, harmlessly.
+                    const blockEl = setting.settingEl.createDiv()
+                    const removeBlock = (): void => blockEl.remove()
+                    const tagsContainer = blockEl.createDiv({
                         cls: 'typefully-settings-tags'
                     })
                     // Guarded: this hook also runs when Obsidian indexes the
                     // tab for settings search on plugin load.
                     if (!this.containerEl.isConnected) {
-                        return
+                        return removeBlock
                     }
                     const client = this.plugin.getApiClient()
                     if (!client) {
-                        return
+                        return removeBlock
                     }
-                    const loadingEl = setting.settingEl.createEl('p', { text: 'Loading tags...' })
+                    const loadingEl = blockEl.createEl('p', { text: 'Loading tags...' })
                     void (async (): Promise<void> => {
                         try {
                             const tags = await client.listTags(this.plugin.settings.socialSetId)
@@ -691,6 +705,7 @@ export class TypefullySettingTab extends PluginSettingTab {
                             log('Failed to load tags in settings', 'warn', error)
                         }
                     })()
+                    return removeBlock
                 }
             },
             {
