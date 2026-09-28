@@ -135,7 +135,8 @@ export class TypefullySettingTab extends PluginSettingTab {
                     setting.infoEl.remove()
                     setting.settingEl.addClass('settings-stack')
                     // Removed by the returned cleanup: update() re-runs this
-                    // hook on the SAME row and only resets its control area
+                    // hook on the SAME row and only resets its name,
+                    // description and control area
                     const profileEl = setting.settingEl.createDiv({
                         cls: 'typefully-user-profile'
                     })
@@ -582,8 +583,9 @@ export class TypefullySettingTab extends PluginSettingTab {
                             // is a stack of full-width rows.
                             setting.settingEl.addClass('settings-stack')
                             // In a wrapper removed by the returned cleanup: update() re-runs
-                            // this hook on the SAME row and only resets its control area, so
-                            // content appended straight to settingEl would pile up.
+                            // this hook on the SAME row and only resets its name, description
+                            // and control area, so content appended straight to settingEl
+                            // would pile up.
                             const blockEl = setting.settingEl.createDiv()
                             renderSupportSection(blockEl, (el) => {
                                 this.renderBuyMeACoffeeBadge(el)
@@ -660,8 +662,9 @@ export class TypefullySettingTab extends PluginSettingTab {
                     setting.settingEl.addClass('settings-stack')
                     // Everything this hook draws goes in one wrapper, removed
                     // by the returned cleanup: update() re-runs the hook on
-                    // the SAME row and only resets its control area. A fetch
-                    // still in flight then fills a detached wrapper, harmlessly.
+                    // the SAME row and only resets its name, description and
+                    // control area. A fetch still in flight then fills a
+                    // detached wrapper, harmlessly.
                     const blockEl = setting.settingEl.createDiv()
                     const removeBlock = (): void => blockEl.remove()
                     const tagsContainer = blockEl.createDiv({
