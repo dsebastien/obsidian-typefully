@@ -110,6 +110,7 @@ Before committing changes:
 - Use Immer for immutable state updates
 - Use `log()` utility for debug logging
 - Follow existing patterns for settings (produce/draft pattern)
+- Never `produce()` from the shared `DEFAULT_SETTINGS`: Immer deep-freezes what `produce` returns, including every subtree it shares with its base, so the exported constant (nested values too) stays frozen for the rest of the process. Produce from `createDefaultSettings()` (deep-fresh, never a spread of `DEFAULT_SETTINGS`) and keep `DEFAULT_SETTINGS` for reads. The `test` script runs `bun test --isolate`, which hides the freeze from `validate` and CI: only the `Object.isFrozen` assertions in `src/app/settings/settings-write.spec.ts` catch it.
 - All settings changes should call `saveSettings()`
 - Platform validation before publishing
 
