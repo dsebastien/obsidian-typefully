@@ -11,7 +11,7 @@ import {
 import {
     DEFAULT_PLATFORM_SETTINGS,
     DEFAULT_SCREENSHOT_SETTINGS,
-    DEFAULT_SETTINGS,
+    createDefaultSettings,
     SCREENSHOT_ASPECT_RATIOS,
     SCREENSHOT_BACKGROUND_IDS,
     SCREENSHOT_CARD_THEMES,
@@ -60,7 +60,7 @@ export class TypefullyPlugin extends Plugin {
     /**
      * The plugin settings are immutable
      */
-    override settings: PluginSettings = produce(DEFAULT_SETTINGS, () => DEFAULT_SETTINGS)
+    override settings: PluginSettings = produce(createDefaultSettings(), () => {})
 
     /**
      * Cached API client instance. Recreated when the API key changes.
@@ -923,7 +923,6 @@ export class TypefullyPlugin extends Plugin {
 
         if (!loadedSettings) {
             log('Using default settings', 'debug')
-            this.settings = produce(DEFAULT_SETTINGS, () => DEFAULT_SETTINGS)
             return
         }
 

@@ -1,6 +1,8 @@
 import { describe, expect, test, mock } from 'bun:test'
+import { produce } from 'immer'
+import type { App, PluginManifest } from 'obsidian'
 import { TypefullySettingTab } from './settings-tab'
-import { DEFAULT_SETTINGS } from '../types/plugin-settings.intf'
+import { DEFAULT_SETTINGS, createDefaultSettings } from '../types/plugin-settings.intf'
 import type { PluginSettings } from '../types/plugin-settings.intf'
 import TypefullyPlugin from '../../main'
 
@@ -303,5 +305,49 @@ describe('setControlValue', () => {
             'does not address a known field'
         )
         expect(saveData).not.toHaveBeenCalled()
+    })
+})
+
+describe('default settings', () => {
+    function expectDefaultsNotFrozen(): void {
+        expect(Object.isFrozen(DEFAULT_SETTINGS)).toBe(false)
+        expect(Object.isFrozen(DEFAULT_SETTINGS.excludedTags)).toBe(false)
+        expect(Object.isFrozen(DEFAULT_SETTINGS.platforms)).toBe(false)
+        expect(Object.isFrozen(DEFAULT_SETTINGS.screenshot)).toBe(false)
+    }
+
+    test('constructing the plugin never freezes the shared defaults', () => {
+        const plugin = new TypefullyPlugin({} as App, {} as PluginManifest)
+        expect(Object.isFrozen(plugin.settings)).toBe(true)
+        expectDefaultsNotFrozen()
+    })
+
+    test('loadSettings with no stored data never freezes the shared defaults', async () => {
+        // Skip the constructor: its field initializer is the other test's case.
+        const settings = produce(createDefaultSettings(), () => {})
+        const plugin = Object.assign(Object.create(TypefullyPlugin.prototype) as TypefullyPlugin, {
+            settings,
+            loadData: (): Promise<unknown> => Promise.resolve(null)
+        })
+
+        await plugin.loadSettings()
+
+        // Immer deep-freezes what produce returns, including subtrees shared
+        // with its base: producing from DEFAULT_SETTINGS froze the constant
+        // for the rest of the process.
+        expect(plugin.settings).toBe(settings)
+        expectDefaultsNotFrozen()
+    })
+
+    test('each default settings object is an independent copy', () => {
+        const one = createDefaultSettings()
+        one.excludedTags.push('dev')
+        one.platforms.linkedin = true
+        one.screenshot.font = 'mono'
+        const two = createDefaultSettings()
+        expect(two.excludedTags).toEqual([])
+        expect(two.platforms.linkedin).toBe(false)
+        expect(two.screenshot.font).toBe('sans')
+        expect(DEFAULT_SETTINGS.excludedTags).toEqual([])
     })
 })
