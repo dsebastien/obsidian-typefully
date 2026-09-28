@@ -220,7 +220,10 @@ export default defineConfig([
                         'LinkedIn',
                         'Mastodon',
                         'Bluesky',
-                        'Threads',
+                        // Not 'Threads': the platform only appears as a
+                        // one-word label, already sentence case, and as a brand
+                        // it would force every "threads" (tweet threads, this
+                        // plugin's core concept) to a capital.
                         // Typefully feature names, spelled as their UI does
                         'Threadify',
                         'AutoRT',
