@@ -1,4 +1,4 @@
-import { Notice, PluginSettingTab } from 'obsidian'
+import { Notice, PluginSettingTab, SecretComponent } from 'obsidian'
 import type { App, SettingDefinitionItem, SettingGroupItem, TextComponent } from 'obsidian'
 import type TypefullyPlugin from '../../main'
 import { log } from '../../utils/log'
@@ -25,6 +25,7 @@ import { formatExcludedTags, parseExcludedTags } from '../utils/parse-excluded-t
 import { NOTICE_TIMEOUT, SCREENSHOT_BACKGROUNDS, SCREENSHOT_FONTS } from '../constants'
 import { BUY_ME_A_COFFEE_BADGE_DATA_URL } from '../assets/buy-me-a-coffee'
 import { renderSupportSection } from '../ui/support-links'
+import { ConfirmModal } from '../modals/confirm-modal'
 import { resolveScreenshotStyle } from '../utils/resolve-screenshot-style.fn'
 import type { TypefullySocialSet } from '../types/typefully-draft-contents.intf'
 
@@ -157,33 +158,29 @@ export class TypefullySettingTab extends PluginSettingTab {
                 items: [
                     {
                         name: 'Typefully API key',
-                        desc: 'Your Typefully API key. Get it from Typefully Settings → API & Integrations.',
-                        // A render row rather than a text control: the input is
-                        // masked, and the validation status is written into
-                        // this row asynchronously — re-rendering the pane
-                        // instead would fight with the user's typing.
+                        desc: "Pick or create the secret holding your Typefully API key (Typefully Settings → API & Integrations). The key is kept in Obsidian's secret storage, never in the plugin's data file.",
+                        // A render row rather than a control: the secret
+                        // picker is a component the declarative API has no
+                        // control type for, and the validation status is
+                        // written into this row asynchronously.
                         render: (setting): void => {
-                            setting.addText((text) => {
-                                text.inputEl.type = 'password'
-                                text.inputEl.addClass('typefully-api-key-input')
-                                text.setPlaceholder('Enter your API key')
-                                    .setValue(this.plugin.settings.apiKey)
-                                    .onChange((newValue) => {
-                                        log(`Typefully API Key set`, 'debug')
+                            setting.addComponent((el) =>
+                                new SecretComponent(this.app, el)
+                                    .setValue(this.plugin.settings.apiKeySecretName)
+                                    .onChange((newName) => {
+                                        log('Typefully API key secret selected', 'debug')
                                         // Sets fetched for the previous key
                                         // must not stay clickable: selecting
                                         // one would store an id this account
                                         // cannot use.
                                         this.socialSets = []
                                         this.plugin
-                                            .updateSettings((draft) => {
-                                                draft.apiKey = newValue
-                                            })
+                                            .setApiKeySecretName(newName)
                                             .then(() => {
-                                                if (newValue) {
+                                                if (this.plugin.getApiKey()) {
                                                     void this.validateApiKey(setting.settingEl)
                                                 } else {
-                                                    this.clearApiKeyStatus(setting.settingEl)
+                                                    this.showMissingApiKey(setting.settingEl)
                                                     this.plugin.cachedUser = null
                                                     // The account block above
                                                     // is gated on this.
@@ -195,27 +192,67 @@ export class TypefullySettingTab extends PluginSettingTab {
                                                     'Failed to save settings.',
                                                     NOTICE_TIMEOUT
                                                 )
-                                                // Put the stored value back so
-                                                // the field cannot disagree
-                                                // with what other controls
-                                                // (e.g. "Load available sets")
-                                                // read — unless the user has
-                                                // typed on, in which case the
-                                                // next write heals it and a
-                                                // rollback would eat their
-                                                // input.
-                                                if (text.getValue() === newValue) {
-                                                    text.setValue(this.plugin.settings.apiKey)
-                                                }
                                             })
+                                    })
+                            )
+                            setting.addButton((button) => {
+                                button
+                                    .setButtonText('Clear')
+                                    .setTooltip(
+                                        "Remove the API key from this device's secret storage"
+                                    )
+                                    .onClick(() => {
+                                        new ConfirmModal(
+                                            this.app,
+                                            "Clear the Typefully API key? It is removed from this device's secret storage and from the plain-text copy in the plugin's data file. Other devices keep their own copy until cleared there.",
+                                            () => {
+                                                this.socialSets = []
+                                                this.plugin
+                                                    .clearApiKey()
+                                                    .then(() => this.refresh())
+                                                    .catch(() => {
+                                                        new Notice(
+                                                            'Failed to save settings.',
+                                                            NOTICE_TIMEOUT
+                                                        )
+                                                    })
+                                            }
+                                        ).open()
                                     })
                             })
                             // Only when the pane is really on screen: this hook
                             // also runs when Obsidian indexes the tab for
                             // settings search on plugin load.
-                            if (this.plugin.settings.apiKey && this.containerEl.isConnected) {
-                                void this.validateApiKey(setting.settingEl)
+                            if (this.containerEl.isConnected) {
+                                if (this.plugin.getApiKey()) {
+                                    void this.validateApiKey(setting.settingEl)
+                                } else {
+                                    this.showMissingApiKey(setting.settingEl)
+                                }
                             }
+                        }
+                    },
+                    {
+                        name: 'Plain-text copy of the API key',
+                        desc: "Older versions stored the API key in the plugin's data file. A copy stays there for 60 days so each synced device can move it into its own secret storage on its next start, then it is removed automatically. Remove it now once all your devices run this version.",
+                        visible: (): boolean => this.plugin.hasLegacyApiKey(),
+                        render: (setting): void => {
+                            setting.addButton((button) => {
+                                button.setButtonText('Remove plain-text copy now').onClick(() => {
+                                    this.plugin
+                                        .removeLegacyApiKey()
+                                        .then(() => {
+                                            new Notice(
+                                                'Plain-text API key removed from the data file.',
+                                                NOTICE_TIMEOUT
+                                            )
+                                            this.refresh()
+                                        })
+                                        .catch(() => {
+                                            new Notice('Failed to save settings.', NOTICE_TIMEOUT)
+                                        })
+                                })
+                            })
                         }
                     }
                 ]
@@ -640,7 +677,7 @@ export class TypefullySettingTab extends PluginSettingTab {
      * otherwise a row that loads the tag list into itself plus a create row.
      */
     private tagDefinitions(): SettingGroupItem[] {
-        if (!this.plugin.settings.apiKey || !this.plugin.settings.socialSetId) {
+        if (!this.plugin.getApiKey() || !this.plugin.settings.socialSetId) {
             return [
                 {
                     name: 'Configure your API key and social set ID to manage tags.',
@@ -787,6 +824,21 @@ export class TypefullySettingTab extends PluginSettingTab {
     }
 
     /**
+     * Explain, inside the row, that the selected secret has no value on this
+     * device. SecretStorage is device-local: a data.json synced from another
+     * device carries the secret's name but not its value.
+     */
+    private showMissingApiKey(settingEl: HTMLElement): void {
+        this.clearApiKeyStatus(settingEl)
+        const statusEl = settingEl.createSpan({
+            cls: 'typefully-api-status typefully-api-status-error'
+        })
+        statusEl.setText(
+            `No value for secret "${this.plugin.settings.apiKeySecretName}" on this device. Select it above and enter your API key.`
+        )
+    }
+
+    /**
      * Validate the stored API key and report the result inside the row.
      * Writes into the row element rather than re-rendering, so a slow API
      * response cannot replace the key the user is still typing.
@@ -858,13 +910,14 @@ export class TypefullySettingTab extends PluginSettingTab {
      * chosen, so nothing else in the pane is disturbed.
      */
     private async loadSocialSets(input: TextComponent | undefined): Promise<void> {
-        if (!this.plugin.settings.apiKey) {
-            new Notice('Please enter your API key first', NOTICE_TIMEOUT)
+        const apiKey = this.plugin.getApiKey()
+        if (!apiKey) {
+            new Notice('Please set your API key secret first', NOTICE_TIMEOUT)
             return
         }
 
         new Notice('Loading social sets...', 2000)
-        const socialSets = await fetchSocialSets(this.plugin.settings.apiKey)
+        const socialSets = await fetchSocialSets(apiKey)
 
         if (!socialSets || 0 === socialSets.results.length) {
             new Notice('No social sets found. Check your API key.', NOTICE_TIMEOUT)

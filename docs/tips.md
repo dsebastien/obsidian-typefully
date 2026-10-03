@@ -117,14 +117,16 @@ Supported formats: PNG, JPEG, GIF, WebP, SVG, MP4, PDF (LinkedIn only).
 
 ## Troubleshooting
 
-### "Please configure your Typefully API key"
+### "No Typefully API key found on this device"
 
 **Problem:** You see this notice when loading the plugin.
+
+**Cause:** The API key lives in Obsidian's secret storage, which is per device and not synced. This happens on a fresh install, or on a device that never ran a version with the plain-text copy (or after that copy was removed).
 
 **Solution:**
 
 1. Get your API key from Typefully Settings > API & Integrations
-2. Enter it in Obsidian Settings > Typefully > API key
+2. In Obsidian Settings > Typefully > Typefully API key, select the secret (the name is synced, e.g. `typefully-api-key`) or create one, and paste your key
 3. The plugin validates the key immediately - look for the green "Connected" status
 
 ### "Please enable at least one target platform in settings"
@@ -192,7 +194,7 @@ Supported formats: PNG, JPEG, GIF, WebP, SVG, MP4, PDF (LinkedIn only).
 1. Go to Typefully Settings > API & Integrations
 2. Revoke the old key and create a new one
 3. Copy carefully (no extra spaces)
-4. Paste into plugin settings
+4. Paste it into the API key secret in the plugin settings
 5. Check that the green "Connected" status appears
 
 ### Images Not Uploading

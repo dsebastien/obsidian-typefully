@@ -9,7 +9,7 @@ nav_order: 2
 
 1. Install the plugin via Obsidian's Community Plugins browser
 2. Enable the plugin in Settings > Community Plugins
-3. Configure your Typefully API key (see [Configuration](configuration.md))
+3. Store your Typefully API key in the plugin settings (kept in Obsidian's secret storage, see [Configuration](configuration.md))
 4. Enable at least one target platform
 5. Start publishing your notes!
 

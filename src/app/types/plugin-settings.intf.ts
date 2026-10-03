@@ -1,3 +1,5 @@
+import { DEFAULT_API_KEY_SECRET_NAME } from '../utils/api-key-secret.fn'
+
 export interface PlatformSettings {
     x: boolean
     linkedin: boolean
@@ -59,7 +61,18 @@ export interface ScreenshotSettings {
 }
 
 export interface PluginSettings {
-    apiKey: string
+    /**
+     * Name of the Obsidian SecretStorage entry holding the Typefully API key.
+     * Only the name is stored in data.json; the key itself never is. Read the
+     * value at use time through the plugin's getApiKey().
+     */
+    apiKeySecretName: string
+    /**
+     * ISO date at which a device first moved the legacy plaintext API key
+     * into SecretStorage; '' if that never happened. The plaintext copy is
+     * removed from data.json 60 days later.
+     */
+    legacySecretMigratedAt: string
     socialSetId: string
     autoRetweet: boolean
     autoPlug: boolean
@@ -134,7 +147,8 @@ export const DEFAULT_PLATFORM_SETTINGS: PlatformSettings = {
  */
 export function createDefaultSettings(): PluginSettings {
     return {
-        apiKey: '',
+        apiKeySecretName: DEFAULT_API_KEY_SECRET_NAME,
+        legacySecretMigratedAt: '',
         socialSetId: '',
         autoRetweet: false,
         autoPlug: false,

@@ -20,7 +20,7 @@ export const TYPEFULLY_API_ME = '/me'
 export const TYPEFULLY_API_ANALYTICS = '/analytics'
 
 export const MSG_API_KEY_CONFIGURATION_REQUIRED =
-    'Please configure the Typefully plugin to provide a valid API key'
+    "No Typefully API key found on this device. Open the plugin settings and set the API key secret: it lives in Obsidian's secret storage, which is not synced between devices."
 
 export const MSG_PUBLISH_NOW_DEFERRED_X_URL =
     'X blocks publishing links instantly — scheduled to go out in ~2 minutes instead'

@@ -18,6 +18,7 @@ An Obsidian plugin that integrates with [Typefully](https://typefully.com) to pu
 - Optional publish modal for per-draft scheduling, notes, and X settings
 - Automatic Markdown cleaning (strips frontmatter, wiki links, blockquotes, image syntax)
 - Append note tags as hashtags, with an exclusion list for the ones you never want to publish
+- Your Typefully API key is kept in Obsidian's secret storage, never in the synced plugin data file
 
 Any note or selection can become a branded image post, with the colors, font, format, and watermark you configure:
 

@@ -55,6 +55,10 @@ import { ConfirmModal } from './modals/confirm-modal'
 import { TypefullyView } from './views/typefully-view'
 import { VIEW_TYPE_TYPEFULLY } from './views/typefully-view-state'
 import type { ViewPage } from './views/typefully-view-state'
+import { migrateLegacyApiKey, readSecret, writeSecret } from './utils/api-key-secret.fn'
+
+/** data.json as written by versions that stored the API key in plaintext. */
+type StoredSettings = PluginSettings & { apiKey?: string }
 
 export class TypefullyPlugin extends Plugin {
     /**
@@ -67,6 +71,15 @@ export class TypefullyPlugin extends Plugin {
      */
     private apiClient: TypefullyApiClient | null = null
     private apiClientKey = ''
+
+    /**
+     * Legacy plaintext API key from data.json (pre-SecretStorage versions).
+     * Never written with a new value: it is only carried over, untouched, as a
+     * read-only bootstrap source so every synced device can move it into its
+     * own (device-local) SecretStorage on its next start. Dropped once stale
+     * (key rotated or cleared), after the grace period, or on request.
+     */
+    private legacyApiKey = ''
 
     /**
      * Cached user info from getMe()
@@ -88,7 +101,7 @@ export class TypefullyPlugin extends Plugin {
         // Add a settings screen for the plugin
         this.addSettingTab(new TypefullySettingTab(this.app, this))
 
-        if ('' === this.settings.apiKey) {
+        if ('' === this.getApiKey()) {
             new Notice(MSG_API_KEY_CONFIGURATION_REQUIRED, NOTICE_TIMEOUT)
         }
 
@@ -544,7 +557,7 @@ export class TypefullyPlugin extends Plugin {
                 platforms: targetPlatforms,
                 publish_at: this.settings.autoSchedule ? 'next-free-slot' : undefined
             },
-            this.settings.apiKey,
+            this.getApiKey(),
             this.settings.socialSetId
         )
 
@@ -846,12 +859,78 @@ export class TypefullyPlugin extends Plugin {
      * Recreates the client if the API key has changed.
      */
     getApiClient(): TypefullyApiClient | null {
-        if (!this.settings.apiKey) return null
-        if (!this.apiClient || this.apiClientKey !== this.settings.apiKey) {
-            this.apiClient = new TypefullyApiClient(this.settings.apiKey)
-            this.apiClientKey = this.settings.apiKey
+        const apiKey = this.getApiKey()
+        if (!apiKey) return null
+        if (!this.apiClient || this.apiClientKey !== apiKey) {
+            this.apiClient = new TypefullyApiClient(apiKey)
+            this.apiClientKey = apiKey
         }
         return this.apiClient
+    }
+
+    /**
+     * The Typefully API key, read from Obsidian's SecretStorage at use time.
+     * Never cached in the settings: SecretStorage is device-local, so a
+     * data.json synced from another device may name a secret that does not
+     * exist here, in which case this returns ''.
+     */
+    getApiKey(): string {
+        const store = this.app.secretStorage
+        const name = this.settings.apiKeySecretName
+        const apiKey = readSecret(store, name)
+        if (apiKey) {
+            if (this.legacyApiKey && apiKey !== this.legacyApiKey) {
+                // Rotated on this device: the plaintext copy is stale
+                this.removeLegacyApiKey().catch(() => {
+                    log('Failed to remove the stale plain-text API key', 'warn')
+                })
+            }
+            return apiKey
+        }
+        if (this.legacyApiKey) {
+            // Not migrated on this device yet: do it now
+            writeSecret(store, name, this.legacyApiKey)
+            return this.legacyApiKey
+        }
+        return ''
+    }
+
+    /** True while data.json still carries the legacy plaintext API key. */
+    hasLegacyApiKey(): boolean {
+        return '' !== this.legacyApiKey
+    }
+
+    /**
+     * Drop the legacy plaintext API key from data.json. Devices that have not
+     * run this version since then will need the key re-entered.
+     */
+    removeLegacyApiKey(): Promise<void> {
+        return this.updateSettings(() => {}, { dropLegacyApiKey: true })
+    }
+
+    /**
+     * Point the settings at another secret. The plaintext copy no longer
+     * describes the key in use, so it is dropped.
+     */
+    setApiKeySecretName(name: string): Promise<void> {
+        const nameChanged = name !== this.settings.apiKeySecretName
+        return this.updateSettings(
+            (draft) => {
+                draft.apiKeySecretName = name
+            },
+            { dropLegacyApiKey: nameChanged }
+        )
+    }
+
+    /**
+     * Forget the API key: clear this device's secret (there is no delete API,
+     * '' counts as absent) and the plaintext copy, so other devices do not
+     * bootstrap it back.
+     */
+    async clearApiKey(): Promise<void> {
+        writeSecret(this.app.secretStorage, this.settings.apiKeySecretName, '')
+        this.cachedUser = null
+        await this.removeLegacyApiKey()
     }
 
     /**
@@ -919,7 +998,8 @@ export class TypefullyPlugin extends Plugin {
      */
     async loadSettings() {
         log('Loading settings', 'debug')
-        const loadedSettings = (await this.loadData()) as PluginSettings | null
+        const loadedSettings = (await this.loadData()) as StoredSettings | null
+        this.legacyApiKey = ''
 
         if (!loadedSettings) {
             log('Using default settings', 'debug')
@@ -928,9 +1008,25 @@ export class TypefullyPlugin extends Plugin {
 
         let needToSaveSettings = false
 
+        // Move a plaintext API key (pre-SecretStorage versions) into Obsidian's
+        // SecretStorage; data.json then only keeps the secret's name
+        // (per device: data.json keeps the plaintext copy for a grace period
+        // so the other synced devices can do the same on their next start)
+        const apiKeyMigration = migrateLegacyApiKey(
+            loadedSettings,
+            this.app.secretStorage,
+            new Date()
+        )
+        this.legacyApiKey = apiKeyMigration.legacyApiKey
+        if (apiKeyMigration.changed) {
+            log('Updated the Typefully API key secret migration state', 'debug')
+            needToSaveSettings = true
+        }
+
         this.settings = produce(this.settings, (draft: Draft<PluginSettings>) => {
+            draft.apiKeySecretName = apiKeyMigration.secretName
+            draft.legacySecretMigratedAt = apiKeyMigration.legacySecretMigratedAt
             // String settings - use nullish coalescing for empty strings
-            draft.apiKey = loadedSettings.apiKey ?? ''
             draft.socialSetId = loadedSettings.socialSetId ?? ''
 
             // Boolean settings - check if defined
@@ -1095,8 +1191,20 @@ export class TypefullyPlugin extends Plugin {
      */
     async saveSettings() {
         log('Saving settings', 'debug', this.settings)
-        await this.saveData(this.settings)
+        await this.saveData(this.toStoredSettings(this.settings, this.legacyApiKey))
         log('Settings saved', 'debug', this.settings)
+    }
+
+    /**
+     * What goes to data.json. The settings never hold the API key; the only
+     * exception is the legacy plaintext copy, written back untouched during
+     * its grace period (see legacyApiKey).
+     */
+    private toStoredSettings(settings: PluginSettings, legacyApiKey: string): StoredSettings {
+        if (!legacyApiKey) {
+            return settings
+        }
+        return { ...settings, apiKey: legacyApiKey }
     }
 
     /** Serializes settings writes; see updateSettings. */
@@ -1116,11 +1224,16 @@ export class TypefullyPlugin extends Plugin {
      * fields (the platform toggles keep `enableAllPlatforms` in sync), so two
      * quick toggles must not each build on the same stale base.
      */
-    updateSettings(mutator: (draft: Draft<PluginSettings>) => void): Promise<void> {
+    updateSettings(
+        mutator: (draft: Draft<PluginSettings>) => void,
+        options?: { dropLegacyApiKey?: boolean }
+    ): Promise<void> {
         const run = async (): Promise<void> => {
             const next = produce(this.settings, mutator)
-            await this.saveData(next)
+            const legacyApiKey = options?.dropLegacyApiKey ? '' : this.legacyApiKey
+            await this.saveData(this.toStoredSettings(next, legacyApiKey))
             this.settings = next
+            this.legacyApiKey = legacyApiKey
         }
         const p = this.settingsWriteChain.then(run, run)
         this.settingsWriteChain = p.catch(() => {})

@@ -11,11 +11,16 @@ All plugin settings are available in Obsidian Settings > Community Plugins > Typ
 
 ### Account
 
-| Setting           | Type     | Default | Description                                                                                                   |
-| ----------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------- |
-| Typefully API key | password | `""`    | Your Typefully API key. Get it from Typefully Settings > API & Integrations. Required for the plugin to work. |
+| Setting                        | Type   | Default             | Description                                                                                                                                                         |
+| ------------------------------ | ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Typefully API key              | secret | `typefully-api-key` | The Obsidian secret holding your Typefully API key. Pick an existing secret or create one and paste your key. **Clear** removes the key from this device. Required. |
+| Plain-text copy of the API key | button | -                   | Only shown while the plugin's data file still holds the plain-text key written by older versions. **Remove plain-text copy now** deletes it.                        |
 
-When you enter your API key, the plugin validates it immediately by calling `GET /me`. A green status message confirms the connection, or a red message indicates an invalid key.
+The API key is stored in Obsidian's secret storage, not in the plugin's `data.json`, so it does not travel with your vault through git, Syncthing, or cloud sync. The data file only records the secret's name. Secret storage is per device: on a new device, select the same secret name and enter the key once.
+
+When the secret is set, the plugin validates the key immediately by calling `GET /me`. A green status message confirms the connection, or a red message indicates an invalid key. If the selected secret has no value on this device, the row says so.
+
+**Upgrading from an older version:** older versions stored the key in plain text in `data.json`. Each device moves it into its own secret storage automatically on its next start, so you stay connected everywhere with no action. The plain-text copy stays in `data.json` for 60 days after the first device migrated, so devices you open less often can migrate too, then it is removed automatically. Once all your devices run this version you can remove it right away with **Remove plain-text copy now**. Changing or clearing the key also removes it.
 
 Your user profile (name, email, avatar) is displayed at the top of the settings when authenticated.
 
@@ -27,7 +32,7 @@ Your user profile (name, email, avatar) is displayed at the top of the settings 
 
 **Loading Social Sets:**
 
-1. Enter your API key first
+1. Set your API key secret first
 2. Click "Load available sets"
 3. Click on a social set to select it
 4. The plugin will use this set for all future drafts
@@ -99,6 +104,7 @@ To edit the schedule, open the Typefully panel (Schedule tab) where you can add,
 2. Go to Settings (gear icon)
 3. Navigate to "API & Integrations"
 4. Create or copy your API key
+5. In the plugin settings, pick or create the API key secret and paste the key into it
 
 ### Connecting Social Accounts
 

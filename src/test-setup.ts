@@ -56,6 +56,7 @@ void mock.module('obsidian', () => ({
     TFolder,
     AbstractInputSuggest: class AbstractInputSuggest {},
     SearchComponent: class SearchComponent {},
+    SecretComponent: class SecretComponent {},
     Platform: { isDesktopApp: true, isMobile: false },
     debounce: (fn: (...args: unknown[]) => unknown) => fn,
     setIcon: () => {},
